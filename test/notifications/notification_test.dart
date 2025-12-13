@@ -305,6 +305,13 @@ void main() {
       );
       expect(extractedAmount, 12.34);
       expect(extractedCurrency?.attributes.code, "CAD");
+
+      (extractedCurrency, extractedAmount) = await parseNotificationText(
+        apiService,
+        r"已支付¥4.00",
+        cadCurrency,
+      );
+      expect(extractedAmount, 4);
     });
   });
 }
