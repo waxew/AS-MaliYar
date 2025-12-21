@@ -128,7 +128,10 @@ void main() {
 
       test('handles complex partial expressions', () {
         expect(evaluator.evaluatePartial('10+5*2+'), 20.0); // 10 + (5*2) = 20
-        expect(evaluator.evaluatePartial('2*3+4*'), 10.0); // 2*3+4 = 10 (evaluates before last operator)
+        expect(
+          evaluator.evaluatePartial('2*3+4*'),
+          10.0,
+        ); // 2*3+4 = 10 (evaluates before last operator)
       });
 
       test('returns null for invalid partial expressions', () {
@@ -214,4 +217,3 @@ void main() {
     });
   });
 }
-

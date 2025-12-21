@@ -19,10 +19,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: NumberInput(
-              controller: controller,
-              decimals: 2,
-            ),
+            body: NumberInput(controller: controller, decimals: 2),
           ),
         ),
       );
@@ -36,10 +33,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: NumberInput(
-              controller: controller,
-              decimals: 2,
-            ),
+            body: NumberInput(controller: controller, decimals: 2),
           ),
         ),
       );
@@ -51,16 +45,15 @@ void main() {
       expect(controller.text, '123.45');
     });
 
-    testWidgets('replaces comma with dot for decimals', (WidgetTester tester) async {
+    testWidgets('replaces comma with dot for decimals', (
+      WidgetTester tester,
+    ) async {
       final TextEditingController controller = TextEditingController();
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: NumberInput(
-              controller: controller,
-              decimals: 2,
-            ),
+            body: NumberInput(controller: controller, decimals: 2),
           ),
         ),
       );
@@ -72,7 +65,9 @@ void main() {
       expect(controller.text, '123.45');
     });
 
-    testWidgets('allows math operators when math evaluation enabled', (WidgetTester tester) async {
+    testWidgets('allows math operators when math evaluation enabled', (
+      WidgetTester tester,
+    ) async {
       final TextEditingController controller = TextEditingController();
 
       await tester.pumpWidget(
@@ -122,7 +117,9 @@ void main() {
       expect(controller.text, isNot(contains('++')));
     });
 
-    testWidgets('evaluates expression on Enter key', (WidgetTester tester) async {
+    testWidgets('evaluates expression on Enter key', (
+      WidgetTester tester,
+    ) async {
       final TextEditingController controller = TextEditingController();
 
       await tester.pumpWidget(
@@ -149,7 +146,9 @@ void main() {
       expect(controller.text, '15.00');
     });
 
-    testWidgets('evaluates expression on focus loss', (WidgetTester tester) async {
+    testWidgets('evaluates expression on focus loss', (
+      WidgetTester tester,
+    ) async {
       final TextEditingController controller = TextEditingController();
       final FocusNode focusNode = FocusNode();
 
@@ -157,7 +156,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Column(
-              children: [
+              children: <Widget>[
                 NumberInput(
                   controller: controller,
                   focusNode: focusNode,
@@ -201,7 +200,7 @@ void main() {
       );
 
       final Finder textField = find.byType(TextFormField);
-      
+
       // Type "10+5" - should not evaluate yet
       await tester.enterText(textField, '10+5');
       await tester.pump();
@@ -210,13 +209,15 @@ void main() {
       // Add "*" - should evaluate "10+5" to 15, then add "*"
       await tester.enterText(textField, '10+5*');
       await tester.pump();
-      
+
       // Should have evaluated and added the operator
       expect(controller.text, startsWith('15'));
       expect(controller.text, endsWith('*'));
     });
 
-    testWidgets('formats result with correct decimal places', (WidgetTester tester) async {
+    testWidgets('formats result with correct decimal places', (
+      WidgetTester tester,
+    ) async {
       final TextEditingController controller = TextEditingController();
 
       await tester.pumpWidget(
@@ -243,7 +244,9 @@ void main() {
       expect(controller.text, '3.33');
     });
 
-    testWidgets('handles invalid expressions gracefully', (WidgetTester tester) async {
+    testWidgets('handles invalid expressions gracefully', (
+      WidgetTester tester,
+    ) async {
       final TextEditingController controller = TextEditingController();
       controller.text = '10+5';
 
@@ -260,7 +263,7 @@ void main() {
       );
 
       final Finder textField = find.byType(TextFormField);
-      
+
       // Try to enter invalid expression
       await tester.enterText(textField, '10++5');
       await tester.pump();
@@ -269,7 +272,9 @@ void main() {
       expect(controller.text, isNot(contains('++')));
     });
 
-    testWidgets('disables math evaluation when flag is false', (WidgetTester tester) async {
+    testWidgets('disables math evaluation when flag is false', (
+      WidgetTester tester,
+    ) async {
       final TextEditingController controller = TextEditingController();
 
       await tester.pumpWidget(
@@ -285,7 +290,7 @@ void main() {
       );
 
       final Finder textField = find.byType(TextFormField);
-      
+
       // Try to enter operator - should be rejected
       await tester.enterText(textField, '10+5');
       await tester.pump();
@@ -337,10 +342,9 @@ void main() {
 
       final Finder textField = find.byType(TextFormField);
       final TextFormField field = tester.widget<TextFormField>(textField);
-      
+
       // Check that the field is disabled (readOnly is not directly accessible)
       expect(field.enabled, false);
     });
   });
 }
-

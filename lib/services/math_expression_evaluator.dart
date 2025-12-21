@@ -99,7 +99,9 @@ class MathExpressionEvaluator {
 
       // Validate partial expression
       if (!isValidExpression(withoutTrailingOperator)) {
-        _log.warning('Invalid partial expression format: $withoutTrailingOperator');
+        _log.warning(
+          'Invalid partial expression format: $withoutTrailingOperator',
+        );
         return null;
       }
 
@@ -148,9 +150,7 @@ class MathExpressionEvaluator {
     // Pattern: optional leading minus, number, then optional (operator + number)*
     // Allow: "123", "-123", "123+456", "123.45*67.89", etc.
     // Disallow: "++", "123++", "123.", ".123", etc.
-    final RegExp validPattern = RegExp(
-      r'^-?\d+(\.\d+)?([+\-*/]\d+(\.\d+)?)*$',
-    );
+    final RegExp validPattern = RegExp(r'^-?\d+(\.\d+)?([+\-*/]\d+(\.\d+)?)*$');
 
     if (!validPattern.hasMatch(normalized)) {
       return false;
@@ -270,7 +270,9 @@ class MathExpressionEvaluator {
       final String secondToken = tokens[1];
       final double? firstNumber = double.tryParse(secondToken);
       if (firstNumber == null) {
-        throw FormatException('Invalid number after leading minus: $secondToken');
+        throw FormatException(
+          'Invalid number after leading minus: $secondToken',
+        );
       }
       tokens.removeRange(0, 2);
       tokens.insert(0, (-firstNumber).toString());
@@ -279,8 +281,7 @@ class MathExpressionEvaluator {
     // First pass: handle multiplication and division
     final List<String> afterMulDiv = <String>[];
     for (int i = 0; i < tokens.length; i++) {
-      if (i < tokens.length - 1 &&
-          (tokens[i] == '*' || tokens[i] == '/')) {
+      if (i < tokens.length - 1 && (tokens[i] == '*' || tokens[i] == '/')) {
         // Get previous number and next number
         if (afterMulDiv.isEmpty) {
           throw FormatException('No left operand for operator ${tokens[i]}');
@@ -308,7 +309,9 @@ class MathExpressionEvaluator {
           }
           result = left / right;
         } else {
-          throw FormatException('Unexpected operator in mul/div pass: $operator');
+          throw FormatException(
+            'Unexpected operator in mul/div pass: $operator',
+          );
         }
 
         afterMulDiv.add(result.toString());
@@ -321,7 +324,9 @@ class MathExpressionEvaluator {
 
     // Second pass: handle addition and subtraction
     if (afterMulDiv.isEmpty) {
-      throw const FormatException('Empty expression after multiplication/division');
+      throw const FormatException(
+        'Empty expression after multiplication/division',
+      );
     }
 
     double result = double.tryParse(afterMulDiv[0]) ?? 0.0;
@@ -349,4 +354,3 @@ class MathExpressionEvaluator {
     return result;
   }
 }
-
