@@ -244,6 +244,33 @@ void main() {
       expect(controller.text, '3.33');
     });
 
+    testWidgets('handles fixed decimal places', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: NumberInput(controller: controller, decimals: 2),
+          ),
+        ),
+      );
+      final Finder textField = find.byType(TextFormField);
+      await tester.enterText(textField, '10.005');
+      await tester.pump();
+      expect(controller.text, '10.01');
+
+      await tester.enterText(textField, '10.502');
+      await tester.pump();
+      expect(controller.text, '10.5');
+
+      await tester.enterText(textField, '10.5.5');
+      await tester.pump();
+      expect(controller.text, '10.5');
+
+      await tester.enterText(textField, '10..');
+      await tester.pump();
+      expect(controller.text, '10');
+    });
+
     testWidgets('handles invalid expressions gracefully', (
       WidgetTester tester,
     ) async {

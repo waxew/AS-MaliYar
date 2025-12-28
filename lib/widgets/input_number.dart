@@ -84,10 +84,9 @@ class _NumberInputState extends State<NumberInput> {
   void _onFocusChange() {
     if (widget.focusNode != null &&
         !widget.focusNode!.hasFocus &&
-        widget.enableMathEvaluation &&
         widget.controller != null) {
-      // Evaluate on focus loss
-      _evaluateExpression(widget.controller!.text, isFullEvaluation: true);
+      // Format number or evaluate expression on focus loss
+      _formatOrEvaluate(widget.controller!.text);
     }
   }
 
@@ -124,11 +123,58 @@ class _NumberInputState extends State<NumberInput> {
     }
   }
 
-  String _formatResult(double result) {
+  String _formatResult(double result, {bool removeTrailingZeros = false}) {
     if (widget.decimals > 0) {
-      return result.toStringAsFixed(widget.decimals);
+      String formatted = result.toStringAsFixed(widget.decimals);
+      if (removeTrailingZeros) {
+        // Remove trailing zeros
+        formatted = formatted.replaceAll(RegExp(r'0+$'), '');
+        // Remove decimal point if no digits remain after it
+        formatted = formatted.replaceAll(RegExp(r'\.$'), '');
+      }
+      return formatted;
     }
     return result.toStringAsFixed(0);
+  }
+
+  void _formatOrEvaluate(String text) {
+    if (text.isEmpty) {
+      return;
+    }
+
+    // Clean up invalid input (e.g., "10.5.5" -> "10.5")
+    String cleanedText = text;
+    final int firstDotIndex = cleanedText.indexOf('.');
+    if (firstDotIndex != -1) {
+      final int secondDotIndex = cleanedText.indexOf('.', firstDotIndex + 1);
+      if (secondDotIndex != -1) {
+        // Multiple decimal points - keep only the first part
+        cleanedText = cleanedText.substring(0, secondDotIndex);
+      }
+    }
+
+    if (widget.enableMathEvaluation) {
+      // Check if it's an expression (contains operators)
+      if (RegExp(r'[+\-*/]').hasMatch(cleanedText)) {
+        // Evaluate expression
+        _evaluateExpression(cleanedText, isFullEvaluation: true);
+        return;
+      }
+    }
+
+    // Format plain number
+    final double? number = double.tryParse(cleanedText);
+    if (number != null && widget.controller != null) {
+      final String formattedNumber = _formatResult(number, removeTrailingZeros: true);
+      if (formattedNumber != cleanedText) {
+        widget.controller!.text = formattedNumber;
+        widget.controller!.selection = TextSelection.fromPosition(
+          TextPosition(offset: formattedNumber.length),
+        );
+        widget.onChanged?.call(formattedNumber);
+        _previousText = formattedNumber;
+      }
+    }
   }
 
   bool _isOperator(String char) {
@@ -136,20 +182,51 @@ class _NumberInputState extends State<NumberInput> {
   }
 
   void _handleTextChange(String newText) {
+    // Clean up invalid input (e.g., "10.5.5" -> "10.5")
+    String cleanedText = newText;
+    final int firstDotIndex = cleanedText.indexOf('.');
+    if (firstDotIndex != -1) {
+      final int secondDotIndex = cleanedText.indexOf('.', firstDotIndex + 1);
+      if (secondDotIndex != -1) {
+        // Multiple decimal points - keep only the first part
+        cleanedText = cleanedText.substring(0, secondDotIndex);
+        if (cleanedText != newText && widget.controller != null) {
+          widget.controller!.text = cleanedText;
+          widget.controller!.selection = TextSelection.fromPosition(
+            TextPosition(offset: cleanedText.length),
+          );
+        }
+      }
+    }
+
     if (!widget.enableMathEvaluation) {
-      widget.onChanged?.call(newText);
-      _previousText = newText;
+      // Format number if it's a valid number that needs formatting
+      final double? number = double.tryParse(cleanedText);
+      if (number != null && widget.controller != null) {
+        final String formattedNumber = _formatResult(number, removeTrailingZeros: true);
+        if (formattedNumber != cleanedText) {
+          widget.controller!.text = formattedNumber;
+          widget.controller!.selection = TextSelection.fromPosition(
+            TextPosition(offset: formattedNumber.length),
+          );
+          widget.onChanged?.call(formattedNumber);
+          _previousText = formattedNumber;
+          return;
+        }
+      }
+      widget.onChanged?.call(cleanedText);
+      _previousText = cleanedText;
       return;
     }
 
     // Check if an operator was just pressed (chained calculation)
-    if (newText.length > _previousText.length) {
-      final String addedChar = newText.substring(_previousText.length);
+    if (cleanedText.length > _previousText.length) {
+      final String addedChar = cleanedText.substring(_previousText.length);
       if (addedChar.length == 1 && _isOperator(addedChar)) {
         // Operator was pressed - check if there's a previous operator
-        final String textBeforeNewOperator = newText.substring(
+        final String textBeforeNewOperator = cleanedText.substring(
           0,
-          newText.length - 1,
+          cleanedText.length - 1,
         );
         if (textBeforeNewOperator.isNotEmpty &&
             RegExp(r'[+\-*/]').hasMatch(textBeforeNewOperator)) {
@@ -181,9 +258,26 @@ class _NumberInputState extends State<NumberInput> {
       }
     }
 
+    // Check if it's a plain number (no operators) that needs formatting
+    if (!RegExp(r'[+\-*/]').hasMatch(cleanedText)) {
+      final double? number = double.tryParse(cleanedText);
+      if (number != null && widget.controller != null) {
+        final String formattedNumber = _formatResult(number, removeTrailingZeros: true);
+        if (formattedNumber != cleanedText) {
+          widget.controller!.text = formattedNumber;
+          widget.controller!.selection = TextSelection.fromPosition(
+            TextPosition(offset: formattedNumber.length),
+          );
+          widget.onChanged?.call(formattedNumber);
+          _previousText = formattedNumber;
+          return;
+        }
+      }
+    }
+
     // Normal text change - update previous text and call onChanged
-    _previousText = newText;
-    widget.onChanged?.call(newText);
+    _previousText = cleanedText;
+    widget.onChanged?.call(cleanedText);
   }
 
   @override
@@ -194,9 +288,9 @@ class _NumberInputState extends State<NumberInput> {
       initialValue: widget.value,
       onChanged: _handleTextChange,
       onEditingComplete: () {
-        // Evaluate on Enter key press
-        if (widget.enableMathEvaluation && widget.controller != null) {
-          _evaluateExpression(widget.controller!.text, isFullEvaluation: true);
+        // Format number or evaluate expression on Enter key press
+        if (widget.controller != null) {
+          _formatOrEvaluate(widget.controller!.text);
         }
         // Move focus to next field
         widget.focusNode?.unfocus();
@@ -207,13 +301,25 @@ class _NumberInputState extends State<NumberInput> {
         decimal: (widget.decimals > 0),
       ),
       inputFormatters: <TextInputFormatter>[
-        FilteringTextInputFormatter.allow(RegExp(_getRegexString())),
         TextInputFormatter.withFunction((
           TextEditingValue oldValue,
           TextEditingValue newValue,
         ) {
           // Replace comma with dot
-          final String normalized = newValue.text.replaceAll(',', '.');
+          String normalized = newValue.text.replaceAll(',', '.');
+
+          // Handle multiple decimal points - keep only the first one
+          final int firstDotIndex = normalized.indexOf('.');
+          int? newSelectionOffset;
+          if (firstDotIndex != -1) {
+            final int secondDotIndex = normalized.indexOf('.', firstDotIndex + 1);
+            if (secondDotIndex != -1) {
+              // Multiple decimal points - keep only the first part
+              normalized = normalized.substring(0, secondDotIndex);
+              // Adjust selection to be at the end of the cleaned text
+              newSelectionOffset = normalized.length;
+            }
+          }
 
           // Prevent consecutive operators
           if (widget.enableMathEvaluation) {
@@ -222,8 +328,17 @@ class _NumberInputState extends State<NumberInput> {
             }
           }
 
+          // Update selection if text was modified
+          if (newSelectionOffset != null) {
+            return TextEditingValue(
+              text: normalized,
+              selection: TextSelection.collapsed(offset: newSelectionOffset),
+            );
+          }
+
           return newValue.copyWith(text: normalized);
         }),
+        FilteringTextInputFormatter.allow(RegExp(_getRegexString())),
       ],
       decoration: InputDecoration(
         label: (widget.label != null) ? Text(widget.label!) : null,
@@ -242,10 +357,13 @@ class _NumberInputState extends State<NumberInput> {
   }
 
   String _getRegexString() {
+    // Allow more decimal places during input (up to 10), formatting will handle the limit
+    const int maxDecimalPlaces = 10;
+    
     if (!widget.enableMathEvaluation) {
       // Original regex without operators
       return (widget.decimals > 0)
-          ? r'^[0-9]+[,.]{0,1}[0-9]{0,' + widget.decimals.toString() + r'}'
+          ? r'^[0-9]+[,.]{0,1}[0-9]{0,' + maxDecimalPlaces.toString() + r'}'
           : r'[0-9]';
     }
 
@@ -255,7 +373,7 @@ class _NumberInputState extends State<NumberInput> {
     if (widget.decimals > 0) {
       // Pattern: ^-?[0-9]+([,.]{0,1}[0-9]{0,N})?([+\-*/]([0-9]+([,.]{0,1}[0-9]{0,N})?)?)?)*$
       final String decimalPart =
-          r'([,.]{0,1}[0-9]{0,' + widget.decimals.toString() + r'})';
+          r'([,.]{0,1}[0-9]{0,' + maxDecimalPlaces.toString() + r'})';
       final String numberWithDecimal = r'([0-9]+' + decimalPart + r'?)';
       final String operatorWithNumber = r'([+\-*/]' + numberWithDecimal + r'?)';
       return r'^-?[0-9]+' + decimalPart + r'?(' + operatorWithNumber + r')*$';
