@@ -61,7 +61,6 @@ class _NumberInputState extends State<NumberInput> {
   final Logger _log = Logger('NumberInput');
   final MathExpressionEvaluator _evaluator = MathExpressionEvaluator();
   String _previousText = '';
-  bool _isEvaluating = false;
 
   @override
   void initState() {
@@ -93,11 +92,10 @@ class _NumberInputState extends State<NumberInput> {
   }
 
   void _evaluateExpression(String text, {required bool isFullEvaluation}) {
-    if (_isEvaluating || text.isEmpty) {
+    if (text.isEmpty) {
       return;
     }
 
-    _isEvaluating = true;
     _log.fine(() => 'Evaluating expression: $text (full: $isFullEvaluation)');
 
     try {
@@ -123,8 +121,6 @@ class _NumberInputState extends State<NumberInput> {
       }
     } catch (e, stackTrace) {
       _log.warning('Error evaluating expression: $text', e, stackTrace);
-    } finally {
-      _isEvaluating = false;
     }
   }
 
@@ -140,7 +136,7 @@ class _NumberInputState extends State<NumberInput> {
   }
 
   void _handleTextChange(String newText) {
-    if (!widget.enableMathEvaluation || _isEvaluating) {
+    if (!widget.enableMathEvaluation) {
       widget.onChanged?.call(newText);
       _previousText = newText;
       return;
@@ -162,8 +158,6 @@ class _NumberInputState extends State<NumberInput> {
             textBeforeNewOperator,
           );
           if (partialResult != null && widget.controller != null) {
-            // Set evaluating flag to prevent recursive calls
-            _isEvaluating = true;
             final String formattedResult = _formatResult(partialResult);
             final String newExpression = formattedResult + addedChar;
 
@@ -177,7 +171,6 @@ class _NumberInputState extends State<NumberInput> {
             widget.onChanged?.call(newExpression);
 
             _previousText = newExpression;
-            _isEvaluating = false;
             _log.fine(
               () =>
                   'Chained calculation: $textBeforeNewOperator -> $formattedResult, added operator: $addedChar',
