@@ -19,6 +19,17 @@ class MathExpressionEvaluator {
 
   final Logger _log;
 
+  /// Normalizes an expression by removing whitespace and replacing commas with dots.
+  ///
+  /// Parameters:
+  /// - [expression]: The expression to normalize
+  ///
+  /// Returns:
+  /// - [String] Normalized expression
+  String _normalizeExpression(String expression) {
+    return expression.replaceAll(RegExp(r'\s+'), '').replaceAll(',', '.');
+  }
+
   /// Evaluates a complete mathematical expression.
   ///
   /// Supports operators: +, -, *, /
@@ -42,9 +53,7 @@ class MathExpressionEvaluator {
 
     try {
       // Normalize expression: remove whitespace, replace comma with dot
-      String normalized = expression
-          .replaceAll(RegExp(r'\s+'), '')
-          .replaceAll(',', '.');
+      String normalized = _normalizeExpression(expression);
 
       // Normalize invalid decimals (multiple decimal points, too many decimal places)
       normalized = _normalizeInvalidDecimals(normalized);
@@ -85,9 +94,7 @@ class MathExpressionEvaluator {
 
     try {
       // Normalize expression
-      final String normalized = expression
-          .replaceAll(RegExp(r'\s+'), '')
-          .replaceAll(',', '.');
+      final String normalized = _normalizeExpression(expression);
 
       // Remove trailing operator for evaluation
       final String withoutTrailingOperator = normalized.replaceAll(
@@ -127,11 +134,11 @@ class MathExpressionEvaluator {
   /// Checks for:
   /// - Valid number format
   /// - Valid operator placement
-  /// - No consecutive operators
   /// - Proper decimal point usage
+  /// - Division by zero (for early validation)
   ///
   /// Parameters:
-  /// - [expression]: The expression to validate
+  /// - [expression]: The expression to validate (should already be normalized)
   ///
   /// Returns:
   /// - [bool] True if expression format is valid, false otherwise
@@ -140,39 +147,21 @@ class MathExpressionEvaluator {
       return false;
     }
 
-    // Remove whitespace and normalize
-    final String normalized = expression
-        .replaceAll(RegExp(r'\s+'), '')
-        .replaceAll(',', '.');
-
-    // Check for empty after normalization
-    if (normalized.isEmpty) {
-      return false;
-    }
-
     // Pattern: optional leading minus, number, then optional (operator + number)*
     // Allow: "123", "-123", "123+456", "123.45*67.89", etc.
     // Disallow: "++", "123++", "123.", ".123", etc.
+    // The pattern already ensures operators are separated by numbers (no consecutive operators)
     final RegExp validPattern = RegExp(r'^-?\d+(\.\d+)?([+\-*/]\d+(\.\d+)?)*$');
 
-    if (!validPattern.hasMatch(normalized)) {
+    if (!validPattern.hasMatch(expression)) {
       return false;
     }
 
-    // Additional checks: no consecutive operators, no trailing operators
-    // (trailing operators are handled separately for partial evaluation)
-    if (RegExp(r'[+\-*/]{2,}').hasMatch(normalized)) {
+    // Check for division by zero (allow /0.5, /0.123, etc., but not /0)
+    final RegExp divisionByZeroPattern = RegExp(r'/0(?!\.)');
+    if (divisionByZeroPattern.hasMatch(expression)) {
+      _log.warning('Division by zero detected in expression: $expression');
       return false;
-    }
-
-    // Check for division by zero (basic check)
-    if (normalized.contains('/0') && !normalized.contains('/0.')) {
-      // Allow /0.5, /0.123, etc., but not /0
-      final RegExp divisionByZeroPattern = RegExp(r'/0(?!\.)');
-      if (divisionByZeroPattern.hasMatch(normalized)) {
-        _log.warning('Division by zero detected in expression: $normalized');
-        return false;
-      }
     }
 
     return true;
