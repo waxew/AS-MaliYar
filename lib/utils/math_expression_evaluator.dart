@@ -1,6 +1,6 @@
 import 'package:logging/logging.dart';
 
-/// Math Expression Evaluator Service
+/// Math Expression Evaluator
 ///
 /// Provides safe evaluation of mathematical expressions with support for:
 /// - Basic arithmetic operations (+, -, *, /)

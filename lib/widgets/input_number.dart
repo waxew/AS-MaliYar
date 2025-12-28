@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
-import 'package:waterflyiii/services/math_expression_evaluator.dart';
+import 'package:waterflyiii/utils/math_expression_evaluator.dart';
 
 /// Number Input Widget with Math Evaluation Support
 ///
