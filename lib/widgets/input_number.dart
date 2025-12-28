@@ -165,7 +165,10 @@ class _NumberInputState extends State<NumberInput> {
     // Format plain number
     final double? number = double.tryParse(cleanedText);
     if (number != null && widget.controller != null) {
-      final String formattedNumber = _formatResult(number, removeTrailingZeros: true);
+      final String formattedNumber = _formatResult(
+        number,
+        removeTrailingZeros: true,
+      );
       if (formattedNumber != cleanedText) {
         widget.controller!.text = formattedNumber;
         widget.controller!.selection = TextSelection.fromPosition(
@@ -203,7 +206,10 @@ class _NumberInputState extends State<NumberInput> {
       // Format number if it's a valid number that needs formatting
       final double? number = double.tryParse(cleanedText);
       if (number != null && widget.controller != null) {
-        final String formattedNumber = _formatResult(number, removeTrailingZeros: true);
+        final String formattedNumber = _formatResult(
+          number,
+          removeTrailingZeros: true,
+        );
         if (formattedNumber != cleanedText) {
           widget.controller!.text = formattedNumber;
           widget.controller!.selection = TextSelection.fromPosition(
@@ -262,7 +268,10 @@ class _NumberInputState extends State<NumberInput> {
     if (!RegExp(r'[+\-*/]').hasMatch(cleanedText)) {
       final double? number = double.tryParse(cleanedText);
       if (number != null && widget.controller != null) {
-        final String formattedNumber = _formatResult(number, removeTrailingZeros: true);
+        final String formattedNumber = _formatResult(
+          number,
+          removeTrailingZeros: true,
+        );
         if (formattedNumber != cleanedText) {
           widget.controller!.text = formattedNumber;
           widget.controller!.selection = TextSelection.fromPosition(
@@ -312,7 +321,10 @@ class _NumberInputState extends State<NumberInput> {
           final int firstDotIndex = normalized.indexOf('.');
           int? newSelectionOffset;
           if (firstDotIndex != -1) {
-            final int secondDotIndex = normalized.indexOf('.', firstDotIndex + 1);
+            final int secondDotIndex = normalized.indexOf(
+              '.',
+              firstDotIndex + 1,
+            );
             if (secondDotIndex != -1) {
               // Multiple decimal points - keep only the first part
               normalized = normalized.substring(0, secondDotIndex);
@@ -359,7 +371,7 @@ class _NumberInputState extends State<NumberInput> {
   String _getRegexString() {
     // Allow more decimal places during input (up to 10), formatting will handle the limit
     const int maxDecimalPlaces = 10;
-    
+
     if (!widget.enableMathEvaluation) {
       // Original regex without operators
       return (widget.decimals > 0)
