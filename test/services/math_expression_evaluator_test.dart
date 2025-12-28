@@ -192,6 +192,17 @@ void main() {
         expect(evaluator.evaluate(' 10 + 5 '), 15.0);
         expect(evaluator.evaluate('10+ 5*2'), 20.0);
       });
+
+      test('handles invalid decimals', () {
+        expect(evaluator.evaluate('..'), null);
+        expect(evaluator.evaluate('.5'), 0.5);
+        expect(evaluator.evaluate('.0005'), 0);
+        expect(evaluator.evaluate('.005'), 0.01);
+        expect(evaluator.evaluate('10.5.5'), 10.5);
+        expect(evaluator.evaluate('10.50.5'), 10.5);
+        expect(evaluator.evaluate('10.5005'), 10.5);
+        expect(evaluator.evaluate('10.505'), 10.51);
+      });
     });
 
     group('Edge cases', () {
