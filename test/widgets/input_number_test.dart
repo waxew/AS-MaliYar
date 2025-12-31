@@ -271,6 +271,74 @@ void main() {
       expect(controller.text, '10');
     });
 
+    testWidgets('preserves trailing decimal separator while typing', (
+      WidgetTester tester,
+    ) async {
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: NumberInput(controller: controller, decimals: 2),
+          ),
+        ),
+      );
+
+      final Finder textField = find.byType(TextFormField);
+
+      // Type "123" then add decimal separator - should preserve it
+      await tester.enterText(textField, '123');
+      await tester.pump();
+      expect(controller.text, '123');
+
+      // Simulate typing the decimal separator (dot)
+      controller.text = '123.';
+      controller.selection = const TextSelection.collapsed(offset: 4);
+      await tester.pump();
+      // Trigger onChanged by simulating text change
+      await tester.enterText(textField, '123.');
+      await tester.pump();
+      // The trailing dot should be preserved
+      expect(controller.text, '123.');
+
+      // Now type a digit after the dot
+      await tester.enterText(textField, '123.4');
+      await tester.pump();
+      expect(controller.text, '123.4');
+    });
+
+    testWidgets('preserves trailing comma decimal separator while typing', (
+      WidgetTester tester,
+    ) async {
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: NumberInput(controller: controller, decimals: 2),
+          ),
+        ),
+      );
+
+      final Finder textField = find.byType(TextFormField);
+
+      // Type "123" then add comma decimal separator - should preserve it (normalized to dot)
+      await tester.enterText(textField, '123');
+      await tester.pump();
+      expect(controller.text, '123');
+
+      // Simulate typing the comma decimal separator
+      await tester.enterText(textField, '123,');
+      await tester.pump();
+      // The comma should be normalized to dot and preserved
+      expect(controller.text, '123.');
+
+      // Now type a digit after the separator
+      await tester.enterText(textField, '123.4');
+      await tester.pump();
+      expect(controller.text, '123.4');
+    });
+
     testWidgets('handles invalid expressions gracefully', (
       WidgetTester tester,
     ) async {

@@ -138,7 +138,7 @@ class MathExpressionEvaluator {
   /// - Division by zero (for early validation)
   ///
   /// Parameters:
-  /// - [expression]: The expression to validate (should already be normalized)
+  /// - [expression]: The expression to validate (can contain commas or dots as decimal separators)
   ///
   /// Returns:
   /// - [bool] True if expression format is valid, false otherwise
@@ -147,19 +147,22 @@ class MathExpressionEvaluator {
       return false;
     }
 
+    // Normalize expression: remove whitespace and replace commas with dots
+    final String normalized = _normalizeExpression(expression);
+
     // Pattern: optional leading minus, number, then optional (operator + number)*
     // Allow: "123", "-123", "123+456", "123.45*67.89", etc.
     // Disallow: "++", "123++", "123.", ".123", etc.
     // The pattern already ensures operators are separated by numbers (no consecutive operators)
     final RegExp validPattern = RegExp(r'^-?\d+(\.\d+)?([+\-*/]\d+(\.\d+)?)*$');
 
-    if (!validPattern.hasMatch(expression)) {
+    if (!validPattern.hasMatch(normalized)) {
       return false;
     }
 
     // Check for division by zero (allow /0.5, /0.123, etc., but not /0)
     final RegExp divisionByZeroPattern = RegExp(r'/0(?!\.)');
-    if (divisionByZeroPattern.hasMatch(expression)) {
+    if (divisionByZeroPattern.hasMatch(normalized)) {
       _log.warning('Division by zero detected in expression: $expression');
       return false;
     }

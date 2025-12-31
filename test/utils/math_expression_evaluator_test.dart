@@ -99,6 +99,47 @@ void main() {
       });
     });
 
+    group('Regional configuration with comma decimal separator', () {
+      test('single number with comma decimal separator', () {
+        expect(evaluator.evaluate('10,5'), 10.5);
+        expect(evaluator.evaluate('123,45'), 123.45);
+        expect(evaluator.evaluate('0,5'), 0.5);
+        expect(evaluator.evaluate('0,01'), 0.01);
+      });
+
+      test('arithmetic operations with comma decimal separator', () {
+        expect(evaluator.evaluate('10,5+5,2'), 15.7);
+        expect(evaluator.evaluate('20,75-10,25'), 10.5);
+        expect(evaluator.evaluate('2,5*4'), 10.0);
+        expect(evaluator.evaluate('15,5/2'), 7.75);
+      });
+
+      test('complex expressions with comma decimal separator', () {
+        expect(evaluator.evaluate('10,5+5,2*2'), 20.9); // 10.5 + (5.2*2) = 20.9
+        expect(
+          evaluator.evaluate('20,5-8,5/2'),
+          16.25,
+        ); // 20.5 - (8.5/2) = 16.25
+        expect(evaluator.evaluate('2,5*3+4,5*2'), 16.5); // 7.5 + 9 = 16.5
+      });
+
+      test('partial evaluation with comma decimal separator', () {
+        expect(evaluator.evaluatePartial('10,5+5,2*'), 15.7);
+        expect(evaluator.evaluatePartial('10,5+5,2+'), 15.7);
+        expect(evaluator.evaluatePartial('10,5*2+'), 21.0);
+      });
+
+      test('validation with comma decimal separator', () {
+        expect(evaluator.isValidExpression('10,5'), true);
+        expect(evaluator.isValidExpression('10,5+5,2'), true);
+        expect(
+          evaluator.isValidExpression('10,5/0'),
+          false,
+        ); // Division by zero
+        expect(evaluator.isValidExpression('10,5/0,5'), true); // 0.5 is valid
+      });
+    });
+
     group('Negative numbers', () {
       test('leading minus', () {
         expect(evaluator.evaluate('-10+5'), -5.0);

@@ -187,12 +187,14 @@ class _NumberInputState extends State<NumberInput> {
   void _handleTextChange(String newText) {
     // Clean up invalid input (e.g., "10.5.5" -> "10.5")
     String cleanedText = newText;
+    bool wasCleaned = false;
     final int firstDotIndex = cleanedText.indexOf('.');
     if (firstDotIndex != -1) {
       final int secondDotIndex = cleanedText.indexOf('.', firstDotIndex + 1);
       if (secondDotIndex != -1) {
         // Multiple decimal points - keep only the first part
         cleanedText = cleanedText.substring(0, secondDotIndex);
+        wasCleaned = true;
         if (cleanedText != newText && widget.controller != null) {
           widget.controller!.text = cleanedText;
           widget.controller!.selection = TextSelection.fromPosition(
@@ -203,9 +205,30 @@ class _NumberInputState extends State<NumberInput> {
     }
 
     if (!widget.enableMathEvaluation) {
+      // Check if input ends with a decimal separator (user is still typing decimal part)
+      // Only preserve if:
+      // 1. There's exactly one decimal separator and it's at the end
+      // 2. The input wasn't cleaned (no multiple decimal points were removed)
+      // 3. The text length increased (user is actively typing, not replacing entire text)
+      final bool textLengthIncreased =
+          cleanedText.length > _previousText.length;
+      final bool endsWithDecimalSeparator =
+          !wasCleaned &&
+          textLengthIncreased &&
+          (cleanedText.endsWith('.') || cleanedText.endsWith(',')) &&
+          cleanedText.split('.').length == 2; // Only one decimal point
+
       // Format number if it's a valid number that needs formatting
       final double? number = double.tryParse(cleanedText);
       if (number != null && widget.controller != null) {
+        // If input ends with decimal separator and has only one, preserve it (user is still typing)
+        if (endsWithDecimalSeparator) {
+          // Don't format - preserve the trailing decimal separator
+          widget.onChanged?.call(cleanedText);
+          _previousText = cleanedText;
+          return;
+        }
+
         final String formattedNumber = _formatResult(
           number,
           removeTrailingZeros: true,
@@ -266,8 +289,29 @@ class _NumberInputState extends State<NumberInput> {
 
     // Check if it's a plain number (no operators) that needs formatting
     if (!RegExp(r'[+\-*/]').hasMatch(cleanedText)) {
+      // Check if input ends with a decimal separator (user is still typing decimal part)
+      // Only preserve if:
+      // 1. There's exactly one decimal separator and it's at the end
+      // 2. The input wasn't cleaned (no multiple decimal points were removed)
+      // 3. The text length increased (user is actively typing, not replacing entire text)
+      final bool textLengthIncreased =
+          cleanedText.length > _previousText.length;
+      final bool endsWithDecimalSeparator =
+          !wasCleaned &&
+          textLengthIncreased &&
+          (cleanedText.endsWith('.') || cleanedText.endsWith(',')) &&
+          cleanedText.split('.').length == 2; // Only one decimal point
+
       final double? number = double.tryParse(cleanedText);
       if (number != null && widget.controller != null) {
+        // If input ends with decimal separator and has only one, preserve it (user is still typing)
+        if (endsWithDecimalSeparator) {
+          // Don't format - preserve the trailing decimal separator
+          widget.onChanged?.call(cleanedText);
+          _previousText = cleanedText;
+          return;
+        }
+
         final String formattedNumber = _formatResult(
           number,
           removeTrailingZeros: true,
@@ -374,20 +418,26 @@ class _NumberInputState extends State<NumberInput> {
 
     if (!widget.enableMathEvaluation) {
       // Original regex without operators
+      // Pattern allows: digits, optional comma/dot, then 0-10 digits
+      // This allows trailing comma/dot (e.g., "123," or "123.") because [0-9]{0,10} allows 0 digits
       return (widget.decimals > 0)
-          ? r'^[0-9]+[,.]{0,1}[0-9]{0,' + maxDecimalPlaces.toString() + r'}'
+          ? r'^[0-9]+([,.]?[0-9]{0,' + maxDecimalPlaces.toString() + r'})?'
           : r'[0-9]';
     }
 
     // Regex with operators support
     // Pattern: optional leading minus, number, then optional (operator + optional number)*
     // Allows trailing operators for partial input (e.g., "10+")
+    // Allows trailing decimal separator for partial input (e.g., "123," or "123.")
     if (widget.decimals > 0) {
-      // Pattern: ^-?[0-9]+([,.]{0,1}[0-9]{0,N})?([+\-*/]([0-9]+([,.]{0,1}[0-9]{0,N})?)?)?)*$
+      // Pattern: ^-?[0-9]+([,.]?[0-9]{0,N})?([+\-*/]([0-9]+([,.]?[0-9]{0,N})?)?)?)*$
+      // Explicitly allow trailing decimal separator by making [0-9]{0,N} allow 0 digits
+      // This allows "123," or "123." where the decimal separator is followed by 0 digits
       final String decimalPart =
-          r'([,.]{0,1}[0-9]{0,' + maxDecimalPlaces.toString() + r'})';
+          r'([,.]?[0-9]{0,' + maxDecimalPlaces.toString() + r'})';
       final String numberWithDecimal = r'([0-9]+' + decimalPart + r'?)';
       final String operatorWithNumber = r'([+\-*/]' + numberWithDecimal + r'?)';
+      // Allow trailing decimal separator by making the decimal part optional and allowing 0 digits after separator
       return r'^-?[0-9]+' + decimalPart + r'?(' + operatorWithNumber + r')*$';
     } else {
       // Pattern: ^-?[0-9]+([+\-*/]([0-9]+)?)?*$
