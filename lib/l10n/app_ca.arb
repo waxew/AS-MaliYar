@@ -825,10 +825,6 @@
     "@navigationCategories": {
         "description": "Navigation Label: Categories"
     },
-    "navigationMain": "Tauler de control Principal",
-    "@navigationMain": {
-        "description": "Navigation Label: Main Dashboard"
-    },
     "generalSettings": "Configuració",
     "@generalSettings": {
         "description": "Label: Settings"
