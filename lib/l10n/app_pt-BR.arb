@@ -1,5 +1,5 @@
 {
-  "@@locale": "pt_BR",
+    "@@locale": "pt-BR",
     "@@x-reference": true,
     "accountRoleAssetCashWallet": "Carteira de Dinheiro",
     "@accountRoleAssetCashWallet": {
@@ -824,10 +824,6 @@
     "navigationCategories": "Categorias",
     "@navigationCategories": {
         "description": "Navigation Label: Categories"
-    },
-    "navigationMain": "Painel Principal",
-    "@navigationMain": {
-        "description": "Navigation Label: Main Dashboard"
     },
     "generalSettings": "Configurações",
     "@generalSettings": {
