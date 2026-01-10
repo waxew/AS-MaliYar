@@ -1,5 +1,5 @@
 {
-  "@@locale": "sv",
+    "@@locale": "sv-SE",
     "@@x-reference": true,
     "accountRoleAssetCashWallet": "Plånbok",
     "@accountRoleAssetCashWallet": {
@@ -824,10 +824,6 @@
     "navigationCategories": "Kategorier",
     "@navigationCategories": {
         "description": "Navigation Label: Categories"
-    },
-    "navigationMain": "Kontrollpanel",
-    "@navigationMain": {
-        "description": "Navigation Label: Main Dashboard"
     },
     "generalSettings": "Inställningar",
     "@generalSettings": {
