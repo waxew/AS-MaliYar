@@ -783,10 +783,6 @@
     "@navigationCategories": {
         "description": "Navigation Label: Categories"
     },
-    "navigationMain": "Главное табло",
-    "@navigationMain": {
-        "description": "Navigation Label: Main Dashboard"
-    },
     "generalSettings": "Настройки",
     "@generalSettings": {
         "description": "Label: Settings"
