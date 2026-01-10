@@ -88,7 +88,6 @@ class _TransactionPageState extends State<TransactionPage>
       AccountTypeProperty.swaggerGeneratedUnknown;
   final TextEditingController _localAmountTextController =
       TextEditingController();
-  final FocusNode _localAmountFocusNode = FocusNode();
 
   // Always in card view
   final List<TextEditingController> _categoryTextControllers =
@@ -118,11 +117,9 @@ class _TransactionPageState extends State<TransactionPage>
   final List<double> _localAmounts = <double>[];
   final List<TextEditingController> _localAmountTextControllers =
       <TextEditingController>[];
-  final List<FocusNode> _localAmountFocusNodes = <FocusNode>[];
   final List<double> _foreignAmounts = <double>[];
   final List<TextEditingController> _foreignAmountTextControllers =
       <TextEditingController>[];
-  final List<FocusNode> _foreignAmountFocusNodes = <FocusNode>[];
   final List<CurrencyRead?> _foreignCurrencies = <CurrencyRead?>[];
   final List<String?> _transactionJournalIDs = <String?>[];
   final List<String> _deletedSplitIDs = <String>[];
@@ -259,7 +256,6 @@ class _TransactionPageState extends State<TransactionPage>
             ),
           ),
         );
-        _localAmountFocusNodes.add(FocusNode());
 
         /// source account
         _sourceAccountTextControllers.add(
@@ -285,8 +281,6 @@ class _TransactionPageState extends State<TransactionPage>
             ),
           ),
         );
-        _foreignAmountFocusNodes.add(FocusNode());
-
         //// foreign currency
         if (trans.foreignCurrencyCode?.isNotEmpty ?? false) {
           _foreignCurrencies.add(
@@ -523,7 +517,6 @@ class _TransactionPageState extends State<TransactionPage>
     _destinationAccountTextController.dispose();
     _destinationAccountFocusNode.dispose();
     _localAmountTextController.dispose();
-    _localAmountFocusNode.dispose();
 
     for (TextEditingController t in _sourceAccountTextControllers) {
       t.dispose();
@@ -564,14 +557,8 @@ class _TransactionPageState extends State<TransactionPage>
     for (TextEditingController t in _localAmountTextControllers) {
       t.dispose();
     }
-    for (FocusNode f in _localAmountFocusNodes) {
-      f.dispose();
-    }
     for (TextEditingController t in _foreignAmountTextControllers) {
       t.dispose();
-    }
-    for (FocusNode f in _foreignAmountFocusNodes) {
-      f.dispose();
     }
 
     for (AnimationController a in _cardsAnimationController) {
@@ -641,10 +628,8 @@ class _TransactionPageState extends State<TransactionPage>
     _titleFocusNodes.removeAt(i).dispose();
     _localAmounts.removeAt(i);
     _localAmountTextControllers.removeAt(i).dispose();
-    _localAmountFocusNodes.removeAt(i).dispose();
     _foreignAmounts.removeAt(i);
     _foreignAmountTextControllers.removeAt(i).dispose();
-    _foreignAmountFocusNodes.removeAt(i).dispose();
     _foreignCurrencies.removeAt(i);
     _deletedSplitIDs.add(_transactionJournalIDs.elementAtOrNull(i) ?? "");
     _transactionJournalIDs.removeAt(i);
@@ -727,10 +712,8 @@ class _TransactionPageState extends State<TransactionPage>
     _titleFocusNodes.add(FocusNode());
     _localAmounts.add(0);
     _localAmountTextControllers.add(TextEditingController());
-    _localAmountFocusNodes.add(FocusNode());
     _foreignAmounts.add(0);
     _foreignAmountTextControllers.add(TextEditingController());
-    _foreignAmountFocusNodes.add(FocusNode());
     _foreignCurrencies.add(_foreignCurrencies.firstOrNull);
     _transactionJournalIDs.add(null);
 
@@ -1339,7 +1322,6 @@ class _TransactionPageState extends State<TransactionPage>
                   decimals: _localCurrency?.attributes.decimalPlaces ?? 2,
                   //style: Theme.of(context).textTheme.headlineLarge,
                   controller: _localAmountTextController,
-                  focusNode: _localAmountFocusNode,
                   disabled:
                       _savingInProgress ||
                       _split ||
@@ -1986,10 +1968,6 @@ class _TransactionPageState extends State<TransactionPage>
                                         (_foreignCurrencies[i] != null)
                                             ? _foreignAmountTextControllers[i]
                                             : _localAmountTextControllers[i],
-                                    focusNode:
-                                        (_foreignCurrencies[i] != null)
-                                            ? _foreignAmountFocusNodes[i]
-                                            : _localAmountFocusNodes[i],
                                     hintText:
                                         _foreignCurrencies[i]?.zero() ??
                                         _localCurrency?.zero() ??
@@ -2041,7 +2019,6 @@ class _TransactionPageState extends State<TransactionPage>
                                   child: NumberInput(
                                     icon: const Icon(Icons.currency_exchange),
                                     controller: _localAmountTextControllers[i],
-                                    focusNode: _localAmountFocusNodes[i],
                                     hintText:
                                         _localCurrency?.zero() ??
                                         NumberFormat.currency(
