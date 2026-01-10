@@ -1,5 +1,5 @@
 {
-    "@@locale": "zh_TW",
+    "@@locale": "zh-TW",
     "@@x-reference": true,
     "accountRoleAssetCashWallet": "現金皮夾",
     "@accountRoleAssetCashWallet": {
@@ -824,10 +824,6 @@
     "navigationCategories": "分類",
     "@navigationCategories": {
         "description": "Navigation Label: Categories"
-    },
-    "navigationMain": "主頁",
-    "@navigationMain": {
-        "description": "Navigation Label: Main Dashboard"
     },
     "generalSettings": "設定",
     "@generalSettings": {
