@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
-import 'package:waterflyiii/utils/math_expression_evaluator.dart';
+import 'package:waterflyiii/math_expression_evaluator.dart';
 
 /// Number Input Widget with Math Evaluation Support
 ///
@@ -59,14 +59,15 @@ class NumberInput extends StatefulWidget {
 
 class _NumberInputState extends State<NumberInput> {
   final Logger _log = Logger('NumberInput');
-  final MathExpressionEvaluator _evaluator = MathExpressionEvaluator();
+  final MathExpressionEvaluator _evaluator =
+      MathExpressionEvaluator(); // :TODO: remove
   String _previousText = '';
 
   @override
   void initState() {
     super.initState();
-    _previousText = widget.controller?.text ?? widget.value ?? '';
 
+    _previousText = widget.controller?.text ?? widget.value ?? '';
     // Listen to focus changes for evaluation on focus loss
     if (widget.focusNode != null && widget.enableMathEvaluation) {
       widget.focusNode!.addListener(_onFocusChange);
@@ -78,24 +79,27 @@ class _NumberInputState extends State<NumberInput> {
     if (widget.focusNode != null && widget.enableMathEvaluation) {
       widget.focusNode!.removeListener(_onFocusChange);
     }
+
     super.dispose();
   }
 
   void _onFocusChange() {
     if (widget.focusNode != null &&
-        !widget.focusNode!.hasFocus &&
+        widget.focusNode!.hasFocus == false &&
         widget.controller != null) {
       // Format number or evaluate expression on focus loss
       _formatOrEvaluate(widget.controller!.text);
     }
   }
 
+  // Called on blur by _formatOrEvaluate
+  // :TODO: remove isFullEvaluation
   void _evaluateExpression(String text, {required bool isFullEvaluation}) {
-    if (text.isEmpty) {
+    if (text.isEmpty || widget.controller == null) {
       return;
     }
 
-    _log.fine(() => 'Evaluating expression: $text (full: $isFullEvaluation)');
+    _log.finest(() => "Evaluating expression: $text (full: $isFullEvaluation)");
 
     try {
       double? result;
@@ -106,7 +110,9 @@ class _NumberInputState extends State<NumberInput> {
         result = _evaluator.evaluatePartial(text);
       }
 
-      if (result != null && widget.controller != null) {
+      if (result != null) {
+        // :TODO: get rid of _formatResult here - evaluator should never output
+        // :TODO: a bad number
         final String formattedResult = _formatResult(result);
         widget.controller!.text = formattedResult;
         widget.controller!.selection = TextSelection.fromPosition(
@@ -116,13 +122,14 @@ class _NumberInputState extends State<NumberInput> {
         // Trigger onChanged with the evaluated result
         widget.onChanged?.call(formattedResult);
 
-        _log.fine(() => 'Expression evaluated: $text -> $formattedResult');
+        _log.fine("Expression evaluated: $text -> $formattedResult");
       }
     } catch (e, stackTrace) {
       _log.warning('Error evaluating expression: $text', e, stackTrace);
     }
   }
 
+  // Called by _formatOrEvaluate & _handleTextChange
   String _formatResult(double result, {bool removeTrailingZeros = false}) {
     if (widget.decimals > 0) {
       String formatted = result.toStringAsFixed(widget.decimals);
@@ -137,6 +144,7 @@ class _NumberInputState extends State<NumberInput> {
     return result.toStringAsFixed(0);
   }
 
+  // Called on blur by listener
   void _formatOrEvaluate(String text) {
     if (text.isEmpty) {
       return;
@@ -180,14 +188,20 @@ class _NumberInputState extends State<NumberInput> {
     }
   }
 
+  // :TODO: single use, remove
   bool _isOperator(String char) {
     return char == '+' || char == '-' || char == '*' || char == '/';
   }
 
+  // Called by onChanged
   void _handleTextChange(String newText) {
+    if (widget.controller == null) {
+      return;
+    }
+
     // Clean up invalid input (e.g., "10.5.5" -> "10.5")
     String cleanedText = newText;
-    bool wasCleaned = false;
+    bool wasCleaned = false; // :TODO: why?!
     final int firstDotIndex = cleanedText.indexOf('.');
     if (firstDotIndex != -1) {
       final int secondDotIndex = cleanedText.indexOf('.', firstDotIndex + 1);
@@ -195,7 +209,7 @@ class _NumberInputState extends State<NumberInput> {
         // Multiple decimal points - keep only the first part
         cleanedText = cleanedText.substring(0, secondDotIndex);
         wasCleaned = true;
-        if (cleanedText != newText && widget.controller != null) {
+        if (cleanedText != newText) {
           widget.controller!.text = cleanedText;
           widget.controller!.selection = TextSelection.fromPosition(
             TextPosition(offset: cleanedText.length),
@@ -204,6 +218,7 @@ class _NumberInputState extends State<NumberInput> {
       }
     }
 
+    // :TODO: why are we formatting any number? should just check if valid
     if (!widget.enableMathEvaluation) {
       // Check if input ends with a decimal separator (user is still typing decimal part)
       // Only preserve if:
@@ -247,8 +262,8 @@ class _NumberInputState extends State<NumberInput> {
       _previousText = cleanedText;
       return;
     }
-
     // Check if an operator was just pressed (chained calculation)
+    // :TODO: why? just handle the complete text.
     if (cleanedText.length > _previousText.length) {
       final String addedChar = cleanedText.substring(_previousText.length);
       if (addedChar.length == 1 && _isOperator(addedChar)) {
@@ -288,6 +303,7 @@ class _NumberInputState extends State<NumberInput> {
     }
 
     // Check if it's a plain number (no operators) that needs formatting
+    // :TODO: should already be formatted?!
     if (!RegExp(r'[+\-*/]').hasMatch(cleanedText)) {
       // Check if input ends with a decimal separator (user is still typing decimal part)
       // Only preserve if:
@@ -358,6 +374,7 @@ class _NumberInputState extends State<NumberInput> {
           TextEditingValue oldValue,
           TextEditingValue newValue,
         ) {
+          // :TODO: why are we not just using this instead of all the listener stuff?
           // Replace comma with dot
           String normalized = newValue.text.replaceAll(',', '.');
 

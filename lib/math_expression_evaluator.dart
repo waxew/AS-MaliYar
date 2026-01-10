@@ -14,10 +14,11 @@ import 'package:logging/logging.dart';
 /// final result = evaluator.evaluate('10+5*2'); // Returns 20.0
 /// final partial = evaluator.evaluatePartial('10+5*'); // Returns 15.0
 /// ```
+// :TODO: get rid of class, just keep single function
 class MathExpressionEvaluator {
-  MathExpressionEvaluator() : _log = Logger('MathExpressionEvaluator');
+  MathExpressionEvaluator();
 
-  final Logger _log;
+  final Logger _log = Logger('MathExpressionEvaluator');
 
   /// Normalizes an expression by removing whitespace and replacing commas with dots.
   ///
@@ -26,9 +27,8 @@ class MathExpressionEvaluator {
   ///
   /// Returns:
   /// - [String] Normalized expression
-  String _normalizeExpression(String expression) {
-    return expression.replaceAll(RegExp(r'\s+'), '').replaceAll(',', '.');
-  }
+  String _normalizeExpression(String s) =>
+      s.replaceAll(RegExp(r'\s+'), '').replaceAll(',', '.');
 
   /// Evaluates a complete mathematical expression.
   ///
@@ -45,11 +45,11 @@ class MathExpressionEvaluator {
   /// - No exceptions thrown, returns null for invalid expressions
   double? evaluate(String expression) {
     if (expression.isEmpty) {
-      _log.fine('Empty expression provided');
+      _log.finest(() => "Empty expression provided");
       return null;
     }
 
-    _log.fine(() => 'Evaluating expression: $expression');
+    _log.fine("Evaluating expression: $expression");
 
     try {
       // Normalize expression: remove whitespace, replace comma with dot
@@ -60,13 +60,13 @@ class MathExpressionEvaluator {
 
       // Validate expression format
       if (!isValidExpression(normalized)) {
-        _log.warning('Invalid expression format: $normalized');
+        _log.warning("Invalid expression format: $normalized");
         return null;
       }
 
       // Parse and evaluate
       final double result = _evaluateExpression(normalized);
-      _log.fine(() => 'Evaluation result: $result');
+      _log.finest(() => 'Evaluation result: $result');
       return result;
     } catch (e, stackTrace) {
       _log.severe('Error evaluating expression: $expression', e, stackTrace);

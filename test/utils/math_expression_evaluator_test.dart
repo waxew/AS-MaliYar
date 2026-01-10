@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:waterflyiii/utils/math_expression_evaluator.dart';
+import 'package:waterflyiii/math_expression_evaluator.dart';
 
 /// Comprehensive test suite for MathExpressionEvaluator.
 ///

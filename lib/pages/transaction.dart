@@ -286,6 +286,7 @@ class _TransactionPageState extends State<TransactionPage>
           ),
         );
         _foreignAmountFocusNodes.add(FocusNode());
+
         //// foreign currency
         if (trans.foreignCurrencyCode?.isNotEmpty ?? false) {
           _foreignCurrencies.add(
