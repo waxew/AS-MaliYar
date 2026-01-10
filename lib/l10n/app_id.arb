@@ -767,10 +767,6 @@
     "@navigationCategories": {
         "description": "Navigation Label: Categories"
     },
-    "navigationMain": "Dasbor Utama",
-    "@navigationMain": {
-        "description": "Navigation Label: Main Dashboard"
-    },
     "generalSettings": "Pengaturan",
     "@generalSettings": {
         "description": "Label: Settings"
