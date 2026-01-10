@@ -430,7 +430,7 @@ class _TransactionPageState extends State<TransactionPage>
           }
 
           // Check currency
-          if (currency == _localCurrency) {
+          if (currency.id == _localCurrency!.id) {
             _localAmounts[0] = amount;
             _localAmountTextController.text = amount.toStringAsFixed(
               currency.attributes.decimalPlaces ?? 2,
