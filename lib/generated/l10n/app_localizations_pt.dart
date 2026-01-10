@@ -638,7 +638,7 @@ class SPt extends S {
   String get navigationCategories => 'Categories';
 
   @override
-  String get navigationMain => 'Main Dashboard';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Settings';
