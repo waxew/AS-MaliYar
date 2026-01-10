@@ -29,18 +29,18 @@
 		<key>NSCameraUsageDescription</key>
 		<string>Allows the app to capture pictures and attach them to transactions.</string>
 		<key>AppGroupId</key>
-        <string>$(CUSTOM_GROUP_ID)</string>
-        <key>CFBundleURLTypes</key>
-        <array>
-            <dict>
-                <key>CFBundleTypeRole</key>
-                <string>Editor</string>
-                <key>CFBundleURLSchemes</key>
-                <array>
-                    <string>SharingMedia-$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-                </array>
-            </dict>
-        </array>
+		<string>$(CUSTOM_GROUP_ID)</string>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>SharingMedia-$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+				</array>
+			</dict>
+		</array>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Allows the app to attach existing pictures to transactions.</string>
 		<key>UIApplicationSceneManifest</key>
