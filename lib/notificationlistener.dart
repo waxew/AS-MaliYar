@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:chopper/chopper.dart';
 import 'package:flutter/material.dart';
@@ -50,24 +51,31 @@ class NotificationListenerStatus {
 }
 
 final RegExp rFindMoney = RegExp(
-  r'(?:^|\s)(?<preCurrency>(?:[^\r\n\t\f\v 0-9]){0,3})\s*(?<amount>\d[.,\s\d]+(?:[.,]\d+)?)\s*(?<postCurrency>(?:[^\r\n\t\f\v 0-9]){0,3})(?:$|\s|\.|,)',
+  r'(?:^|[^\w])(?<preCurrency>(?:[^\r\n\t\f\v 0-9]){0,3})\s*(?<amount>\d[.,\s\d]+(?:[.,]\d+)?)\s*(?<postCurrency>(?:[^\r\n\t\f\v 0-9]){0,3})(?:$|\s|\.|,)',
 );
 
 Future<NotificationListenerStatus> nlStatus() async {
-  return NotificationListenerStatus(
-    await NotificationServicePlugin.instance.isServicePermissionGranted(),
-    await NotificationServicePlugin.instance.isServiceRunning(),
-    await FlutterLocalNotificationsPlugin()
-            .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin
-            >()!
-            .areNotificationsEnabled() ??
-        false,
-  );
+  if (Platform.isAndroid) {
+    return NotificationListenerStatus(
+      await NotificationServicePlugin.instance.isServicePermissionGranted(),
+      await NotificationServicePlugin.instance.isServiceRunning(),
+      await FlutterLocalNotificationsPlugin()
+              .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin
+              >()!
+              .areNotificationsEnabled() ??
+          false,
+    );
+  } else {
+    return NotificationListenerStatus(false, false, false);
+  }
 }
 
 @pragma('vm:entry-point')
 void nlCallback() {
+  if (!Platform.isAndroid) {
+    return;
+  }
   log.finest(() => "nlCallback()");
   NotificationServicePlugin.instance.executeNotificationListener((
     NotificationEvent? evt,
@@ -250,6 +258,9 @@ void nlCallback() {
 }
 
 Future<void> nlInit() async {
+  if (!Platform.isAndroid) {
+    return;
+  }
   log.finest(() => "nlInit()");
   await NotificationServicePlugin.instance.initialize(nlCallback);
   nlCallback();

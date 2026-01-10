@@ -148,6 +148,7 @@ class _HomeMainState extends State<HomeMain>
             'en_US',
           ).format(now.copyWith(month: now.month - 3)),
           end: DateFormat('yyyy-MM-dd', 'en_US').format(now),
+          period: V1ChartAccountOverviewGetPeriod.value_1d,
         );
     apiThrowErrorIfEmpty(respChartData, mounted ? context : null);
 
@@ -426,6 +427,7 @@ class _HomeMainState extends State<HomeMain>
             start: DateFormat('yyyy-MM-dd', 'en_US').format(start),
             end: DateFormat('yyyy-MM-dd', 'en_US').format(end),
             preselected: V1ChartAccountOverviewGetPreselected.all,
+            period: V1ChartAccountOverviewGetPeriod.value_1d,
           ),
         ).wait;
     apiThrowErrorIfEmpty(respAssetAccounts, mounted ? context : null);
@@ -559,7 +561,7 @@ class _HomeMainState extends State<HomeMain>
       cards.remove(e);
     }
 
-    return RefreshIndicator(
+    return RefreshIndicator.adaptive(
       onRefresh: _refreshStats,
       child: ListView(
         cacheExtent: 1000,
@@ -1053,7 +1055,9 @@ class _HomeMainState extends State<HomeMain>
                         margin: EdgeInsets.only(bottom: 8),
                         child: Padding(
                           padding: EdgeInsets.fromLTRB(4, 4, 4, 12),
-                          child: Center(child: CircularProgressIndicator()),
+                          child: Center(
+                            child: CircularProgressIndicator.adaptive(),
+                          ),
                         ),
                       );
                     }
@@ -1100,7 +1104,9 @@ class _HomeMainState extends State<HomeMain>
                         clipBehavior: Clip.hardEdge,
                         child: Padding(
                           padding: EdgeInsets.all(8),
-                          child: Center(child: CircularProgressIndicator()),
+                          child: Center(
+                            child: CircularProgressIndicator.adaptive(),
+                          ),
                         ),
                       );
                     }
@@ -1542,7 +1548,7 @@ class ChartCard extends StatelessWidget {
               } else {
                 return const Padding(
                   padding: EdgeInsets.all(8),
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(child: CircularProgressIndicator.adaptive()),
                 );
               }
             },

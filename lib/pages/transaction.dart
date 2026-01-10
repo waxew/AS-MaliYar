@@ -441,7 +441,7 @@ class _TransactionPageState extends State<TransactionPage>
           }
 
           // Check currency
-          if (currency == _localCurrency) {
+          if (currency.id == _localCurrency!.id) {
             _localAmounts[0] = amount;
             _localAmountTextController.text = amount.toStringAsFixed(
               currency.attributes.decimalPlaces ?? 2,
@@ -938,6 +938,8 @@ class _TransactionPageState extends State<TransactionPage>
                         destinationName =
                             _destinationAccountTextController.text;
                       }
+                      debugPrint(sourceName);
+                      debugPrint(destinationName);
 
                       final TransactionSplitUpdate
                       txSs = TransactionSplitUpdate(
@@ -1460,7 +1462,12 @@ class _TransactionPageState extends State<TransactionPage>
                       ? S.of(context).transactionErrorInvalidAccount
                       : null,*/
                   errorIconOnly: true,
-                  onChanged: (_) {
+                  onChanged: (String val) {
+                    for (TextEditingController e
+                        in _sourceAccountTextControllers) {
+                      e.text = val;
+                    }
+
                     // Reset own account & account type when changed
                     if (_sourceAccountType ==
                         AccountTypeProperty.assetAccount) {
@@ -1800,9 +1807,6 @@ class _TransactionPageState extends State<TransactionPage>
         e.text = _destinationAccountTextController.text;
       }
     }
-
-    // Don't change TX type when editing!
-    if (!_newTX) return;
 
     if (_transactionType != txType) {
       setState(() {
