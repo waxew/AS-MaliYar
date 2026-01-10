@@ -641,7 +641,7 @@ class SId extends S {
   String get navigationCategories => 'Kategori';
 
   @override
-  String get navigationMain => 'Dasbor Utama';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Pengaturan';

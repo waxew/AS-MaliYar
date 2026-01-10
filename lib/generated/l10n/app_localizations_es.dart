@@ -643,7 +643,7 @@ class SEs extends S {
   String get navigationCategories => 'Categorías';
 
   @override
-  String get navigationMain => 'Panel principal';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Configuración';

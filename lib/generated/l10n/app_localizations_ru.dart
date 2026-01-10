@@ -647,7 +647,7 @@ class SRu extends S {
   String get navigationCategories => 'Категории';
 
   @override
-  String get navigationMain => 'Главное табло';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Настройки';

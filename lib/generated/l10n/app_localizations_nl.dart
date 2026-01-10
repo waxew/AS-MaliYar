@@ -640,7 +640,7 @@ class SNl extends S {
   String get navigationCategories => 'Categorieën';
 
   @override
-  String get navigationMain => 'Hoofd Dashboard';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Instellingen';

@@ -647,7 +647,7 @@ class SFr extends S {
   String get navigationCategories => 'Catégories';
 
   @override
-  String get navigationMain => 'Tableau de bord';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Paramètres';

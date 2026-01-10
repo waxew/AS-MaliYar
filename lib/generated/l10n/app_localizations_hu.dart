@@ -646,7 +646,7 @@ class SHu extends S {
   String get navigationCategories => 'Kategóriák';
 
   @override
-  String get navigationMain => 'Főoldal';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Beállítások';

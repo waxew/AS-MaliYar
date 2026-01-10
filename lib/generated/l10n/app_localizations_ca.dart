@@ -646,7 +646,7 @@ class SCa extends S {
   String get navigationCategories => 'Categories';
 
   @override
-  String get navigationMain => 'Tauler de control Principal';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Configuració';
