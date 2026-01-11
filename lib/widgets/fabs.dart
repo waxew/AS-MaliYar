@@ -16,31 +16,28 @@ class NewTransactionFab extends StatelessWidget {
   Widget build(BuildContext context) {
     if (context.watch<LayoutProvider>().currentSize >= ScreenSize.expanded) {
       return FloatingActionButton(
-        onPressed:
-            () => showDialog(
-              context: context,
-              builder:
-                  (BuildContext context) => AlertDialog(
-                    title: Text(S.of(context).transactionTitleAdd),
-                    content: Container(
-                      constraints: BoxConstraints(
-                        minWidth: 280,
-                        maxWidth: MediaQuery.of(context).size.width * 0.5,
-                      ),
-                      width: double.maxFinite,
-                      child: TransactionPage(accountId: accountId),
-                    ),
-                  ),
+        onPressed: () => showDialog(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: Text(S.of(context).transactionTitleAdd),
+            content: Container(
+              constraints: BoxConstraints(
+                minWidth: 280,
+                maxWidth: MediaQuery.of(context).size.width * 0.5,
+              ),
+              width: double.maxFinite,
+              child: TransactionPage(accountId: accountId),
             ),
+          ),
+        ),
         tooltip: S.of(context).formButtonTransactionAdd,
         elevation: 0,
         child: const Icon(Icons.add),
       );
     } else {
       return OpenContainer(
-        openBuilder:
-            (BuildContext context, Function closedContainer) =>
-                TransactionPage(accountId: accountId),
+        openBuilder: (BuildContext context, Function closedContainer) =>
+            TransactionPage(accountId: accountId),
         openColor: Theme.of(context).cardColor,
         closedColor: Theme.of(context).colorScheme.primaryContainer,
         closedShape:

@@ -51,11 +51,10 @@ class _CategoryAddEditDialogState extends State<CategoryAddEditDialog> {
             }
           }
           setState(() {
-            includeInSum =
-                !context
-                    .read<SettingsProvider>()
-                    .categoriesSumExcluded
-                    .contains(widget.category!.id);
+            includeInSum = !context
+                .read<SettingsProvider>()
+                .categoriesSumExcluded
+                .contains(widget.category!.id);
             notesController.text = resp.body?.data.attributes.notes ?? "";
             loaded = true;
           });
@@ -90,8 +89,8 @@ class _CategoryAddEditDialogState extends State<CategoryAddEditDialog> {
 
               final bool? ok = await showDialog(
                 context: context,
-                builder:
-                    (BuildContext context) => const DeletionConfirmDialog(),
+                builder: (BuildContext context) =>
+                    const DeletionConfirmDialog(),
               );
               if (!(ok ?? false)) {
                 return;
@@ -147,10 +146,9 @@ class _CategoryAddEditDialogState extends State<CategoryAddEditDialog> {
                         ? S.of(context).errorUnknown
                         : "[nocontext] Unknown error.");
               } catch (_) {
-                error =
-                    context.mounted
-                        ? S.of(context).errorUnknown
-                        : "[nocontext] Unknown error.";
+                error = context.mounted
+                    ? S.of(context).errorUnknown
+                    : "[nocontext] Unknown error.";
               }
 
               msg.showSnackBar(
@@ -218,12 +216,11 @@ class _CategoryAddEditDialogState extends State<CategoryAddEditDialog> {
                   title: Text(S.of(context).categoryFormLabelIncludeInSum),
                   value: includeInSum,
                   isThreeLine: false,
-                  onChanged:
-                      loaded != true
-                          ? null
-                          : (bool value) => setState(() {
-                            includeInSum = value;
-                          }),
+                  onChanged: loaded != true
+                      ? null
+                      : (bool value) => setState(() {
+                          includeInSum = value;
+                        }),
                 ),
               ),
           ],

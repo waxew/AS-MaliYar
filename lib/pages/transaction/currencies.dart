@@ -43,38 +43,41 @@ class CurrencyDialog extends StatelessWidget {
       children: <Widget>[
         FutureBuilder<List<CurrencyRead>>(
           future: _getCurrencies(context),
-          builder: (
-            BuildContext context,
-            AsyncSnapshot<List<CurrencyRead>> snapshot,
-          ) {
-            if (snapshot.hasData) {
-              final List<Widget> child = <Widget>[];
-              for (CurrencyRead currency in snapshot.data!) {
-                child.add(
-                  CurrencyDialogOption(
-                    optionCurrency: currency,
-                    currentCurrency: currentCurrency,
-                  ),
-                );
-                child.add(const Divider());
-              }
-              child.removeLast();
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: child,
-              );
-            } else if (snapshot.hasError) {
-              log.severe(
-                "error getting currencies",
-                snapshot.error,
-                snapshot.stackTrace,
-              );
-              Navigator.pop(context);
-              return const CircularProgressIndicator.adaptive();
-            } else {
-              return const Center(child: CircularProgressIndicator.adaptive());
-            }
-          },
+          builder:
+              (
+                BuildContext context,
+                AsyncSnapshot<List<CurrencyRead>> snapshot,
+              ) {
+                if (snapshot.hasData) {
+                  final List<Widget> child = <Widget>[];
+                  for (CurrencyRead currency in snapshot.data!) {
+                    child.add(
+                      CurrencyDialogOption(
+                        optionCurrency: currency,
+                        currentCurrency: currentCurrency,
+                      ),
+                    );
+                    child.add(const Divider());
+                  }
+                  child.removeLast();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: child,
+                  );
+                } else if (snapshot.hasError) {
+                  log.severe(
+                    "error getting currencies",
+                    snapshot.error,
+                    snapshot.stackTrace,
+                  );
+                  Navigator.pop(context);
+                  return const CircularProgressIndicator.adaptive();
+                } else {
+                  return const Center(
+                    child: CircularProgressIndicator.adaptive(),
+                  );
+                }
+              },
         ),
       ],
     );
@@ -119,12 +122,12 @@ class CurrencyDialogOption extends StatelessWidget {
       },
       trailing:
           (optionCurrency.id ==
-                  context.read<FireflyService>().defaultCurrency.id)
-              ? Text(
-                S.of(context).generalDefault,
-                style: const TextStyle(fontStyle: FontStyle.italic),
-              )
-              : null,
+              context.read<FireflyService>().defaultCurrency.id)
+          ? Text(
+              S.of(context).generalDefault,
+              style: const TextStyle(fontStyle: FontStyle.italic),
+            )
+          : null,
       selected: (optionCurrency.id == currentCurrency.id),
     );
   }

@@ -76,45 +76,42 @@ class _TransactionTagsState extends State<TransactionTags> {
                 labelText: S.of(context).transactionFormLabelTags,
                 icon: const Icon(Icons.bookmarks),
                 filled: !widget.interactable,
-                prefixIcon:
-                    widget.tagsController.tags.isNotEmpty
-                        ? Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Wrap(
-                            spacing: 5,
-                            runSpacing: 5,
-                            children:
-                                widget.tagsController.tags
-                                    .map(
-                                      (String e) => InputChip(
-                                        label: Text(e),
-                                        onDeleted: () {
-                                          setState(() {
-                                            widget.tagsController.remove(e);
-                                            widget.textController.text =
-                                                (widget
-                                                        .tagsController
-                                                        .tags
-                                                        .isNotEmpty)
-                                                    ? " "
-                                                    : "";
-                                          });
-                                        },
-                                      ),
-                                    )
-                                    .toList(),
-                          ),
-                        )
-                        : null,
+                prefixIcon: widget.tagsController.tags.isNotEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Wrap(
+                          spacing: 5,
+                          runSpacing: 5,
+                          children: widget.tagsController.tags
+                              .map(
+                                (String e) => InputChip(
+                                  label: Text(e),
+                                  onDeleted: () {
+                                    setState(() {
+                                      widget.tagsController.remove(e);
+                                      widget.textController.text =
+                                          (widget
+                                              .tagsController
+                                              .tags
+                                              .isNotEmpty)
+                                          ? " "
+                                          : "";
+                                    });
+                                  },
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      )
+                    : null,
               ),
               onTap: () async {
                 final List<String>? tags = await showDialog<List<String>>(
                   context: context,
-                  builder:
-                      (BuildContext context) => TagDialog(
-                        selectedTags: widget.tagsController.tags,
-                        enableAdd: widget.enableAdd,
-                      ),
+                  builder: (BuildContext context) => TagDialog(
+                    selectedTags: widget.tagsController.tags,
+                    enableAdd: widget.enableAdd,
+                  ),
                 );
                 // Cancelled
                 if (tags == null) {
@@ -236,8 +233,10 @@ class _TagDialogState extends State<TagDialog> {
         future: _getTags(),
         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
           if (snapshot.hasData) {
-            final List<String> allTags =
-                <String>{...snapshot.data!, ..._newSelectedTags}.toList();
+            final List<String> allTags = <String>{
+              ...snapshot.data!,
+              ..._newSelectedTags,
+            }.toList();
             bool showAddTag = true;
 
             return StatefulBuilder(
@@ -264,40 +263,30 @@ class _TagDialogState extends State<TagDialog> {
                     onChanged: (String value) {
                       setAlertState(() {});
                     },
-                    onSubmitted:
-                        (String value) =>
-                            widget.enableAdd
-                                ? _newTagSubmitted(
+                    onSubmitted: (String value) => widget.enableAdd
+                        ? _newTagSubmitted(setAlertState, allTags, value)
+                        : null,
+                    decoration: InputDecoration(
+                      hintText: widget.enableAdd
+                          ? S.of(context).transactionDialogTagsHint
+                          : S.of(context).transactionDialogTagsTitle,
+                      icon: const Icon(Icons.bookmark_add),
+                      suffixIcon: (showAddTag && widget.enableAdd)
+                          ? Padding(
+                              padding: const EdgeInsetsDirectional.only(
+                                end: 12.0,
+                              ),
+                              child: IconButton(
+                                icon: const Icon(Icons.add),
+                                onPressed: () => _newTagSubmitted(
                                   setAlertState,
                                   allTags,
-                                  value,
-                                )
-                                : null,
-                    decoration: InputDecoration(
-                      hintText:
-                          widget.enableAdd
-                              ? S.of(context).transactionDialogTagsHint
-                              : S.of(context).transactionDialogTagsTitle,
-                      icon: const Icon(Icons.bookmark_add),
-                      suffixIcon:
-                          (showAddTag && widget.enableAdd)
-                              ? Padding(
-                                padding: const EdgeInsetsDirectional.only(
-                                  end: 12.0,
+                                  _newTagTextController.text,
                                 ),
-                                child: IconButton(
-                                  icon: const Icon(Icons.add),
-                                  onPressed:
-                                      () => _newTagSubmitted(
-                                        setAlertState,
-                                        allTags,
-                                        _newTagTextController.text,
-                                      ),
-                                  tooltip:
-                                      S.of(context).transactionDialogTagsAdd,
-                                ),
-                              )
-                              : null,
+                                tooltip: S.of(context).transactionDialogTagsAdd,
+                              ),
+                            )
+                          : null,
                     ),
                   ),
                   const Divider(),

@@ -53,8 +53,8 @@ class BillChartState extends State<BillChart> {
               axisLine: AxisLine(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              axisLabelFormatter:
-                  (AxisLabelRenderDetails args) => ChartAxisLabel(
+              axisLabelFormatter: (AxisLabelRenderDetails args) =>
+                  ChartAxisLabel(
                     NumberFormat().format(double.parse(args.text)),
                     args.textStyle,
                   ),

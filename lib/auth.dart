@@ -92,21 +92,20 @@ class AuthErrorNoInstance extends AuthError {
   final String host;
 }
 
-http.Client get httpClient =>
-    Platform.isAndroid
-        ? CronetClient.fromCronetEngine(
-          CronetEngine.build(
-            cacheMode: CacheMode.memory,
-            cacheMaxSize: 2 * 1024 * 1024,
-          ),
-          closeEngine: false,
-        )
-        : Platform.isIOS
-        ? CupertinoClient.fromSessionConfiguration(
-          URLSessionConfiguration.ephemeralSessionConfiguration()
-            ..cache = URLCache.withCapacity(memoryCapacity: 2 * 1024 * 1024),
-        )
-        : http.Client();
+http.Client get httpClient => Platform.isAndroid
+    ? CronetClient.fromCronetEngine(
+        CronetEngine.build(
+          cacheMode: CacheMode.memory,
+          cacheMaxSize: 2 * 1024 * 1024,
+        ),
+        closeEngine: false,
+      )
+    : Platform.isIOS
+    ? CupertinoClient.fromSessionConfiguration(
+        URLSessionConfiguration.ephemeralSessionConfiguration()
+          ..cache = URLCache.withCapacity(memoryCapacity: 2 * 1024 * 1024),
+      )
+    : http.Client();
 
 class APIRequestInterceptor implements Interceptor {
   APIRequestInterceptor(this.headerFunc);
@@ -313,8 +312,8 @@ class FireflyService with ChangeNotifier {
     _currentUser = await AuthUser.create(host, apiKey);
     if (_currentUser == null || !hasApi) return false;
 
-    final Response<CurrencySingle> currencyInfo =
-        await api.v1CurrenciesPrimaryGet();
+    final Response<CurrencySingle> currencyInfo = await api
+        .v1CurrenciesPrimaryGet();
     defaultCurrency = currencyInfo.body!.data;
 
     final Response<SystemInfo> about = await api.v1AboutGet();

@@ -20,15 +20,13 @@ PagedChildBuilderDelegate<T> customPagedChildBuilderDelegate<T>({
 
     animateTransitions: true,
     transitionDuration: animDurationStandard,
-    firstPageProgressIndicatorBuilder:
-        (_) => const Padding(
-          padding: EdgeInsets.all(32),
-          child: Center(child: CircularProgressIndicator.adaptive()),
-        ),
-    newPageProgressIndicatorBuilder:
-        (_) => const Padding(
-          padding: EdgeInsets.only(top: 16, bottom: 16),
-          child: Center(child: CircularProgressIndicator.adaptive()),
-        ),
+    firstPageProgressIndicatorBuilder: (_) => const Padding(
+      padding: EdgeInsets.all(32),
+      child: Center(child: CircularProgressIndicator.adaptive()),
+    ),
+    newPageProgressIndicatorBuilder: (_) => const Padding(
+      padding: EdgeInsets.only(top: 16, bottom: 16),
+      child: Center(child: CircularProgressIndicator.adaptive()),
+    ),
   );
 }

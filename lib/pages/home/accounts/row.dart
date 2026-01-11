@@ -112,8 +112,8 @@ Widget accountRowBuilder(
   }
 
   return OpenContainer(
-    openBuilder:
-        (BuildContext context, Function closedContainer) => AccountTXpage(
+    openBuilder: (BuildContext context, Function closedContainer) =>
+        AccountTXpage(
           account: account,
           nameUpdateFunc: (_) => pagingResetFunc(),
         ),
@@ -126,58 +126,53 @@ Widget accountRowBuilder(
       ),
     ),
     closedElevation: 0,
-    closedBuilder:
-        (BuildContext context, Function openContainer) => ListTile(
-          title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
-          subtitle: Text(
-            subtitle,
-            maxLines:
-                account.attributes.type == ShortAccountTypeProperty.asset ||
-                        account.attributes.type ==
-                            ShortAccountTypeProperty.liabilities
-                    ? 2
-                    : 1,
-          ),
-          isThreeLine:
-              account.attributes.type == ShortAccountTypeProperty.asset ||
-              account.attributes.type == ShortAccountTypeProperty.liabilities,
-          trailing: RichText(
-            textAlign: TextAlign.end,
-            maxLines: 2,
-            text: TextSpan(
-              style: Theme.of(context).textTheme.bodyMedium,
-              children: <InlineSpan>[
-                TextSpan(
-                  text: currency.fmt(currentAmount),
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: (currentAmount < 0) ? Colors.red : Colors.green,
-                    fontWeight: FontWeight.bold,
-                    fontFeatures: const <FontFeature>[
-                      FontFeature.tabularFigures(),
-                    ],
-                  ),
-                ),
-                const TextSpan(text: "\n"),
-                TextSpan(
-                  text:
-                      account.attributes.lastActivity != null
-                          ? DateFormat.yMd().add_Hms().format(
-                            account.attributes.lastActivity!.toLocal(),
-                          )
-                          : S.of(context).generalNever,
-                ),
-              ],
+    closedBuilder: (BuildContext context, Function openContainer) => ListTile(
+      title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
+      subtitle: Text(
+        subtitle,
+        maxLines:
+            account.attributes.type == ShortAccountTypeProperty.asset ||
+                account.attributes.type == ShortAccountTypeProperty.liabilities
+            ? 2
+            : 1,
+      ),
+      isThreeLine:
+          account.attributes.type == ShortAccountTypeProperty.asset ||
+          account.attributes.type == ShortAccountTypeProperty.liabilities,
+      trailing: RichText(
+        textAlign: TextAlign.end,
+        maxLines: 2,
+        text: TextSpan(
+          style: Theme.of(context).textTheme.bodyMedium,
+          children: <InlineSpan>[
+            TextSpan(
+              text: currency.fmt(currentAmount),
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                color: (currentAmount < 0) ? Colors.red : Colors.green,
+                fontWeight: FontWeight.bold,
+                fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+              ),
             ),
-          ),
-          enabled: account.attributes.active ?? true,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(16),
-              bottomLeft: Radius.circular(16),
+            const TextSpan(text: "\n"),
+            TextSpan(
+              text: account.attributes.lastActivity != null
+                  ? DateFormat.yMd().add_Hms().format(
+                      account.attributes.lastActivity!.toLocal(),
+                    )
+                  : S.of(context).generalNever,
             ),
-          ),
-          onTap: () => openContainer(),
+          ],
         ),
+      ),
+      enabled: account.attributes.active ?? true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          bottomLeft: Radius.circular(16),
+        ),
+      ),
+      onTap: () => openContainer(),
+    ),
   );
 }
 
@@ -272,11 +267,10 @@ class _AccountTXpageState extends State<AccountTXpage> {
                     : "[nocontext] Unknown error.");
           } catch (_) {
             // ignore: use_build_context_synchronously
-            error =
-                context.mounted
-                    // ignore: use_build_context_synchronously
-                    ? S.of(context).errorUnknown
-                    : "[nocontext] Unknown error.";
+            error = context.mounted
+                // ignore: use_build_context_synchronously
+                ? S.of(context).errorUnknown
+                : "[nocontext] Unknown error.";
           }
 
           msg.showSnackBar(
@@ -308,11 +302,8 @@ class _AccountTXpageState extends State<AccountTXpage> {
       appBar: AppBar(title: _titleWidget, actions: <Widget>[_editIcon]),
       floatingActionButton:
           widget.account.attributes.type == ShortAccountTypeProperty.asset
-              ? NewTransactionFab(
-                context: context,
-                accountId: widget.account.id,
-              )
-              : null,
+          ? NewTransactionFab(context: context, accountId: widget.account.id)
+          : null,
       body: HomeTransactions(
         filters: TransactionFilters(account: widget.account),
       ),

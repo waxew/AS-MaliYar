@@ -151,15 +151,9 @@ class DashboardCard extends StatelessWidget {
             icon: const Icon(Icons.visibility),
             selectedIcon: const Icon(Icons.visibility_off_outlined),
             isSelected: hidden,
-            onPressed:
-                () =>
-                    hidden
-                        ? context.read<SettingsProvider>().dashboardShowCard(
-                          card,
-                        )
-                        : context.read<SettingsProvider>().dashboardHideCard(
-                          card,
-                        ),
+            onPressed: () => hidden
+                ? context.read<SettingsProvider>().dashboardShowCard(card)
+                : context.read<SettingsProvider>().dashboardHideCard(card),
           ),
           trailing: ReorderableDragStartListener(
             index: index,

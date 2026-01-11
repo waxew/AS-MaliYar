@@ -100,8 +100,9 @@ class _LoginPageState extends State<LoginPage> {
                     width: double.infinity,
                     child: Card(
                       elevation: 0,
-                      color:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       child: Padding(
                         padding: const EdgeInsets.all(12),
                         child: Text(
@@ -205,19 +206,19 @@ class _LoginPageState extends State<LoginPage> {
                                 _hostError != S.of(context).errorInvalidURL)) {
                           setState(() {
                             _hostErrorIcon = ErrorIcon(error);
-                            _hostError =
-                                error ? S.of(context).errorInvalidURL : null;
+                            _hostError = error
+                                ? S.of(context).errorInvalidURL
+                                : null;
                           });
                         }
                       },
                       autovalidateMode: AutovalidateMode.disabled,
                       validator: (String? value) {
-                        final String? error =
-                            value == null || value.isEmpty
-                                ? S.of(context).errorFieldRequired
-                                : !_hostValid(value)
-                                ? S.of(context).errorInvalidURL
-                                : null;
+                        final String? error = value == null || value.isEmpty
+                            ? S.of(context).errorFieldRequired
+                            : !_hostValid(value)
+                            ? S.of(context).errorInvalidURL
+                            : null;
                         if (_hostError != error ||
                             _hostErrorIcon.isError != (error != null)) {
                           setState(() {
@@ -250,10 +251,9 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       autovalidateMode: AutovalidateMode.disabled,
                       validator: (String? value) {
-                        final String? error =
-                            value == null || value.isEmpty
-                                ? S.of(context).errorFieldRequired
-                                : null;
+                        final String? error = value == null || value.isEmpty
+                            ? S.of(context).errorFieldRequired
+                            : null;
                         if (_keyError != error ||
                             _keyErrorIcon.isError != (error != null)) {
                           setState(() {
@@ -296,11 +296,10 @@ class _LoginPageState extends State<LoginPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute<Widget>(
-                              builder:
-                                  (BuildContext context) => SplashPage(
-                                    host: _hostTextController.text,
-                                    apiKey: _keyTextController.text,
-                                  ),
+                              builder: (BuildContext context) => SplashPage(
+                                host: _hostTextController.text,
+                                apiKey: _keyTextController.text,
+                              ),
                             ),
                           );
                           /*setState(() {

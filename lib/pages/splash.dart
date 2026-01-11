@@ -176,12 +176,11 @@ class _SplashPageState extends State<SplashPage> {
                       context.read<FireflyService>().signOut();
                     }
                   },
-                  child:
-                      Navigator.canPop(context)
-                          ? Text(
-                            MaterialLocalizations.of(context).backButtonTooltip,
-                          )
-                          : Text(S.of(context).formButtonResetLogin),
+                  child: Navigator.canPop(context)
+                      ? Text(
+                          MaterialLocalizations.of(context).backButtonTooltip,
+                        )
+                      : Text(S.of(context).formButtonResetLogin),
                 ),
                 FilledButton(
                   onPressed: () {
