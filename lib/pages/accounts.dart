@@ -55,10 +55,8 @@ class _AccountsPageState extends State<AccountsPage>
             log.finest(() => "pressed search button");
             Navigator.of(context).push(
               PageRouteBuilder<Widget>(
-                pageBuilder:
-                    (BuildContext context, _, _) => AccountSearch(
-                      type: _accountTypes[_tabController.index],
-                    ),
+                pageBuilder: (BuildContext context, _, _) =>
+                    AccountSearch(type: _accountTypes[_tabController.index]),
                 transitionDuration: animDurationEmphasizedDecelerate,
                 reverseTransitionDuration: animDurationEmphasizedAccelerate,
                 transitionsBuilder:
@@ -111,10 +109,9 @@ class _AccountsPageState extends State<AccountsPage>
     AccountTypeFilter.revenue,
     AccountTypeFilter.liabilities,
   ];
-  final List<Widget> _tabPages =
-      _accountTypes
-          .map<Widget>((AccountTypeFilter t) => AccountDetails(accountType: t))
-          .toList();
+  final List<Widget> _tabPages = _accountTypes
+      .map<Widget>((AccountTypeFilter t) => AccountDetails(accountType: t))
+      .toList();
 
   @override
   Widget build(BuildContext context) {
@@ -189,26 +186,24 @@ class _AccountDetailsState extends State<AccountDetails>
     log.fine(() => "build()");
 
     return RefreshIndicator.adaptive(
-      onRefresh:
-          () => Future<void>.sync(
-            () => setState(() {
-              _pagingState = _pagingState.reset();
-            }),
-          ),
+      onRefresh: () => Future<void>.sync(
+        () => setState(() {
+          _pagingState = _pagingState.reset();
+        }),
+      ),
       child: PagedListView<int, AccountRead>(
         state: _pagingState,
         fetchNextPage: _fetchPage,
         builderDelegate: customPagedChildBuilderDelegate<AccountRead>(
-          itemBuilder:
-              (BuildContext context, AccountRead item, int index) =>
-                  accountRowBuilder(
-                    context,
-                    item,
-                    index,
-                    () => setState(() {
-                      _pagingState = _pagingState.reset();
-                    }),
-                  ),
+          itemBuilder: (BuildContext context, AccountRead item, int index) =>
+              accountRowBuilder(
+                context,
+                item,
+                index,
+                () => setState(() {
+                  _pagingState = _pagingState.reset();
+                }),
+              ),
         ),
       ),
     );

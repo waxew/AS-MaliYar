@@ -648,82 +648,89 @@ TransactionTypeProperty accountsToTransaction(
     AccountTypeProperty,
     Map<AccountTypeProperty, TransactionTypeProperty>
   >
-  map = <
-    AccountTypeProperty,
-    Map<AccountTypeProperty, TransactionTypeProperty>
-  >{
-    AccountTypeProperty
-        .assetAccount: <AccountTypeProperty, TransactionTypeProperty>{
-      AccountTypeProperty.assetAccount: TransactionTypeProperty.transfer,
-      AccountTypeProperty.cashAccount: TransactionTypeProperty.withdrawal,
-      AccountTypeProperty.debt: TransactionTypeProperty.withdrawal,
-      AccountTypeProperty.expenseAccount: TransactionTypeProperty.withdrawal,
-      AccountTypeProperty.initialBalanceAccount:
-          TransactionTypeProperty.openingBalance,
-      AccountTypeProperty.loan: TransactionTypeProperty.withdrawal,
-      AccountTypeProperty.mortgage: TransactionTypeProperty.withdrawal,
-      AccountTypeProperty.reconciliationAccount:
-          TransactionTypeProperty.reconciliation,
-    },
-    AccountTypeProperty
-        .cashAccount: <AccountTypeProperty, TransactionTypeProperty>{
-      AccountTypeProperty.assetAccount: TransactionTypeProperty.deposit,
-      AccountTypeProperty.loan: TransactionTypeProperty.deposit,
-      AccountTypeProperty.debt: TransactionTypeProperty.deposit,
-      AccountTypeProperty.mortgage: TransactionTypeProperty.deposit,
-    },
-    AccountTypeProperty.debt: <AccountTypeProperty, TransactionTypeProperty>{
-      AccountTypeProperty.assetAccount: TransactionTypeProperty.deposit,
-      AccountTypeProperty.debt: TransactionTypeProperty.transfer,
-      AccountTypeProperty.expenseAccount: TransactionTypeProperty.withdrawal,
-      AccountTypeProperty.initialBalanceAccount:
-          TransactionTypeProperty.openingBalance,
-      AccountTypeProperty.loan: TransactionTypeProperty.transfer,
-      AccountTypeProperty.mortgage: TransactionTypeProperty.transfer,
-    },
-    AccountTypeProperty
-        .initialBalanceAccount: <AccountTypeProperty, TransactionTypeProperty>{
-      AccountTypeProperty.assetAccount: TransactionTypeProperty.openingBalance,
-      AccountTypeProperty.debt: TransactionTypeProperty.openingBalance,
-      AccountTypeProperty.loan: TransactionTypeProperty.openingBalance,
-      AccountTypeProperty.mortgage: TransactionTypeProperty.openingBalance,
-    },
-    AccountTypeProperty.loan: <AccountTypeProperty, TransactionTypeProperty>{
-      AccountTypeProperty.assetAccount: TransactionTypeProperty.deposit,
-      AccountTypeProperty.debt: TransactionTypeProperty.transfer,
-      AccountTypeProperty.expenseAccount: TransactionTypeProperty.withdrawal,
-      AccountTypeProperty.initialBalanceAccount:
-          TransactionTypeProperty.openingBalance,
-      AccountTypeProperty.loan: TransactionTypeProperty.transfer,
-      AccountTypeProperty.mortgage: TransactionTypeProperty.transfer,
-    },
-    AccountTypeProperty
-        .mortgage: <AccountTypeProperty, TransactionTypeProperty>{
-      AccountTypeProperty.assetAccount: TransactionTypeProperty.deposit,
-      AccountTypeProperty.debt: TransactionTypeProperty.transfer,
-      AccountTypeProperty.expenseAccount: TransactionTypeProperty.withdrawal,
-      AccountTypeProperty.initialBalanceAccount:
-          TransactionTypeProperty.openingBalance,
-      AccountTypeProperty.loan: TransactionTypeProperty.transfer,
-      AccountTypeProperty.mortgage: TransactionTypeProperty.transfer,
-    },
-    AccountTypeProperty
-        .reconciliationAccount: <AccountTypeProperty, TransactionTypeProperty>{
-      AccountTypeProperty.assetAccount: TransactionTypeProperty.reconciliation,
-    },
-    AccountTypeProperty
-        .revenueAccount: <AccountTypeProperty, TransactionTypeProperty>{
-      AccountTypeProperty.assetAccount: TransactionTypeProperty.deposit,
-      AccountTypeProperty.debt: TransactionTypeProperty.deposit,
-      AccountTypeProperty.loan: TransactionTypeProperty.deposit,
-      AccountTypeProperty.mortgage: TransactionTypeProperty.deposit,
-    },
-    /*AccountTypeProperty.liabilityCredit: {
+  map =
+      <AccountTypeProperty, Map<AccountTypeProperty, TransactionTypeProperty>>{
+        AccountTypeProperty
+            .assetAccount: <AccountTypeProperty, TransactionTypeProperty>{
+          AccountTypeProperty.assetAccount: TransactionTypeProperty.transfer,
+          AccountTypeProperty.cashAccount: TransactionTypeProperty.withdrawal,
+          AccountTypeProperty.debt: TransactionTypeProperty.withdrawal,
+          AccountTypeProperty.expenseAccount:
+              TransactionTypeProperty.withdrawal,
+          AccountTypeProperty.initialBalanceAccount:
+              TransactionTypeProperty.openingBalance,
+          AccountTypeProperty.loan: TransactionTypeProperty.withdrawal,
+          AccountTypeProperty.mortgage: TransactionTypeProperty.withdrawal,
+          AccountTypeProperty.reconciliationAccount:
+              TransactionTypeProperty.reconciliation,
+        },
+        AccountTypeProperty.cashAccount:
+            <AccountTypeProperty, TransactionTypeProperty>{
+              AccountTypeProperty.assetAccount: TransactionTypeProperty.deposit,
+              AccountTypeProperty.loan: TransactionTypeProperty.deposit,
+              AccountTypeProperty.debt: TransactionTypeProperty.deposit,
+              AccountTypeProperty.mortgage: TransactionTypeProperty.deposit,
+            },
+        AccountTypeProperty.debt:
+            <AccountTypeProperty, TransactionTypeProperty>{
+              AccountTypeProperty.assetAccount: TransactionTypeProperty.deposit,
+              AccountTypeProperty.debt: TransactionTypeProperty.transfer,
+              AccountTypeProperty.expenseAccount:
+                  TransactionTypeProperty.withdrawal,
+              AccountTypeProperty.initialBalanceAccount:
+                  TransactionTypeProperty.openingBalance,
+              AccountTypeProperty.loan: TransactionTypeProperty.transfer,
+              AccountTypeProperty.mortgage: TransactionTypeProperty.transfer,
+            },
+        AccountTypeProperty.initialBalanceAccount:
+            <AccountTypeProperty, TransactionTypeProperty>{
+              AccountTypeProperty.assetAccount:
+                  TransactionTypeProperty.openingBalance,
+              AccountTypeProperty.debt: TransactionTypeProperty.openingBalance,
+              AccountTypeProperty.loan: TransactionTypeProperty.openingBalance,
+              AccountTypeProperty.mortgage:
+                  TransactionTypeProperty.openingBalance,
+            },
+        AccountTypeProperty.loan:
+            <AccountTypeProperty, TransactionTypeProperty>{
+              AccountTypeProperty.assetAccount: TransactionTypeProperty.deposit,
+              AccountTypeProperty.debt: TransactionTypeProperty.transfer,
+              AccountTypeProperty.expenseAccount:
+                  TransactionTypeProperty.withdrawal,
+              AccountTypeProperty.initialBalanceAccount:
+                  TransactionTypeProperty.openingBalance,
+              AccountTypeProperty.loan: TransactionTypeProperty.transfer,
+              AccountTypeProperty.mortgage: TransactionTypeProperty.transfer,
+            },
+        AccountTypeProperty.mortgage:
+            <AccountTypeProperty, TransactionTypeProperty>{
+              AccountTypeProperty.assetAccount: TransactionTypeProperty.deposit,
+              AccountTypeProperty.debt: TransactionTypeProperty.transfer,
+              AccountTypeProperty.expenseAccount:
+                  TransactionTypeProperty.withdrawal,
+              AccountTypeProperty.initialBalanceAccount:
+                  TransactionTypeProperty.openingBalance,
+              AccountTypeProperty.loan: TransactionTypeProperty.transfer,
+              AccountTypeProperty.mortgage: TransactionTypeProperty.transfer,
+            },
+        AccountTypeProperty.reconciliationAccount:
+            <AccountTypeProperty, TransactionTypeProperty>{
+              AccountTypeProperty.assetAccount:
+                  TransactionTypeProperty.reconciliation,
+            },
+        AccountTypeProperty.revenueAccount:
+            <AccountTypeProperty, TransactionTypeProperty>{
+              AccountTypeProperty.assetAccount: TransactionTypeProperty.deposit,
+              AccountTypeProperty.debt: TransactionTypeProperty.deposit,
+              AccountTypeProperty.loan: TransactionTypeProperty.deposit,
+              AccountTypeProperty.mortgage: TransactionTypeProperty.deposit,
+            },
+        /*AccountTypeProperty.liabilityCredit: {
       AccountTypeProperty.debt: TransactionTypeProperty.liabilityCredit,
       AccountTypeProperty.loan: TransactionTypeProperty.liabilityCredit,
       AccountTypeProperty.mortgage: TransactionTypeProperty.liabilityCredit,
     },*/
-  };
+      };
 
   return map[source]?[destination] ??
       TransactionTypeProperty.swaggerGeneratedUnknown;

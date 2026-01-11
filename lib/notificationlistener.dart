@@ -144,12 +144,11 @@ void nlCallback() {
         );
 
         // Set date
-        final DateTime date =
-            ffService.tzHandler
-                .notificationTXTime(
-                  DateTime.tryParse(evt.postTime ?? "") ?? DateTime.now(),
-                )
-                .toLocal();
+        final DateTime date = ffService.tzHandler
+            .notificationTXTime(
+              DateTime.tryParse(evt.postTime ?? "") ?? DateTime.now(),
+            )
+            .toLocal();
         String note = "";
         if (appSettings.autoAdd) {
           note = evt.text ?? "";
@@ -275,12 +274,11 @@ Future<void> nlNotificationTap(
   }
   await showDialog(
     context: navigatorKey.currentState!.context,
-    builder:
-        (BuildContext context) => TransactionPage(
-          notification: NotificationTransaction.fromJson(
-            jsonDecode(notificationResponse.payload!),
-          ),
-        ),
+    builder: (BuildContext context) => TransactionPage(
+      notification: NotificationTransaction.fromJson(
+        jsonDecode(notificationResponse.payload!),
+      ),
+    ),
   );
 }
 

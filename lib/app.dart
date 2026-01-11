@@ -205,20 +205,18 @@ class _WaterflyAppState extends State<WaterflyApp> {
     log.fine(() => "WaterflyApp() building");
 
     return DynamicColorBuilder(
-      builder: (
-        ColorScheme? cSchemeDynamicLight,
-        ColorScheme? cSchemeDynamicDark,
-      ) {
+      builder: (ColorScheme? cSchemeDynamicLight, ColorScheme? cSchemeDynamicDark) {
         final ColorScheme cSchemeLight = ColorScheme.fromSeed(
           seedColor: Colors.blue,
         );
-        final ColorScheme cSchemeDark = ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
-        ).copyWith(
-          surfaceContainerHighest: Colors.blueGrey.shade900,
-          onSurfaceVariant: Colors.white,
-        );
+        final ColorScheme cSchemeDark =
+            ColorScheme.fromSeed(
+              seedColor: Colors.blue,
+              brightness: Brightness.dark,
+            ).copyWith(
+              surfaceContainerHighest: Colors.blueGrey.shade900,
+              onSurfaceVariant: Colors.white,
+            );
 
         log.finest(
           () =>
@@ -296,8 +294,8 @@ class _WaterflyAppState extends State<WaterflyApp> {
                 brightness: Brightness.light,
                 colorScheme:
                     context.select((SettingsProvider s) => s.dynamicColors)
-                        ? cSchemeDynamicLight?.harmonized() ?? cSchemeLight
-                        : cSchemeLight,
+                    ? cSchemeDynamicLight?.harmonized() ?? cSchemeLight
+                    : cSchemeLight,
                 useMaterial3: true,
                 // See https://github.com/flutter/flutter/issues/131042#issuecomment-1690737834
                 appBarTheme: const AppBarTheme(shape: RoundedRectangleBorder()),
@@ -312,8 +310,8 @@ class _WaterflyAppState extends State<WaterflyApp> {
                 brightness: Brightness.dark,
                 colorScheme:
                     context.select((SettingsProvider s) => s.dynamicColors)
-                        ? cSchemeDynamicDark?.harmonized() ?? cSchemeDark
-                        : cSchemeDark,
+                    ? cSchemeDynamicDark?.harmonized() ?? cSchemeDark
+                    : cSchemeDark,
                 useMaterial3: true,
               ),
               themeMode: context.select((SettingsProvider s) => s.theme),
@@ -323,22 +321,21 @@ class _WaterflyAppState extends State<WaterflyApp> {
               navigatorKey: navigatorKey,
               home:
                   ((_startup || !_authed) ||
-                          context.select(
-                            (FireflyService f) =>
-                                f.storageSignInException != null,
-                          ))
-                      ? const SplashPage()
-                      : signedIn
-                      ? (_notificationPayload != null ||
-                              _quickAction == "action_transaction_add" ||
-                              (_filesSharedToApp != null &&
-                                  _filesSharedToApp!.isNotEmpty))
-                          ? TransactionPage(
+                      context.select(
+                        (FireflyService f) => f.storageSignInException != null,
+                      ))
+                  ? const SplashPage()
+                  : signedIn
+                  ? (_notificationPayload != null ||
+                            _quickAction == "action_transaction_add" ||
+                            (_filesSharedToApp != null &&
+                                _filesSharedToApp!.isNotEmpty))
+                        ? TransactionPage(
                             notification: _notificationPayload,
                             files: _filesSharedToApp,
                           )
-                          : const NavPage()
-                      : const LoginPage(),
+                        : const NavPage()
+                  : const LoginPage(),
             );
           },
         );

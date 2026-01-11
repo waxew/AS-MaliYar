@@ -128,11 +128,10 @@ class _PiggyChartState extends State<PiggyChart> {
         ),
         plotBands: targetAnnotation,
         maximum: targetAmount != 0 ? targetAmount : null,
-        axisLabelFormatter:
-            (AxisLabelRenderDetails args) => ChartAxisLabel(
-              NumberFormat().format(double.parse(args.text)),
-              args.textStyle,
-            ),
+        axisLabelFormatter: (AxisLabelRenderDetails args) => ChartAxisLabel(
+          NumberFormat().format(double.parse(args.text)),
+          args.textStyle,
+        ),
       ),
       series: chartData,
       palette: possibleChartColorsDart,
