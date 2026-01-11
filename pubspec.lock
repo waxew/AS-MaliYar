@@ -36,12 +36,11 @@ packages:
   appcheck:
     dependency: "direct main"
     description:
-      path: "."
-      ref: ce371398f86412a8d9a2e0b75a9b51597ea1d79f
-      resolved-ref: ce371398f86412a8d9a2e0b75a9b51597ea1d79f
-      url: "https://github.com/bugrevealingbme/AppCheck.git"
-    source: git
-    version: "1.5.2"
+      name: appcheck
+      sha256: aa5877ae559f266a677af538cd343cc463cc592c79f8afce8b6b213894d2e7c0
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.6.0"
   archive:
     dependency: transitive
     description:
@@ -735,7 +734,7 @@ packages:
     source: hosted
     version: "0.7.2"
   json_annotation:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: json_annotation
       sha256: "1ce844379ca14835a50d2f019a3099f419082cfdd231cd86a142af94dd5c6bb1"
@@ -1084,10 +1083,10 @@ packages:
     dependency: transitive
     description:
       name: qs_dart
-      sha256: "27da57e8b394163f96b74bccb6eb6115bfd2585de4b9ad6241bdf1a9797ab54f"
+      sha256: "65ef8d4321cf0183b2789aa73a78cbe1d6073120a0b73745752e3796951c90d4"
       url: "https://pub.dev"
     source: hosted
-    version: "1.6.0"
+    version: "1.6.1"
   quick_actions:
     dependency: "direct main"
     description:
