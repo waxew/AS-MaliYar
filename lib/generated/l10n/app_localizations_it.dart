@@ -641,7 +641,7 @@ class SIt extends S {
   String get navigationCategories => 'Categorie';
 
   @override
-  String get navigationMain => 'Dashboard principale';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Impostazioni';

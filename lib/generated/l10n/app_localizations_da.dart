@@ -639,7 +639,7 @@ class SDa extends S {
   String get navigationCategories => 'Kategorier';
 
   @override
-  String get navigationMain => 'Hoveddashboard';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Indstillinger';

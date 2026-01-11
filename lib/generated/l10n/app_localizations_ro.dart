@@ -640,7 +640,7 @@ class SRo extends S {
   String get navigationCategories => 'Categorii';
 
   @override
-  String get navigationMain => 'Panou principal';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Setări';

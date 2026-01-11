@@ -635,7 +635,7 @@ class SFa extends S {
   String get navigationCategories => 'دسته\n';
 
   @override
-  String get navigationMain => 'داشبورد اصلی\n';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'تنظیمات';

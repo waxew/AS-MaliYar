@@ -630,7 +630,7 @@ class SZh extends S {
   String get navigationCategories => '分类';
 
   @override
-  String get navigationMain => '主仪表盘';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => '设置';
@@ -1544,9 +1544,6 @@ class SZhTw extends SZh {
 
   @override
   String get navigationCategories => '分類';
-
-  @override
-  String get navigationMain => '主頁';
 
   @override
   String get generalSettings => '設定';

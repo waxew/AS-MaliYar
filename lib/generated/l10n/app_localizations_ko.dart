@@ -634,7 +634,7 @@ class SKo extends S {
   String get navigationCategories => '분류';
 
   @override
-  String get navigationMain => '보고서';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Settings';

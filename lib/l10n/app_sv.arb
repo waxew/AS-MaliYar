@@ -825,10 +825,6 @@
     "@navigationCategories": {
         "description": "Navigation Label: Categories"
     },
-    "navigationMain": "Kontrollpanel",
-    "@navigationMain": {
-        "description": "Navigation Label: Main Dashboard"
-    },
     "generalSettings": "Inställningar",
     "@generalSettings": {
         "description": "Label: Settings"

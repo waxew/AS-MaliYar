@@ -644,7 +644,7 @@ class SPl extends S {
   String get navigationCategories => 'Kategorie';
 
   @override
-  String get navigationMain => 'Panel główny';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Ustawienia';

@@ -825,10 +825,6 @@
     "@navigationCategories": {
         "description": "Navigation Label: Categories"
     },
-    "navigationMain": "Übersicht",
-    "@navigationMain": {
-        "description": "Navigation Label: Main Dashboard"
-    },
     "generalSettings": "Einstellungen",
     "@generalSettings": {
         "description": "Label: Settings"

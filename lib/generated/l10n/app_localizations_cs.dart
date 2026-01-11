@@ -642,7 +642,7 @@ class SCs extends S {
   String get navigationCategories => 'Kategorie';
 
   @override
-  String get navigationMain => 'Přehled';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Nastavení';

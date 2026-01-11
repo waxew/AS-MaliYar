@@ -825,10 +825,6 @@
     "@navigationCategories": {
         "description": "Navigation Label: Categories"
     },
-    "navigationMain": "Panou principal",
-    "@navigationMain": {
-        "description": "Navigation Label: Main Dashboard"
-    },
     "generalSettings": "Setări",
     "@generalSettings": {
         "description": "Label: Settings"

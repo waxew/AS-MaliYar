@@ -641,7 +641,7 @@ class SSl extends S {
   String get navigationCategories => 'Kategorije';
 
   @override
-  String get navigationMain => 'Glavna nadzorna plošča';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Nastavitve';

@@ -638,7 +638,7 @@ class SDe extends S {
   String get navigationCategories => 'Kategorien';
 
   @override
-  String get navigationMain => 'Übersicht';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Einstellungen';
