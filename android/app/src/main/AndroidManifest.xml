@@ -111,6 +111,7 @@
         <package android:name="com.apps4fuun.smssender"/>
         <package android:name="com.axis.mobile"/>
         <package android:name="com.b2winc.amedigital"/>
+        <package android:name="com.bancomer.mbanking" />
         <package android:name="com.bankfab.pbg.ae.dubaifirst"/>
         <package android:name="com.barclays.absa.banking"/>
         <package android:name="com.barclays.android.barclaysmobilebanking"/>
@@ -246,6 +247,7 @@
         <package android:name="de.ingdiba.bankingapp"/>
         <package android:name="de.number26.android"/>
         <package android:name="de.traderepublic.app"/>
+        <package android:name="dif.tech.plata" />
         <package android:name="es.bancosantander.apps"/>
         <package android:name="eu.netinfo.colpatria.system"/>
         <package android:name="fi.danskebank.mobilepay"/>
