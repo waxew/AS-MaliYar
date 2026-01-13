@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:expressions/expressions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -37,8 +38,8 @@ class NumberInput extends StatelessWidget {
         if (hasFocus || controller == null) {
           return;
         }
-        final double result = _evaluateExpression(controller!.text);
-        controller!.text = result.toStringAsFixed(decimals);
+        final String result = _evaluateExpression(controller!.text, decimals);
+        controller!.text = result;
       },
       child: TextFormField(
         controller: controller,
@@ -77,11 +78,11 @@ class NumberInput extends StatelessWidget {
             if (opCount > 1) {
               // Only when last operator was inserted at end
               if (newValue.text.startsWith(oldValue.text)) {
-                final double result = _evaluateExpression(oldValue.text);
+                final String result =
+                    _evaluateExpression(oldValue.text, decimals);
 
                 final String newText =
-                    result.toStringAsFixed(decimals) +
-                    newValue.text.substring(oldValue.text.length);
+                    result + newValue.text.substring(oldValue.text.length);
                 return newValue.copyWith(
                   text: newText,
                   selection: TextSelection.collapsed(offset: newText.length),
@@ -127,14 +128,20 @@ class NumberInput extends StatelessWidget {
           ? RegExp(r'^[0-9]+[,.]{0,1}[0-9]{0,' + decimals.toString() + r'}$')
           : RegExp(r'^[0-9]+$');
 
-  double _evaluateExpression(String expression) {
+  /// Evaluates a math expression and returns the result as a formatted string.
+  /// Uses Decimal for proper rounding (avoids floating-point precision issues).
+  String _evaluateExpression(String expression, int decimalPlaces) {
     final Expression? exp = Expression.tryParse(expression);
     if (exp == null) {
-      return 0;
+      return Decimal.zero.toStringAsFixed(decimalPlaces);
     }
-    return const ExpressionEvaluator()
-            .eval(exp, <String, dynamic>{})
-            .toDouble() ??
-        0;
+    final dynamic result = const ExpressionEvaluator().eval(
+      exp,
+      <String, dynamic>{},
+    );
+    if (result == null) {
+      return Decimal.zero.toStringAsFixed(decimalPlaces);
+    }
+    return Decimal.parse(result.toString()).toStringAsFixed(decimalPlaces);
   }
 }

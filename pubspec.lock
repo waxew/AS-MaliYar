@@ -36,11 +36,12 @@ packages:
   appcheck:
     dependency: "direct main"
     description:
-      name: appcheck
-      sha256: aa5877ae559f266a677af538cd343cc463cc592c79f8afce8b6b213894d2e7c0
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.6.0"
+      path: "."
+      ref: ce371398f86412a8d9a2e0b75a9b51597ea1d79f
+      resolved-ref: ce371398f86412a8d9a2e0b75a9b51597ea1d79f
+      url: "https://github.com/bugrevealingbme/AppCheck.git"
+    source: git
+    version: "1.5.2"
   archive:
     dependency: transitive
     description:
@@ -289,6 +290,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.11"
+  decimal:
+    dependency: "direct main"
+    description:
+      name: decimal
+      sha256: fc706a5618b81e5b367b01dd62621def37abc096f2b46a9bd9068b64c1fa36d0
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.4"
   dynamic_color:
     dependency: "direct main"
     description:
@@ -742,7 +751,7 @@ packages:
     source: hosted
     version: "0.7.2"
   json_annotation:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: json_annotation
       sha256: "1ce844379ca14835a50d2f019a3099f419082cfdd231cd86a142af94dd5c6bb1"
@@ -1135,6 +1144,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.2"
+  rational:
+    dependency: transitive
+    description:
+      name: rational
+      sha256: cb808fb6f1a839e6fc5f7d8cb3b0a10e1db48b3be102de73938c627f0b636336
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.3"
   recase:
     dependency: transitive
     description:
