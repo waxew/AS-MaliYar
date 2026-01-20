@@ -270,6 +270,7 @@
         <package android:name="it.beem.app"/>
         <package android:name="it.hype.app"/>
         <package android:name="it.icbpi.mobile"/>
+        <package android:name="it.ing.banking" />
         <package android:name="it.ingdirect.app"/>
         <package android:name="it.nexi.yap"/>
         <package android:name="md.maib.maibank"/>
