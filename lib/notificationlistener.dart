@@ -334,31 +334,33 @@ Future<(CurrencyRead?, double)> parseNotificationText(
       }
     }
 
-    if (bestMatchIndex != -1) {
-      final RegExpMatch bestMatch = matches.elementAt(bestMatchIndex);
+    if (bestMatchIndex == -1) {
+      bestMatchIndex = 0;
+    }
 
-      String amountStr = (bestMatch.namedGroup("amount") ?? "").replaceAll(
-        RegExp(r"\s+"),
-        "",
-      );
+    final RegExpMatch bestMatch = matches.elementAt(bestMatchIndex);
 
-      if (amountStr.isNotEmpty) {
-        // Find the first non-digit character at the end of the string
-        String separator = amountStr[0];
-        for (int i = amountStr.length - 1; i >= 0; i--) {
-          separator = amountStr[i];
-          if (!RegExp(r'\d').hasMatch(separator)) {
-            break;
-          }
+    String amountStr = (bestMatch.namedGroup("amount") ?? "").replaceAll(
+      RegExp(r"\s+"),
+      "",
+    );
+
+    if (amountStr.isNotEmpty) {
+      // Find the first non-digit character at the end of the string
+      String separator = amountStr[0];
+      for (int i = amountStr.length - 1; i >= 0; i--) {
+        separator = amountStr[i];
+        if (!RegExp(r'\d').hasMatch(separator)) {
+          break;
         }
-
-        // Strip all non-digit characters that are not decimal separators
-        if (separator == "." || separator == ",") {
-          amountStr = amountStr.replaceAll(RegExp('[^0-9$separator]'), '');
-        }
-
-        amount = double.tryParse(amountStr.replaceAll(",", "."))!;
       }
+
+      // Strip all non-digit characters that are not decimal separators
+      if (separator == "." || separator == ",") {
+        amountStr = amountStr.replaceAll(RegExp('[^0-9$separator]'), '');
+      }
+
+      amount = double.tryParse(amountStr.replaceAll(",", "."))!;
     }
   }
 
