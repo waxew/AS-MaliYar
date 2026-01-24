@@ -1,4 +1,3 @@
-import 'package:decimal/decimal.dart';
 import 'package:expressions/expressions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -38,8 +37,8 @@ class NumberInput extends StatelessWidget {
         if (hasFocus || controller == null) {
           return;
         }
-        final String result = _evaluateExpression(controller!.text, decimals);
-        controller!.text = result;
+        final double result = _evaluateExpression(controller!.text);
+        controller!.text = result.toStringAsFixed(decimals);
       },
       child: TextFormField(
         controller: controller,
@@ -62,8 +61,9 @@ class NumberInput extends StatelessWidget {
             }
 
             // Check for operators in newValue
-            final int opCount =
-                RegExp(r'[+\-*/]').allMatches(newValue.text).length;
+            final int opCount = RegExp(
+              r'[+\-*/]',
+            ).allMatches(newValue.text).length;
 
             // no operators --> normal number validation
             if (opCount == 0) {
@@ -78,11 +78,11 @@ class NumberInput extends StatelessWidget {
             if (opCount > 1) {
               // Only when last operator was inserted at end
               if (newValue.text.startsWith(oldValue.text)) {
-                final String result =
-                    _evaluateExpression(oldValue.text, decimals);
+                final double result = _evaluateExpression(oldValue.text);
 
                 final String newText =
-                    result + newValue.text.substring(oldValue.text.length);
+                    result.toStringAsFixed(decimals) +
+                    newValue.text.substring(oldValue.text.length);
                 return newValue.copyWith(
                   text: newText,
                   selection: TextSelection.collapsed(offset: newText.length),
@@ -115,33 +115,26 @@ class NumberInput extends StatelessWidget {
           prefixText: prefixText,
           filled: disabled,
         ),
-        style:
-            disabled
-                ? style?.copyWith(color: Theme.of(context).disabledColor)
-                : style,
+        style: disabled
+            ? style?.copyWith(color: Theme.of(context).disabledColor)
+            : style,
       ),
     );
   }
 
-  RegExp _getRegex() =>
-      (decimals > 0)
-          ? RegExp(r'^[0-9]+[,.]{0,1}[0-9]{0,' + decimals.toString() + r'}$')
-          : RegExp(r'^[0-9]+$');
+  RegExp _getRegex() => (decimals > 0)
+      ? RegExp(r'^[0-9]+[,.]{0,1}[0-9]{0,' + decimals.toString() + r'}$')
+      : RegExp(r'^[0-9]+$');
 
-  /// Evaluates a math expression and returns the result as a formatted string.
-  /// Uses Decimal for proper rounding (avoids floating-point precision issues).
-  String _evaluateExpression(String expression, int decimalPlaces) {
+  double _evaluateExpression(String expression) {
     final Expression? exp = Expression.tryParse(expression);
     if (exp == null) {
-      return Decimal.zero.toStringAsFixed(decimalPlaces);
+      return 0;
     }
     final dynamic result = const ExpressionEvaluator().eval(
       exp,
       <String, dynamic>{},
     );
-    if (result == null) {
-      return Decimal.zero.toStringAsFixed(decimalPlaces);
-    }
-    return Decimal.parse(result.toString()).toStringAsFixed(decimalPlaces);
+    return result?.toDouble() ?? 0;
   }
 }
