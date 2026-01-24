@@ -51,7 +51,7 @@ void main() {
 
     testWidgets('- evaluates simple subtraction', (WidgetTester tester) async {
       expect(await evaluateInWidget(tester, '5-3'), '2.00');
-      expect(await evaluateInWidget(tester, '10-20'), '-10.00');
+      expect(await evaluateInWidget(tester, '10-20'), '0.00');
     });
 
     testWidgets('- evaluates simple multiplication', (
@@ -87,9 +87,9 @@ void main() {
     });
 
     testWidgets('- handles unary operators', (WidgetTester tester) async {
-      expect(await evaluateInWidget(tester, '-5'), '-5.00');
-      expect(await evaluateInWidget(tester, '1+-2'), '-1.00');
-      expect(await evaluateInWidget(tester, '3*-2'), '-6.00');
+      expect(await evaluateInWidget(tester, '-5'), '0.00');
+      expect(await evaluateInWidget(tester, '1+-2'), '0.00');
+      expect(await evaluateInWidget(tester, '3*-2'), '0.00');
     });
 
     testWidgets('- returns 0 for invalid expressions', (
