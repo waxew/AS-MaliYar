@@ -1359,6 +1359,7 @@ class _TransactionPageState extends State<TransactionPage>
                   border: OutlineInputBorder(),
                 ),
                 readOnly: true,
+                enabled: !_savingInProgress,
                 onTap: () async {
                   final DateTime? pickedDate = await showDatePicker(
                     context: context,
@@ -1395,6 +1396,7 @@ class _TransactionPageState extends State<TransactionPage>
                 controller: _timeTextController,
                 decoration: const InputDecoration(border: OutlineInputBorder()),
                 readOnly: true,
+                enabled: !_savingInProgress,
                 onTap: () async {
                   final TimeOfDay? pickedTime = await showTimePicker(
                     context: context,
