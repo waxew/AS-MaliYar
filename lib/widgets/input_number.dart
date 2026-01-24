@@ -46,7 +46,10 @@ class NumberInput extends StatelessWidget {
         onChanged: onChanged as void Function(String)?,
         readOnly: disabled,
         enabled: !disabled,
-        keyboardType: TextInputType.numberWithOptions(decimal: (decimals > 0)),
+        keyboardType: TextInputType.numberWithOptions(
+          decimal: (decimals > 0),
+          signed: false,
+        ),
         inputFormatters: <TextInputFormatter>[
           TextInputFormatter.withFunction(
             (TextEditingValue oldValue, TextEditingValue newValue) =>
@@ -135,6 +138,7 @@ class NumberInput extends StatelessWidget {
       exp,
       <String, dynamic>{},
     );
-    return result?.toDouble() ?? 0;
+    final double resultDouble = result?.toDouble() ?? 0;
+    return resultDouble < 0 ? 0 : resultDouble;
   }
 }
