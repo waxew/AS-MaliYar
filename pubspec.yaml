@@ -42,7 +42,7 @@ dependencies:
   filesize: ^2.0.1
   community_charts_flutter: ^1.0.2
   file_picker: ^10.3.8
-  flutter_local_notifications: ^19.4.0
+  flutter_local_notifications: ^20.0.0
   notifications_listener_service:
     git:
       url: https://github.com/dreautall/notification_listener_service.git
