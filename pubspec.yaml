@@ -41,7 +41,7 @@ dependencies:
   badges: ^3.1.2
   filesize: ^2.0.1
   community_charts_flutter: ^1.0.2
-  file_picker: ^10.3.9
+  file_picker: ^10.3.10
   flutter_local_notifications: ^19.4.0
   notifications_listener_service:
     git:
