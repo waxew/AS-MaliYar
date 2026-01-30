@@ -56,7 +56,7 @@ class _WaterflyAppState extends State<WaterflyApp> {
     // Notifications (Android only)
     if (Platform.isAndroid) {
       FlutterLocalNotificationsPlugin().initialize(
-        const InitializationSettings(
+        settings: const InitializationSettings(
           android: AndroidInitializationSettings('ic_stat_notification'),
         ),
         onDidReceiveNotificationResponse: nlNotificationTap,

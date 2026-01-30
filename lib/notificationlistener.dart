@@ -200,10 +200,10 @@ void nlCallback() {
 
         unawaited(
           FlutterLocalNotificationsPlugin().show(
-            DateTime.now().millisecondsSinceEpoch ~/ 1000,
-            "Transaction created",
-            "Transaction created based on notification ${evt.title}",
-            const NotificationDetails(
+            id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+            title: "Transaction created",
+            body: "Transaction created based on notification ${evt.title}",
+            notificationDetails: const NotificationDetails(
               android: AndroidNotificationDetails(
                 'extract_transaction_created',
                 'Transaction from Notification Created',
@@ -228,11 +228,12 @@ void nlCallback() {
       // :TODO: l10n
       unawaited(
         FlutterLocalNotificationsPlugin().show(
-          DateTime.now().millisecondsSinceEpoch ~/ 1000,
-          "Create Transaction?",
+          id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          title: "Create Transaction?",
           // :TODO: once we l10n this, a better switch can be implemented...
-          "Click to create a transaction based on the notification ${evt.title ?? evt.packageName ?? ""}",
-          const NotificationDetails(
+          body:
+              "Click to create a transaction based on the notification ${evt.title ?? evt.packageName ?? ""}",
+          notificationDetails: const NotificationDetails(
             android: AndroidNotificationDetails(
               'extract_transaction',
               'Create Transaction from Notification',
