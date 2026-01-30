@@ -46,7 +46,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
   late PagingState<int, TransactionRead> _pagingState;
 
   DateTime? _lastDate;
-  List<int> _rowsWithDate = <int>[];
+  final List<int> _rowsWithDate = <int>[];
   late TransStock _stock;
   late TimeZoneHandler _tzHandler;
 
@@ -155,7 +155,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
                   return;
                 }
                 _filters.updateFilters();
-                _rowsWithDate = <int>[];
+                _rowsWithDate.clear();
                 _lastDate = null;
                 _txSum = TransactionSum();
                 _txSumUsed.clear();
@@ -406,7 +406,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
 
     return RefreshIndicator.adaptive(
       onRefresh: () => Future<void>.sync(() {
-        _rowsWithDate = <int>[];
+        _rowsWithDate.clear();
         _lastDate = null;
         _txSum = TransactionSum();
         _txSumUsed.clear();
@@ -760,7 +760,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
                         ),
                       );
                       if (ok ?? false) {
-                        _rowsWithDate = <int>[];
+                        _rowsWithDate.clear();
                         _lastDate = null;
                         _txSum = TransactionSum();
                         _txSumUsed.clear();
@@ -795,7 +795,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
                       }
 
                       await api.v1TransactionsIdDelete(id: item.id);
-                      _rowsWithDate = <int>[];
+                      _rowsWithDate.clear();
                       _lastDate = null;
                       _txSum = TransactionSum();
                       _txSumUsed.clear();
@@ -1009,7 +1009,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
         }
 
         if (refresh ?? false == true) {
-          _rowsWithDate = <int>[];
+          _rowsWithDate.clear();
           _lastDate = null;
           _txSum = TransactionSum();
           _txSumUsed.clear();
