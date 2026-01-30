@@ -144,6 +144,7 @@
         <package android:name="com.dkbcodefactory.banking"/>
         <package android:name="com.ehorizon.apollo.numobile"/>
         <package android:name="com.esunbank.ESUNWALLET"/>
+        <package android:name="com.expatrio.app" />
         <package android:name="com.finanteq.finance.bgz"/>
         <package android:name="com.fineco.it"/>
         <package android:name="com.firstbank.mbanklite"/>
