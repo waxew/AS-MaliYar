@@ -51,6 +51,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
   late TimeZoneHandler _tzHandler;
 
   TransactionSum _txSum = TransactionSum();
+  final List<String> _txSumUsed = <String>[];
 
   final TransactionFilters _filters = TransactionFilters();
   final ValueNotifier<bool> _tagsHidden = ValueNotifier<bool>(false);
@@ -121,6 +122,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
                   if (settings.showFutureTXs != oldShowFutureTXs) {
                     settings.showFutureTXs = oldShowFutureTXs;
                     _txSum = TransactionSum();
+                    _txSumUsed.clear();
                     setState(() {
                       _pagingState = _pagingState.reset();
                     });
@@ -131,6 +133,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
                       oldTransactionDateFilter,
                     );
                     _txSum = TransactionSum();
+                    _txSumUsed.clear();
                     setState(() {
                       _pagingState = _pagingState.reset();
                     });
@@ -155,6 +158,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
                 _rowsWithDate = <int>[];
                 _lastDate = null;
                 _txSum = TransactionSum();
+                _txSumUsed.clear();
                 setState(() {
                   _pagingState = _pagingState.reset();
                 });
@@ -342,8 +346,11 @@ class _HomeTransactionsState extends State<HomeTransactions>
           _lastCalculatedBalance = balance;
         }
       }
-
       for (TransactionRead item in transactionList) {
+        if (_txSumUsed.contains(item.id)) {
+          continue;
+        }
+        _txSumUsed.add(item.id);
         for (TransactionSplit tx in item.attributes.transactions) {
           switch (tx.type) {
             case TransactionTypeProperty.deposit:
@@ -402,6 +409,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
         _rowsWithDate = <int>[];
         _lastDate = null;
         _txSum = TransactionSum();
+        _txSumUsed.clear();
         context.read<FireflyService>().transStock!.clear();
         setState(() {
           _lastCalculatedBalance = null;
@@ -755,6 +763,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
                         _rowsWithDate = <int>[];
                         _lastDate = null;
                         _txSum = TransactionSum();
+                        _txSumUsed.clear();
                         if (context.mounted) {
                           context.read<FireflyService>().transStock!.clear();
                         }
@@ -789,6 +798,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
                       _rowsWithDate = <int>[];
                       _lastDate = null;
                       _txSum = TransactionSum();
+                      _txSumUsed.clear();
                       if (context.mounted) {
                         context.read<FireflyService>().transStock!.clear();
                       }
@@ -1002,6 +1012,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
           _rowsWithDate = <int>[];
           _lastDate = null;
           _txSum = TransactionSum();
+          _txSumUsed.clear();
           if (context.mounted) {
             context.read<FireflyService>().transStock!.clear();
           }
