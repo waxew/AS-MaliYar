@@ -166,6 +166,7 @@
         <package android:name="com.grabtaxi.driver"/>
         <package android:name="com.grabtaxi.passenger"/>
         <package android:name="com.grppl.android.shell.CMBlloydsTSB73"/>
+        <package android:name="com.hoosierhillscreditunion4117.mobile" />
         <package android:name="com.hrc.eb.mobile.android.hibismobiledh"/>
         <package android:name="com.idamob.tinkoff.android"/>
         <package android:name="com.ie.capitalone.uk"/>
@@ -201,6 +202,7 @@
         <package android:name="com.opportunitybom.mobile" />
         <package android:name="com.paypal.android.p2pmobile"/>
         <package android:name="com.phonepe.app"/>
+        <package android:name="com.pnc.ecommerce.mobile" />
         <package android:name="com.rappi.restaurants"/>
         <package android:name="com.rbc.mobile.android"/>
         <package android:name="com.rbs.mobile.android.natwest"/>
@@ -226,6 +228,7 @@
         <package android:name="com.sinopac.DaCard"/>
         <package android:name="com.sionpac.app.SinoPac"/>
         <package android:name="com.sixgroup.debixplus"/>
+        <package android:name="com.sofi.mobile" />
         <package android:name="com.softteco.bsbank"/>
         <package android:name="com.starlingbank.android"/>
         <package android:name="com.taxis99"/>
