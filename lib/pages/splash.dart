@@ -10,10 +10,18 @@ import 'package:waterflyiii/widgets/logo.dart';
 final Logger log = Logger("Pages.Splash");
 
 class SplashPage extends StatefulWidget {
-  const SplashPage({super.key, this.host, this.apiKey});
+  const SplashPage({
+    super.key,
+    this.host,
+    this.apiKey,
+    this.cfAccessClientId,
+    this.cfAccessClientSecret,
+  });
 
   final String? host;
   final String? apiKey;
+  final String? cfAccessClientId;
+  final String? cfAccessClientSecret;
 
   @override
   State<SplashPage> createState() => _SplashPageState();
@@ -36,9 +44,15 @@ class _SplashPageState extends State<SplashPage> {
       } else {
         log.finer(
           () =>
-              "SplashPage->_login() with credentials: $host, apiKey ${apiKey.isEmpty ? "unset" : "set"}",
+              "SplashPage->_login() with credentials: $host, apiKey ${apiKey.isEmpty ? "unset" : "set"}, "
+              "cfServiceToken ${widget.cfAccessClientId?.isNotEmpty == true && widget.cfAccessClientSecret?.isNotEmpty == true ? "set" : "unset"}",
         );
-        success = await context.read<FireflyService>().signIn(host, apiKey);
+        success = await context.read<FireflyService>().signIn(
+          host,
+          apiKey,
+          cfAccessClientId: widget.cfAccessClientId,
+          cfAccessClientSecret: widget.cfAccessClientSecret,
+        );
       }
     } catch (e, stackTrace) {
       log.warning(

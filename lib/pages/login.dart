@@ -38,6 +38,10 @@ class _LoginPageState extends State<LoginPage> {
 
   final TextEditingController _hostTextController = TextEditingController();
   final TextEditingController _keyTextController = TextEditingController();
+  final TextEditingController _cfAccessClientIdTextController =
+      TextEditingController();
+  final TextEditingController _cfAccessClientSecretTextController =
+      TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   String _uriScheme = UriScheme.https;
@@ -60,6 +64,8 @@ class _LoginPageState extends State<LoginPage> {
   void dispose() {
     _hostTextController.dispose();
     _keyTextController.dispose();
+    _cfAccessClientIdTextController.dispose();
+    _cfAccessClientSecretTextController.dispose();
     _hostFocusNode.dispose();
 
     super.dispose();
@@ -266,6 +272,32 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
+                  AnimatedHeight(
+                    child: TextFormField(
+                      controller: _cfAccessClientIdTextController,
+                      decoration: const InputDecoration(
+                        filled: true,
+                        labelText: "CF-Access-Client-Id (optional)",
+                      ),
+                      autocorrect: false,
+                      autovalidateMode: AutovalidateMode.disabled,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  AnimatedHeight(
+                    child: TextFormField(
+                      controller: _cfAccessClientSecretTextController,
+                      decoration: const InputDecoration(
+                        filled: true,
+                        labelText: "CF-Access-Client-Secret (optional)",
+                      ),
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      obscureText: true,
+                      autovalidateMode: AutovalidateMode.disabled,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   OverflowBar(
                     alignment: MainAxisAlignment.end,
                     spacing: 12,
@@ -299,6 +331,10 @@ class _LoginPageState extends State<LoginPage> {
                               builder: (BuildContext context) => SplashPage(
                                 host: _hostTextController.text,
                                 apiKey: _keyTextController.text,
+                                cfAccessClientId:
+                                    _cfAccessClientIdTextController.text,
+                                cfAccessClientSecret:
+                                    _cfAccessClientSecretTextController.text,
                               ),
                             ),
                           );

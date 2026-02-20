@@ -26,6 +26,21 @@ import 'package:waterflyiii/timezonehandler.dart';
 
 final Logger log = Logger("Auth");
 final Version minApiVersion = Version(6, 3, 2);
+const String cfAccessClientIdHeader = "CF-Access-Client-Id";
+const String cfAccessClientSecretHeader = "CF-Access-Client-Secret";
+
+Map<String, String> cfServiceTokenHeaders(
+  String? cfAccessClientId,
+  String? cfAccessClientSecret,
+) {
+  if (cfAccessClientId == null || cfAccessClientSecret == null) {
+    return <String, String>{};
+  }
+  return <String, String>{
+    cfAccessClientIdHeader: cfAccessClientId,
+    cfAccessClientSecretHeader: cfAccessClientSecret,
+  };
+}
 
 class APITZReply {
   APITZReply(this.data);
@@ -133,6 +148,8 @@ class AuthUser {
   late Uri _host;
   late String _apiKey;
   late FireflyIii _api;
+  final String? _cfAccessClientId;
+  final String? _cfAccessClientSecret;
 
   //late FireflyIiiV2 _apiV2;
 
@@ -143,7 +160,13 @@ class AuthUser {
 
   final Logger log = Logger("Auth.AuthUser");
 
-  AuthUser._create(Uri host, String apiKey) {
+  AuthUser._create(
+    Uri host,
+    String apiKey, {
+    String? cfAccessClientId,
+    String? cfAccessClientSecret,
+  }) : _cfAccessClientId = cfAccessClientId,
+       _cfAccessClientSecret = cfAccessClientSecret {
     log.config("AuthUser->_create($host)");
     _apiKey = apiKey;
 
@@ -163,13 +186,22 @@ class AuthUser {
   }
 
   Map<String, String> headers() {
-    return <String, String>{
+    final Map<String, String> headers = <String, String>{
       HttpHeaders.authorizationHeader: "Bearer $_apiKey",
       HttpHeaders.acceptHeader: "application/json",
     };
+    headers.addAll(
+      cfServiceTokenHeaders(_cfAccessClientId, _cfAccessClientSecret),
+    );
+    return headers;
   }
 
-  static Future<AuthUser> create(String host, String apiKey) async {
+  static Future<AuthUser> create(
+    String host,
+    String apiKey, {
+    String? cfAccessClientId,
+    String? cfAccessClientSecret,
+  }) async {
     final Logger log = Logger("Auth.AuthUser");
     log.config("AuthUser->create($host)");
 
@@ -190,6 +222,9 @@ class AuthUser {
     try {
       final http.Request request = http.Request(HttpMethod.Get, aboutUri);
       request.headers[HttpHeaders.authorizationHeader] = "Bearer $apiKey";
+      request.headers.addAll(
+        cfServiceTokenHeaders(cfAccessClientId, cfAccessClientSecret),
+      );
       // See #497, redirect is a bad way to check for (un)successful login.
       request.followRedirects = true;
       request.maxRedirects = 5;
@@ -217,7 +252,12 @@ class AuthUser {
       client.close();
     }
 
-    return AuthUser._create(uri, apiKey);
+    return AuthUser._create(
+      uri,
+      apiKey,
+      cfAccessClientId: cfAccessClientId,
+      cfAccessClientSecret: cfAccessClientSecret,
+    );
   }
 }
 
@@ -270,9 +310,19 @@ class FireflyService with ChangeNotifier {
     _storageSignInException = null;
     final String? apiHost = await storage.read(key: 'api_host');
     final String? apiKey = await storage.read(key: 'api_key');
+    final String? cfAccessClientId = await storage.read(
+      key: 'cf_access_client_id',
+    );
+    final String? cfAccessClientSecret = await storage.read(
+      key: 'cf_access_client_secret',
+    );
+    final bool cfServiceTokenSet =
+        cfAccessClientId?.isNotEmpty == true &&
+        cfAccessClientSecret?.isNotEmpty == true;
 
     log.config(
-      "storage: $apiHost, apiKey ${apiKey?.isEmpty ?? true ? "unset" : "set"}",
+      "storage: $apiHost, apiKey ${apiKey?.isEmpty ?? true ? "unset" : "set"}, "
+      "cfServiceToken ${cfServiceTokenSet ? "set" : "unset"}",
     );
 
     if (apiHost == null || apiKey == null) {
@@ -280,7 +330,12 @@ class FireflyService with ChangeNotifier {
     }
 
     try {
-      await signIn(apiHost, apiKey);
+      await signIn(
+        apiHost,
+        apiKey,
+        cfAccessClientId: cfAccessClientId,
+        cfAccessClientSecret: cfAccessClientSecret,
+      );
       return true;
     } catch (e) {
       _storageSignInException = e;
@@ -303,13 +358,39 @@ class FireflyService with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> signIn(String host, String apiKey) async {
+  Future<bool> signIn(
+    String host,
+    String apiKey, {
+    String? cfAccessClientId,
+    String? cfAccessClientSecret,
+  }) async {
     log.config("FireflyService->signIn($host)");
     host = host.strip().rightStrip('/');
     apiKey = apiKey.strip();
+    cfAccessClientId = cfAccessClientId?.strip();
+    cfAccessClientSecret = cfAccessClientSecret?.strip();
+    if (cfAccessClientId?.isEmpty ?? false) {
+      cfAccessClientId = null;
+    }
+    if (cfAccessClientSecret?.isEmpty ?? false) {
+      cfAccessClientSecret = null;
+    }
+    if ((cfAccessClientId == null) != (cfAccessClientSecret == null)) {
+      log.warning(
+        "Incomplete Cloudflare Service Token provided. "
+        "Ignoring service token headers.",
+      );
+      cfAccessClientId = null;
+      cfAccessClientSecret = null;
+    }
 
     _lastTriedHost = host;
-    _currentUser = await AuthUser.create(host, apiKey);
+    _currentUser = await AuthUser.create(
+      host,
+      apiKey,
+      cfAccessClientId: cfAccessClientId,
+      cfAccessClientSecret: cfAccessClientSecret,
+    );
     if (_currentUser == null || !hasApi) return false;
 
     final Response<CurrencySingle> currencyInfo = await api
@@ -359,6 +440,16 @@ class FireflyService with ChangeNotifier {
 
     await storage.write(key: 'api_host', value: host);
     await storage.write(key: 'api_key', value: apiKey);
+    if (cfAccessClientId != null && cfAccessClientSecret != null) {
+      await storage.write(key: 'cf_access_client_id', value: cfAccessClientId);
+      await storage.write(
+        key: 'cf_access_client_secret',
+        value: cfAccessClientSecret,
+      );
+    } else {
+      await storage.delete(key: 'cf_access_client_id');
+      await storage.delete(key: 'cf_access_client_secret');
+    }
 
     return true;
   }
