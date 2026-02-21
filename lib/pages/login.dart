@@ -49,6 +49,7 @@ class _LoginPageState extends State<LoginPage> {
   ErrorIcon _hostErrorIcon = const ErrorIcon(false);
   String? _keyError;
   ErrorIcon _keyErrorIcon = const ErrorIcon(false);
+  bool _showCloudflareFields = false;
   //bool _formSubmitted = false;
 
   final FocusNode _hostFocusNode = FocusNode();
@@ -271,31 +272,36 @@ class _LoginPageState extends State<LoginPage> {
                       },
                     ),
                   ),
-                  const SizedBox(height: 12),
                   AnimatedHeight(
-                    child: TextFormField(
-                      controller: _cfAccessClientIdTextController,
-                      decoration: const InputDecoration(
-                        filled: true,
-                        labelText: "CF-Access-Client-Id (optional)",
-                      ),
-                      autocorrect: false,
-                      autovalidateMode: AutovalidateMode.disabled,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  AnimatedHeight(
-                    child: TextFormField(
-                      controller: _cfAccessClientSecretTextController,
-                      decoration: const InputDecoration(
-                        filled: true,
-                        labelText: "CF-Access-Client-Secret (optional)",
-                      ),
-                      autocorrect: false,
-                      enableSuggestions: false,
-                      obscureText: true,
-                      autovalidateMode: AutovalidateMode.disabled,
-                    ),
+                    child: _showCloudflareFields
+                        ? Column(
+                            children: <Widget>[
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _cfAccessClientIdTextController,
+                                decoration: const InputDecoration(
+                                  filled: true,
+                                  labelText: "CF-Access-Client-Id (optional)",
+                                ),
+                                autocorrect: false,
+                                autovalidateMode: AutovalidateMode.disabled,
+                              ),
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _cfAccessClientSecretTextController,
+                                decoration: const InputDecoration(
+                                  filled: true,
+                                  labelText:
+                                      "CF-Access-Client-Secret (optional)",
+                                ),
+                                autocorrect: false,
+                                enableSuggestions: false,
+                                obscureText: true,
+                                autovalidateMode: AutovalidateMode.disabled,
+                              ),
+                            ],
+                          )
+                        : const SizedBox.shrink(),
                   ),
                   const SizedBox(height: 12),
                   OverflowBar(
@@ -315,6 +321,18 @@ class _LoginPageState extends State<LoginPage> {
                           }
                         },
                         child: Text(S.of(context).formButtonHelp),
+                      ),
+                      OutlinedButton(
+                        onPressed: () {
+                          setState(() {
+                            _showCloudflareFields = !_showCloudflareFields;
+                          });
+                        },
+                        child: Text(
+                          _showCloudflareFields
+                              ? "Hide Cloudflare"
+                              : "Cloudflare",
+                        ),
                       ),
                       FilledButton(
                         onPressed: /*_formSubmitted
