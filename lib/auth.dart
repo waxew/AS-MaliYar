@@ -165,6 +165,11 @@ class AuthErrorNoInstance extends AuthError {
   final String host;
 }
 
+class AuthErrorCloudflareAccess extends AuthError {
+  const AuthErrorCloudflareAccess()
+    : super("Invalid Cloudflare Access service token credentials");
+}
+
 class AuthCredentials {
   const AuthCredentials({
     this.host,
@@ -301,19 +306,31 @@ class AuthUser {
       request.followRedirects = true;
       request.maxRedirects = 5;
       final http.StreamedResponse response = await client.send(request);
+      final String stringData = await response.stream.bytesToString();
+      final bool isCloudflareAccessFailure = _isCloudflareAccessFailure(
+        response: response,
+        body: stringData,
+      );
 
-      // If we get an html page, it's most likely the login page, and auth failed
-      if (response.headers[HttpHeaders.contentTypeHeader]?.startsWith(
-            "text/html",
-          ) ??
-          true) {
+      if (isCloudflareAccessFailure) {
+        throw const AuthErrorCloudflareAccess();
+      }
+
+      if (response.statusCode == 401) {
+        // 401 from Firefly usually means PAT auth failed.
         throw const AuthErrorApiKey();
       }
       if (response.statusCode != 200) {
         throw AuthErrorStatusCode(response.statusCode);
       }
 
-      final String stringData = await response.stream.bytesToString();
+      // If we get an html page with status 200, auth probably got redirected to a login page.
+      if (response.headers[HttpHeaders.contentTypeHeader]?.startsWith(
+            "text/html",
+          ) ??
+          true) {
+        throw const AuthErrorApiKey();
+      }
 
       try {
         SystemInfo.fromJson(json.decode(stringData));
@@ -331,6 +348,36 @@ class AuthUser {
       cfAccessClientSecret: cfAccessClientSecret,
     );
   }
+}
+
+bool _isCloudflareAccessFailure({
+  required http.StreamedResponse response,
+  required String body,
+}) {
+  final String location = response.headers[HttpHeaders.locationHeader] ?? "";
+  final String setCookie = response.headers['set-cookie'] ?? "";
+  final String bodyLower = body.toLowerCase();
+  final String locationLower = location.toLowerCase();
+
+  if (locationLower.contains("/cdn-cgi/access/") ||
+      locationLower.contains(".cloudflareaccess.com")) {
+    return true;
+  }
+
+  if (response.statusCode != 200 &&
+      setCookie.toLowerCase().contains("cf_authorization=")) {
+    return true;
+  }
+
+  // Access block/login pages and prompts include these markers.
+  if (bodyLower.contains("/cdn-cgi/access/") ||
+      bodyLower.contains("cloudflare access") ||
+      bodyLower.contains("cf-access-client-id") ||
+      bodyLower.contains("that account does not have access")) {
+    return true;
+  }
+
+  return false;
 }
 
 class FireflyService with ChangeNotifier {

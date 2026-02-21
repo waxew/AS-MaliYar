@@ -45,7 +45,7 @@ class _SplashPageState extends State<SplashPage> {
         log.finer(
           () =>
               "SplashPage->_login() with credentials: $host, apiKey ${apiKey.isEmpty ? "unset" : "set"}, "
-              "cfServiceToken ${widget.cfAccessClientId?.isNotEmpty == true && widget.cfAccessClientSecret?.isNotEmpty == true ? "set" : "unset"}",
+              "cfServiceToken ${(widget.cfAccessClientId?.isNotEmpty ?? false) && (widget.cfAccessClientSecret?.isNotEmpty ?? false) ? "set" : "unset"}",
         );
         success = await context.read<FireflyService>().signIn(
           host,
@@ -119,6 +119,7 @@ class _SplashPageState extends State<SplashPage> {
       final String errorDescription = () {
         if (_loginError is AuthErrorHost ||
             _loginError is AuthErrorApiKey ||
+            _loginError is AuthErrorCloudflareAccess ||
             _loginError is AuthErrorNoInstance ||
             _loginError is AuthErrorVersionInvalid) {
           final AuthError errorType = _loginError as AuthError;
