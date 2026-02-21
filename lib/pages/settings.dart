@@ -122,6 +122,30 @@ class SettingsPageState extends State<SettingsPage>
             settings.useServerTime = value;
           },
         ),
+        ListTile(
+          title: const Text("Server connection"),
+          subtitle: Text(
+            context.select((FireflyService f) {
+              final Uri? host = f.user?.host;
+              if (host == null) {
+                return "-";
+              }
+              final List<String> segments = <String>[...host.pathSegments];
+              if (segments.isNotEmpty && segments.last == "api") {
+                segments.removeLast();
+              }
+              return host.replace(pathSegments: segments).toString();
+            }),
+            maxLines: 2,
+          ),
+          leading: const CircleAvatar(child: Icon(Icons.cloud_outlined)),
+          onTap: () {
+            showDialog<void>(
+              context: context,
+              builder: (BuildContext context) => const ConnectionDialog(),
+            );
+          },
+        ),
         const Divider(),
         SwitchListTile.adaptive(
           title: Text(S.of(context).settingsLockscreen),
@@ -339,6 +363,262 @@ class ThemeDialog extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class ConnectionDialog extends StatefulWidget {
+  const ConnectionDialog({super.key});
+
+  @override
+  State<ConnectionDialog> createState() => _ConnectionDialogState();
+}
+
+class _ConnectionDialogState extends State<ConnectionDialog> {
+  final TextEditingController _hostTextController = TextEditingController();
+  final TextEditingController _keyTextController = TextEditingController();
+  final TextEditingController _cfAccessClientIdTextController =
+      TextEditingController();
+  final TextEditingController _cfAccessClientSecretTextController =
+      TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  bool _loading = true;
+  bool _saving = false;
+  bool _showCloudflareFields = false;
+  String? _submitError;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCredentials();
+  }
+
+  @override
+  void dispose() {
+    _hostTextController.dispose();
+    _keyTextController.dispose();
+    _cfAccessClientIdTextController.dispose();
+    _cfAccessClientSecretTextController.dispose();
+    super.dispose();
+  }
+
+  static bool _hostValid(String value) {
+    final Uri? uri = Uri.tryParse(value);
+    if (uri == null || uri.host.isEmpty) {
+      return false;
+    }
+    return uri.scheme == "https" || uri.scheme == "http";
+  }
+
+  Future<void> _loadCredentials() async {
+    final FireflyService ff = context.read<FireflyService>();
+    final AuthCredentials creds = await ff.readStoredCredentials();
+    final Uri? currentHost = ff.user?.host;
+
+    String host = creds.host ?? "";
+    if (host.isEmpty && currentHost != null) {
+      final List<String> segments = <String>[...currentHost.pathSegments];
+      if (segments.isNotEmpty && segments.last == "api") {
+        segments.removeLast();
+      }
+      host = currentHost.replace(pathSegments: segments).toString();
+    }
+    if (host.isEmpty) {
+      host = "https://";
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    _hostTextController.text = host;
+    _keyTextController.text = creds.apiKey ?? "";
+    _cfAccessClientIdTextController.text = creds.cfAccessClientId ?? "";
+    _cfAccessClientSecretTextController.text = creds.cfAccessClientSecret ?? "";
+
+    setState(() {
+      _showCloudflareFields =
+          _cfAccessClientIdTextController.text.isNotEmpty ||
+          _cfAccessClientSecretTextController.text.isNotEmpty;
+      _loading = false;
+    });
+  }
+
+  String _errorDescription(Object error, BuildContext context) {
+    if (error is AuthErrorStatusCode) {
+      return "${error.cause}\n${S.of(context).errorStatusCode(error.code)}";
+    }
+    if (error is AuthErrorVersionTooLow) {
+      return "${error.cause}\n${S.of(context).errorMinAPIVersion(error.requiredVersion.toString())}";
+    }
+    if (error is AuthError) {
+      return error.cause;
+    }
+    return S.of(context).errorUnknown;
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    setState(() {
+      _saving = true;
+      _submitError = null;
+    });
+
+    try {
+      await context.read<FireflyService>().signIn(
+        _hostTextController.text,
+        _keyTextController.text,
+        cfAccessClientId: _cfAccessClientIdTextController.text,
+        cfAccessClientSecret: _cfAccessClientSecretTextController.text,
+      );
+      if (!mounted) {
+        return;
+      }
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Connection settings updated."),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (error, stackTrace) {
+      log.warning("failed to update server credentials", error, stackTrace);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _submitError = _errorDescription(error, context);
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _saving = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Server connection"),
+      content: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 150),
+        child: _loading
+            ? const SizedBox(
+                height: 96,
+                child: Center(child: CircularProgressIndicator.adaptive()),
+              )
+            : Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      TextFormField(
+                        controller: _hostTextController,
+                        decoration: InputDecoration(
+                          filled: true,
+                          labelText: S.of(context).loginFormLabelHost,
+                        ),
+                        validator: (String? value) {
+                          if (value == null || value.isEmpty) {
+                            return S.of(context).errorFieldRequired;
+                          }
+                          if (!_hostValid(value)) {
+                            return S.of(context).errorInvalidURL;
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _keyTextController,
+                        decoration: InputDecoration(
+                          filled: true,
+                          labelText: S.of(context).loginFormLabelAPIKey,
+                        ),
+                        obscureText: true,
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        validator: (String? value) {
+                          if (value == null || value.isEmpty) {
+                            return S.of(context).errorFieldRequired;
+                          }
+                          return null;
+                        },
+                      ),
+                      if (_showCloudflareFields) ...<Widget>[
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _cfAccessClientIdTextController,
+                          decoration: const InputDecoration(
+                            filled: true,
+                            labelText: "CF-Access-Client-Id (optional)",
+                          ),
+                          autocorrect: false,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _cfAccessClientSecretTextController,
+                          decoration: const InputDecoration(
+                            filled: true,
+                            labelText: "CF-Access-Client-Secret (optional)",
+                          ),
+                          obscureText: true,
+                          enableSuggestions: false,
+                          autocorrect: false,
+                        ),
+                      ],
+                      if (_submitError != null) ...<Widget>[
+                        const SizedBox(height: 12),
+                        Card(
+                          elevation: 0,
+                          color: Theme.of(context).colorScheme.errorContainer,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Text(
+                              _submitError!,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: _saving ? null : () => Navigator.pop(context),
+          child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+        ),
+        OutlinedButton(
+          onPressed: _loading || _saving
+              ? null
+              : () {
+                  setState(() {
+                    _showCloudflareFields = !_showCloudflareFields;
+                  });
+                },
+          child: Text(_showCloudflareFields ? "Hide Cloudflare" : "Cloudflare"),
+        ),
+        FilledButton(
+          onPressed: _loading || _saving ? null : _save,
+          child: _saving
+              ? const SizedBox.square(
+                  dimension: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text("Save"),
         ),
       ],
     );

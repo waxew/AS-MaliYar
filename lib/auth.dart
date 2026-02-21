@@ -42,6 +42,64 @@ Map<String, String> cfServiceTokenHeaders(
   };
 }
 
+String _stripWrappingQuotes(String value) {
+  if (value.length >= 2 &&
+      ((value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'")))) {
+    return value.substring(1, value.length - 1);
+  }
+  return value;
+}
+
+String _cleanupCfTokenValue(String value) {
+  value = value.strip();
+  value = _stripWrappingQuotes(value).strip();
+  value = value.replaceFirst(RegExp(r'[;,]\s*$'), '');
+  return value.strip();
+}
+
+String _extractCfHeaderValue(String input, String headerName) {
+  final String text = input.replaceAll('\r', '').strip();
+  if (text.isEmpty) {
+    return "";
+  }
+
+  final String lowerHeader = headerName.toLowerCase();
+  for (final String line in text.split('\n')) {
+    final String trimmed = line.strip();
+    if (trimmed.toLowerCase().startsWith("$lowerHeader:")) {
+      final int separator = trimmed.indexOf(':');
+      return _cleanupCfTokenValue(trimmed.substring(separator + 1));
+    }
+  }
+
+  final RegExp inlineHeaderPattern = RegExp(
+    "${RegExp.escape(headerName)}\\s*:\\s*([^\\s\"']+)",
+    caseSensitive: false,
+  );
+  final RegExpMatch? inlineHeaderMatch = inlineHeaderPattern.firstMatch(text);
+  if (inlineHeaderMatch != null) {
+    return _cleanupCfTokenValue(inlineHeaderMatch.group(1)!);
+  }
+
+  return "";
+}
+
+String? _normalizeCfTokenField(String? input, String expectedHeaderName) {
+  if (input == null) {
+    return null;
+  }
+  final String strictExtraction = _extractCfHeaderValue(
+    input,
+    expectedHeaderName,
+  );
+  if (strictExtraction.isNotEmpty) {
+    return strictExtraction;
+  }
+  final String fallback = _cleanupCfTokenValue(input);
+  return fallback.isEmpty ? null : fallback;
+}
+
 class APITZReply {
   APITZReply(this.data);
   APITZReplyData data;
@@ -105,6 +163,20 @@ class AuthErrorNoInstance extends AuthError {
     : super("Not a valid Firefly III instance");
 
   final String host;
+}
+
+class AuthCredentials {
+  const AuthCredentials({
+    this.host,
+    this.apiKey,
+    this.cfAccessClientId,
+    this.cfAccessClientSecret,
+  });
+
+  final String? host;
+  final String? apiKey;
+  final String? cfAccessClientId;
+  final String? cfAccessClientSecret;
 }
 
 http.Client get httpClient => Platform.isAndroid
@@ -306,19 +378,25 @@ class FireflyService with ChangeNotifier {
     log.finest(() => "new FireflyService");
   }
 
+  Future<AuthCredentials> readStoredCredentials() async {
+    return AuthCredentials(
+      host: await storage.read(key: 'api_host'),
+      apiKey: await storage.read(key: 'api_key'),
+      cfAccessClientId: await storage.read(key: 'cf_access_client_id'),
+      cfAccessClientSecret: await storage.read(key: 'cf_access_client_secret'),
+    );
+  }
+
   Future<bool> signInFromStorage() async {
     _storageSignInException = null;
-    final String? apiHost = await storage.read(key: 'api_host');
-    final String? apiKey = await storage.read(key: 'api_key');
-    final String? cfAccessClientId = await storage.read(
-      key: 'cf_access_client_id',
-    );
-    final String? cfAccessClientSecret = await storage.read(
-      key: 'cf_access_client_secret',
-    );
+    final AuthCredentials storedCredentials = await readStoredCredentials();
+    final String? apiHost = storedCredentials.host;
+    final String? apiKey = storedCredentials.apiKey;
+    final String? cfAccessClientId = storedCredentials.cfAccessClientId;
+    final String? cfAccessClientSecret = storedCredentials.cfAccessClientSecret;
     final bool cfServiceTokenSet =
-        cfAccessClientId?.isNotEmpty == true &&
-        cfAccessClientSecret?.isNotEmpty == true;
+        (cfAccessClientId?.isNotEmpty ?? false) &&
+        (cfAccessClientSecret?.isNotEmpty ?? false);
 
     log.config(
       "storage: $apiHost, apiKey ${apiKey?.isEmpty ?? true ? "unset" : "set"}, "
@@ -367,14 +445,29 @@ class FireflyService with ChangeNotifier {
     log.config("FireflyService->signIn($host)");
     host = host.strip().rightStrip('/');
     apiKey = apiKey.strip();
-    cfAccessClientId = cfAccessClientId?.strip();
-    cfAccessClientSecret = cfAccessClientSecret?.strip();
-    if (cfAccessClientId?.isEmpty ?? false) {
-      cfAccessClientId = null;
-    }
-    if (cfAccessClientSecret?.isEmpty ?? false) {
-      cfAccessClientSecret = null;
-    }
+    final String rawCfAccessClientId = cfAccessClientId ?? "";
+    final String rawCfAccessClientSecret = cfAccessClientSecret ?? "";
+
+    // Allow pasting full Cloudflare header lines and extract only token values.
+    cfAccessClientId = _normalizeCfTokenField(
+      rawCfAccessClientId,
+      cfAccessClientIdHeader,
+    );
+    cfAccessClientSecret = _normalizeCfTokenField(
+      rawCfAccessClientSecret,
+      cfAccessClientSecretHeader,
+    );
+
+    // If one field contains a full two-line Cloudflare snippet, recover both values.
+    cfAccessClientId ??= _normalizeCfTokenField(
+      _extractCfHeaderValue(rawCfAccessClientSecret, cfAccessClientIdHeader),
+      cfAccessClientIdHeader,
+    );
+    cfAccessClientSecret ??= _normalizeCfTokenField(
+      _extractCfHeaderValue(rawCfAccessClientId, cfAccessClientSecretHeader),
+      cfAccessClientSecretHeader,
+    );
+
     if ((cfAccessClientId == null) != (cfAccessClientSecret == null)) {
       log.warning(
         "Incomplete Cloudflare Service Token provided. "
@@ -385,56 +478,60 @@ class FireflyService with ChangeNotifier {
     }
 
     _lastTriedHost = host;
-    _currentUser = await AuthUser.create(
+    final AuthUser nextUser = await AuthUser.create(
       host,
       apiKey,
       cfAccessClientId: cfAccessClientId,
       cfAccessClientSecret: cfAccessClientSecret,
     );
-    if (_currentUser == null || !hasApi) return false;
-
-    final Response<CurrencySingle> currencyInfo = await api
+    final Response<CurrencySingle> currencyInfo = await nextUser.api
         .v1CurrenciesPrimaryGet();
-    defaultCurrency = currencyInfo.body!.data;
+    final CurrencyRead nextDefaultCurrency = currencyInfo.body!.data;
 
-    final Response<SystemInfo> about = await api.v1AboutGet();
+    final Response<SystemInfo> about = await nextUser.api.v1AboutGet();
+    late Version nextApiVersion;
     try {
       String apiVersionStr = about.body?.data?.apiVersion ?? "";
       if (apiVersionStr.startsWith("develop/")) {
         apiVersionStr = "9.9.9";
       }
-      _apiVersion = Version.parse(apiVersionStr);
+      nextApiVersion = Version.parse(apiVersionStr);
     } on FormatException {
       throw const AuthErrorVersionInvalid();
     }
-    log.info(() => "Firefly API version $_apiVersion");
-    if (apiVersion == null || apiVersion! < minApiVersion) {
+    log.info(() => "Firefly API version $nextApiVersion");
+    if (nextApiVersion < minApiVersion) {
       throw AuthErrorVersionTooLow(minApiVersion);
     }
 
     // Manual API query as the Swagger type doesn't resolve in Flutter :(
     final http.Client client = httpClient;
-    final Uri tzUri = user!.host.replace(
+    final Uri tzUri = nextUser.host.replace(
       pathSegments: <String>[
-        ...user!.host.pathSegments,
+        ...nextUser.host.pathSegments,
         "v1",
         "configuration",
         ConfigValueFilter.appTimezone.value!,
       ],
     );
+    late TimeZoneHandler nextTzHandler;
     try {
       final http.Response response = await client.get(
         tzUri,
-        headers: user!.headers(),
+        headers: nextUser.headers(),
       );
       final APITZReply reply = APITZReply.fromJson(json.decode(response.body));
-      tzHandler = TimeZoneHandler(reply.data.value);
+      nextTzHandler = TimeZoneHandler(reply.data.value);
     } finally {
       client.close();
     }
 
+    _currentUser = nextUser;
+    defaultCurrency = nextDefaultCurrency;
+    _apiVersion = nextApiVersion;
+    tzHandler = nextTzHandler;
     _signedIn = true;
-    _transStock = TransStock(api);
+    _transStock = TransStock(nextUser.api);
     log.finest(() => "notify FireflyService->signIn");
     notifyListeners();
 
