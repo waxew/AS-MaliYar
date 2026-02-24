@@ -128,17 +128,20 @@ class SUk extends S {
   @override
   String billsFrequencySkip(String frequency, num skip) {
     String _temp0 = intl.Intl.selectLogic(frequency, {
-      'weekly': 'Weekly',
-      'monthly': 'Monthly',
-      'quarterly': 'Quarterly',
-      'halfyear': 'Half-yearly',
-      'yearly': 'Yearly',
-      'other': 'Unknown',
+      'weekly': 'Щотижнєво',
+      'monthly': 'Щомісячно',
+      'quarterly': 'Щоквартально',
+      'halfyear': 'Щопівроку',
+      'yearly': 'Щорічно',
+      'other': 'Невідомо',
     });
     String _temp1 = intl.Intl.pluralLogic(
       skip,
       locale: localeName,
-      other: ', skips over $skip',
+      other: ', пропускає $skip раз',
+      many: ', пропускає $skip разів',
+      few: ', пропускає $skip рази',
+      one: ', пропускає $skip раз',
       zero: '',
     );
     return '$_temp0$_temp1';
