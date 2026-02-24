@@ -47,9 +47,9 @@ class TimeZoneHandler {
   }
 
   tz.TZDateTime getLocalTimeAsServerTime(tz.TZDateTime t) {
-    final int offsetMs =
+    final Duration offsetMs =
         sLocation.currentTimeZone.offset - dLocation.currentTimeZone.offset;
-    return t.subtract(Duration(milliseconds: offsetMs));
+    return t.subtract(offsetMs);
   }
 
   tz.TZDateTime dNow() => tz.TZDateTime.now(dLocation).toLocal();
