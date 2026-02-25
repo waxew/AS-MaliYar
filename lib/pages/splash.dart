@@ -10,18 +10,11 @@ import 'package:waterflyiii/widgets/logo.dart';
 final Logger log = Logger("Pages.Splash");
 
 class SplashPage extends StatefulWidget {
-  const SplashPage({
-    super.key,
-    this.host,
-    this.apiKey,
-    this.cfAccessClientId,
-    this.cfAccessClientSecret,
-  });
+  const SplashPage({super.key, this.host, this.apiKey, this.customHeadersRaw});
 
   final String? host;
   final String? apiKey;
-  final String? cfAccessClientId;
-  final String? cfAccessClientSecret;
+  final String? customHeadersRaw;
 
   @override
   State<SplashPage> createState() => _SplashPageState();
@@ -45,13 +38,12 @@ class _SplashPageState extends State<SplashPage> {
         log.finer(
           () =>
               "SplashPage->_login() with credentials: $host, apiKey ${apiKey.isEmpty ? "unset" : "set"}, "
-              "cfServiceToken ${(widget.cfAccessClientId?.isNotEmpty ?? false) && (widget.cfAccessClientSecret?.isNotEmpty ?? false) ? "set" : "unset"}",
+              "customHeaders ${widget.customHeadersRaw?.isNotEmpty ?? false ? "set" : "unset"}",
         );
         success = await context.read<FireflyService>().signIn(
           host,
           apiKey,
-          cfAccessClientId: widget.cfAccessClientId,
-          cfAccessClientSecret: widget.cfAccessClientSecret,
+          customHeadersRaw: widget.customHeadersRaw,
         );
       }
     } catch (e, stackTrace) {
@@ -117,14 +109,7 @@ class _SplashPageState extends State<SplashPage> {
       String errorDetails =
           "Host: ${context.read<FireflyService>().lastTriedHost}";
       final String errorDescription = () {
-        if (_loginError is AuthErrorHost ||
-            _loginError is AuthErrorApiKey ||
-            _loginError is AuthErrorCloudflareAccess ||
-            _loginError is AuthErrorNoInstance ||
-            _loginError is AuthErrorVersionInvalid) {
-          final AuthError errorType = _loginError as AuthError;
-          return errorType.cause;
-        } else if (_loginError is AuthErrorStatusCode) {
+        if (_loginError is AuthErrorStatusCode) {
           final AuthErrorStatusCode errorType =
               _loginError as AuthErrorStatusCode;
           errorDetails += "\n";
@@ -137,6 +122,9 @@ class _SplashPageState extends State<SplashPage> {
           errorDetails += S
               .of(context)
               .errorMinAPIVersion(errorType.requiredVersion.toString());
+          return errorType.cause;
+        } else if (_loginError is AuthError) {
+          final AuthError errorType = _loginError as AuthError;
           return errorType.cause;
         }
         errorDetails += "\n$_loginError";

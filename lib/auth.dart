@@ -26,21 +26,8 @@ import 'package:waterflyiii/timezonehandler.dart';
 
 final Logger log = Logger("Auth");
 final Version minApiVersion = Version(6, 3, 2);
-const String cfAccessClientIdHeader = "CF-Access-Client-Id";
-const String cfAccessClientSecretHeader = "CF-Access-Client-Secret";
-
-Map<String, String> cfServiceTokenHeaders(
-  String? cfAccessClientId,
-  String? cfAccessClientSecret,
-) {
-  if (cfAccessClientId == null || cfAccessClientSecret == null) {
-    return <String, String>{};
-  }
-  return <String, String>{
-    cfAccessClientIdHeader: cfAccessClientId,
-    cfAccessClientSecretHeader: cfAccessClientSecret,
-  };
-}
+const String customHeadersStorageKey = "api_custom_headers";
+final RegExp _httpHeaderNamePattern = RegExp(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$");
 
 String _stripWrappingQuotes(String value) {
   if (value.length >= 2 &&
@@ -51,53 +38,50 @@ String _stripWrappingQuotes(String value) {
   return value;
 }
 
-String _cleanupCfTokenValue(String value) {
-  value = value.strip();
-  value = _stripWrappingQuotes(value).strip();
-  value = value.replaceFirst(RegExp(r'[;,]\s*$'), '');
-  return value.strip();
+Map<String, String> parseCustomHeaders(String rawInput) {
+  final String text = rawInput.replaceAll('\r', '').strip();
+  if (text.isEmpty) {
+    return <String, String>{};
+  }
+
+  final Map<String, String> headers = <String, String>{};
+  final List<String> lines = text.split('\n');
+  for (int i = 0; i < lines.length; i++) {
+    final int lineNumber = i + 1;
+    final String line = lines[i].strip();
+    if (line.isEmpty) {
+      continue;
+    }
+
+    final int separator = line.indexOf(':');
+    if (separator <= 0 || separator == line.length - 1) {
+      throw AuthErrorCustomHeaders(lineNumber);
+    }
+
+    final String name = line.substring(0, separator).strip();
+    String value = line.substring(separator + 1).strip();
+    value = _stripWrappingQuotes(value).strip();
+    if (name.isEmpty ||
+        !_httpHeaderNamePattern.hasMatch(name) ||
+        value.isEmpty) {
+      throw AuthErrorCustomHeaders(lineNumber);
+    }
+
+    headers[name] = value;
+  }
+
+  return headers;
 }
 
-String _extractCfHeaderValue(String input, String headerName) {
-  final String text = input.replaceAll('\r', '').strip();
-  if (text.isEmpty) {
+String encodeCustomHeaders(Map<String, String> headers) {
+  if (headers.isEmpty) {
     return "";
   }
-
-  final String lowerHeader = headerName.toLowerCase();
-  for (final String line in text.split('\n')) {
-    final String trimmed = line.strip();
-    if (trimmed.toLowerCase().startsWith("$lowerHeader:")) {
-      final int separator = trimmed.indexOf(':');
-      return _cleanupCfTokenValue(trimmed.substring(separator + 1));
-    }
-  }
-
-  final RegExp inlineHeaderPattern = RegExp(
-    "${RegExp.escape(headerName)}\\s*:\\s*([^\\s\"']+)",
-    caseSensitive: false,
-  );
-  final RegExpMatch? inlineHeaderMatch = inlineHeaderPattern.firstMatch(text);
-  if (inlineHeaderMatch != null) {
-    return _cleanupCfTokenValue(inlineHeaderMatch.group(1)!);
-  }
-
-  return "";
-}
-
-String? _normalizeCfTokenField(String? input, String expectedHeaderName) {
-  if (input == null) {
-    return null;
-  }
-  final String strictExtraction = _extractCfHeaderValue(
-    input,
-    expectedHeaderName,
-  );
-  if (strictExtraction.isNotEmpty) {
-    return strictExtraction;
-  }
-  final String fallback = _cleanupCfTokenValue(input);
-  return fallback.isEmpty ? null : fallback;
+  return headers.entries
+      .map((MapEntry<String, String> entry) {
+        return "${entry.key}: ${entry.value}";
+      })
+      .join('\n');
 }
 
 class APITZReply {
@@ -141,6 +125,15 @@ class AuthErrorApiKey extends AuthError {
   const AuthErrorApiKey() : super("Invalid API key");
 }
 
+class AuthErrorCustomHeaders extends AuthError {
+  const AuthErrorCustomHeaders(this.lineNumber)
+    : super(
+        "Invalid custom header on line $lineNumber. Use Header-Name: value",
+      );
+
+  final int lineNumber;
+}
+
 class AuthErrorVersionInvalid extends AuthError {
   const AuthErrorVersionInvalid() : super("Invalid Firefly API version");
 }
@@ -171,17 +164,11 @@ class AuthErrorCloudflareAccess extends AuthError {
 }
 
 class AuthCredentials {
-  const AuthCredentials({
-    this.host,
-    this.apiKey,
-    this.cfAccessClientId,
-    this.cfAccessClientSecret,
-  });
+  const AuthCredentials({this.host, this.apiKey, this.customHeadersRaw});
 
   final String? host;
   final String? apiKey;
-  final String? cfAccessClientId;
-  final String? cfAccessClientSecret;
+  final String? customHeadersRaw;
 }
 
 http.Client get httpClient => Platform.isAndroid
@@ -225,8 +212,7 @@ class AuthUser {
   late Uri _host;
   late String _apiKey;
   late FireflyIii _api;
-  final String? _cfAccessClientId;
-  final String? _cfAccessClientSecret;
+  final Map<String, String> _customHeaders;
 
   //late FireflyIiiV2 _apiV2;
 
@@ -240,10 +226,10 @@ class AuthUser {
   AuthUser._create(
     Uri host,
     String apiKey, {
-    String? cfAccessClientId,
-    String? cfAccessClientSecret,
-  }) : _cfAccessClientId = cfAccessClientId,
-       _cfAccessClientSecret = cfAccessClientSecret {
+    Map<String, String>? customHeaders,
+  }) : _customHeaders = Map<String, String>.unmodifiable(
+         customHeaders ?? const <String, String>{},
+       ) {
     log.config("AuthUser->_create($host)");
     _apiKey = apiKey;
 
@@ -267,17 +253,14 @@ class AuthUser {
       HttpHeaders.authorizationHeader: "Bearer $_apiKey",
       HttpHeaders.acceptHeader: "application/json",
     };
-    headers.addAll(
-      cfServiceTokenHeaders(_cfAccessClientId, _cfAccessClientSecret),
-    );
+    headers.addAll(_customHeaders);
     return headers;
   }
 
   static Future<AuthUser> create(
     String host,
     String apiKey, {
-    String? cfAccessClientId,
-    String? cfAccessClientSecret,
+    Map<String, String>? customHeaders,
   }) async {
     final Logger log = Logger("Auth.AuthUser");
     log.config("AuthUser->create($host)");
@@ -299,9 +282,7 @@ class AuthUser {
     try {
       final http.Request request = http.Request(HttpMethod.Get, aboutUri);
       request.headers[HttpHeaders.authorizationHeader] = "Bearer $apiKey";
-      request.headers.addAll(
-        cfServiceTokenHeaders(cfAccessClientId, cfAccessClientSecret),
-      );
+      request.headers.addAll(customHeaders ?? const <String, String>{});
       // See #497, redirect is a bad way to check for (un)successful login.
       request.followRedirects = true;
       request.maxRedirects = 5;
@@ -341,12 +322,7 @@ class AuthUser {
       client.close();
     }
 
-    return AuthUser._create(
-      uri,
-      apiKey,
-      cfAccessClientId: cfAccessClientId,
-      cfAccessClientSecret: cfAccessClientSecret,
-    );
+    return AuthUser._create(uri, apiKey, customHeaders: customHeaders);
   }
 }
 
@@ -429,8 +405,7 @@ class FireflyService with ChangeNotifier {
     return AuthCredentials(
       host: await storage.read(key: 'api_host'),
       apiKey: await storage.read(key: 'api_key'),
-      cfAccessClientId: await storage.read(key: 'cf_access_client_id'),
-      cfAccessClientSecret: await storage.read(key: 'cf_access_client_secret'),
+      customHeadersRaw: await storage.read(key: customHeadersStorageKey),
     );
   }
 
@@ -439,15 +414,12 @@ class FireflyService with ChangeNotifier {
     final AuthCredentials storedCredentials = await readStoredCredentials();
     final String? apiHost = storedCredentials.host;
     final String? apiKey = storedCredentials.apiKey;
-    final String? cfAccessClientId = storedCredentials.cfAccessClientId;
-    final String? cfAccessClientSecret = storedCredentials.cfAccessClientSecret;
-    final bool cfServiceTokenSet =
-        (cfAccessClientId?.isNotEmpty ?? false) &&
-        (cfAccessClientSecret?.isNotEmpty ?? false);
+    final String? customHeadersRaw = storedCredentials.customHeadersRaw;
+    final bool customHeadersSet = customHeadersRaw?.isNotEmpty ?? false;
 
     log.config(
       "storage: $apiHost, apiKey ${apiKey?.isEmpty ?? true ? "unset" : "set"}, "
-      "cfServiceToken ${cfServiceTokenSet ? "set" : "unset"}",
+      "customHeaders ${customHeadersSet ? "set" : "unset"}",
     );
 
     if (apiHost == null || apiKey == null) {
@@ -455,12 +427,7 @@ class FireflyService with ChangeNotifier {
     }
 
     try {
-      await signIn(
-        apiHost,
-        apiKey,
-        cfAccessClientId: cfAccessClientId,
-        cfAccessClientSecret: cfAccessClientSecret,
-      );
+      await signIn(apiHost, apiKey, customHeadersRaw: customHeadersRaw);
       return true;
     } catch (e) {
       _storageSignInException = e;
@@ -486,50 +453,21 @@ class FireflyService with ChangeNotifier {
   Future<bool> signIn(
     String host,
     String apiKey, {
-    String? cfAccessClientId,
-    String? cfAccessClientSecret,
+    String? customHeadersRaw,
   }) async {
     log.config("FireflyService->signIn($host)");
     host = host.strip().rightStrip('/');
     apiKey = apiKey.strip();
-    final String rawCfAccessClientId = cfAccessClientId ?? "";
-    final String rawCfAccessClientSecret = cfAccessClientSecret ?? "";
-
-    // Allow pasting full Cloudflare header lines and extract only token values.
-    cfAccessClientId = _normalizeCfTokenField(
-      rawCfAccessClientId,
-      cfAccessClientIdHeader,
-    );
-    cfAccessClientSecret = _normalizeCfTokenField(
-      rawCfAccessClientSecret,
-      cfAccessClientSecretHeader,
-    );
-
-    // If one field contains a full two-line Cloudflare snippet, recover both values.
-    cfAccessClientId ??= _normalizeCfTokenField(
-      _extractCfHeaderValue(rawCfAccessClientSecret, cfAccessClientIdHeader),
-      cfAccessClientIdHeader,
-    );
-    cfAccessClientSecret ??= _normalizeCfTokenField(
-      _extractCfHeaderValue(rawCfAccessClientId, cfAccessClientSecretHeader),
-      cfAccessClientSecretHeader,
-    );
-
-    if ((cfAccessClientId == null) != (cfAccessClientSecret == null)) {
-      log.warning(
-        "Incomplete Cloudflare Service Token provided. "
-        "Ignoring service token headers.",
-      );
-      cfAccessClientId = null;
-      cfAccessClientSecret = null;
-    }
-
     _lastTriedHost = host;
+    final Map<String, String> customHeaders = parseCustomHeaders(
+      customHeadersRaw ?? "",
+    );
+    final String customHeadersToStore = encodeCustomHeaders(customHeaders);
+
     final AuthUser nextUser = await AuthUser.create(
       host,
       apiKey,
-      cfAccessClientId: cfAccessClientId,
-      cfAccessClientSecret: cfAccessClientSecret,
+      customHeaders: customHeaders,
     );
     final Response<CurrencySingle> currencyInfo = await nextUser.api
         .v1CurrenciesPrimaryGet();
@@ -584,15 +522,13 @@ class FireflyService with ChangeNotifier {
 
     await storage.write(key: 'api_host', value: host);
     await storage.write(key: 'api_key', value: apiKey);
-    if (cfAccessClientId != null && cfAccessClientSecret != null) {
-      await storage.write(key: 'cf_access_client_id', value: cfAccessClientId);
+    if (customHeadersToStore.isNotEmpty) {
       await storage.write(
-        key: 'cf_access_client_secret',
-        value: cfAccessClientSecret,
+        key: customHeadersStorageKey,
+        value: customHeadersToStore,
       );
     } else {
-      await storage.delete(key: 'cf_access_client_id');
-      await storage.delete(key: 'cf_access_client_secret');
+      await storage.delete(key: customHeadersStorageKey);
     }
 
     return true;

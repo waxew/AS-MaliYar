@@ -379,15 +379,13 @@ class ConnectionDialog extends StatefulWidget {
 class _ConnectionDialogState extends State<ConnectionDialog> {
   final TextEditingController _hostTextController = TextEditingController();
   final TextEditingController _keyTextController = TextEditingController();
-  final TextEditingController _cfAccessClientIdTextController =
-      TextEditingController();
-  final TextEditingController _cfAccessClientSecretTextController =
+  final TextEditingController _customHeadersTextController =
       TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool _loading = true;
   bool _saving = false;
-  bool _showCloudflareFields = false;
+  bool _showCustomHeadersField = false;
   String? _submitError;
 
   @override
@@ -400,8 +398,7 @@ class _ConnectionDialogState extends State<ConnectionDialog> {
   void dispose() {
     _hostTextController.dispose();
     _keyTextController.dispose();
-    _cfAccessClientIdTextController.dispose();
-    _cfAccessClientSecretTextController.dispose();
+    _customHeadersTextController.dispose();
     super.dispose();
   }
 
@@ -436,13 +433,10 @@ class _ConnectionDialogState extends State<ConnectionDialog> {
 
     _hostTextController.text = host;
     _keyTextController.text = creds.apiKey ?? "";
-    _cfAccessClientIdTextController.text = creds.cfAccessClientId ?? "";
-    _cfAccessClientSecretTextController.text = creds.cfAccessClientSecret ?? "";
+    _customHeadersTextController.text = creds.customHeadersRaw ?? "";
 
     setState(() {
-      _showCloudflareFields =
-          _cfAccessClientIdTextController.text.isNotEmpty ||
-          _cfAccessClientSecretTextController.text.isNotEmpty;
+      _showCustomHeadersField = _customHeadersTextController.text.isNotEmpty;
       _loading = false;
     });
   }
@@ -473,8 +467,7 @@ class _ConnectionDialogState extends State<ConnectionDialog> {
       await context.read<FireflyService>().signIn(
         _hostTextController.text,
         _keyTextController.text,
-        cfAccessClientId: _cfAccessClientIdTextController.text,
-        cfAccessClientSecret: _cfAccessClientSecretTextController.text,
+        customHeadersRaw: _customHeadersTextController.text,
       );
       if (!mounted) {
         return;
@@ -553,26 +546,19 @@ class _ConnectionDialogState extends State<ConnectionDialog> {
                           return null;
                         },
                       ),
-                      if (_showCloudflareFields) ...<Widget>[
+                      if (_showCustomHeadersField) ...<Widget>[
                         const SizedBox(height: 12),
                         TextFormField(
-                          controller: _cfAccessClientIdTextController,
+                          controller: _customHeadersTextController,
                           decoration: const InputDecoration(
                             filled: true,
-                            labelText: "CF-Access-Client-Id (optional)",
+                            labelText: "Custom headers (optional)",
+                            helperText: "One per line: Header-Name: value",
                           ),
+                          minLines: 3,
+                          maxLines: 8,
                           autocorrect: false,
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _cfAccessClientSecretTextController,
-                          decoration: const InputDecoration(
-                            filled: true,
-                            labelText: "CF-Access-Client-Secret (optional)",
-                          ),
-                          obscureText: true,
                           enableSuggestions: false,
-                          autocorrect: false,
                         ),
                       ],
                       if (_submitError != null) ...<Widget>[
@@ -606,10 +592,10 @@ class _ConnectionDialogState extends State<ConnectionDialog> {
               ? null
               : () {
                   setState(() {
-                    _showCloudflareFields = !_showCloudflareFields;
+                    _showCustomHeadersField = !_showCustomHeadersField;
                   });
                 },
-          child: Text(_showCloudflareFields ? "Hide Cloudflare" : "Cloudflare"),
+          child: Text(_showCustomHeadersField ? "Hide headers" : "Headers"),
         ),
         FilledButton(
           onPressed: _loading || _saving ? null : _save,

@@ -38,9 +38,7 @@ class _LoginPageState extends State<LoginPage> {
 
   final TextEditingController _hostTextController = TextEditingController();
   final TextEditingController _keyTextController = TextEditingController();
-  final TextEditingController _cfAccessClientIdTextController =
-      TextEditingController();
-  final TextEditingController _cfAccessClientSecretTextController =
+  final TextEditingController _customHeadersTextController =
       TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -49,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
   ErrorIcon _hostErrorIcon = const ErrorIcon(false);
   String? _keyError;
   ErrorIcon _keyErrorIcon = const ErrorIcon(false);
-  bool _showCloudflareFields = false;
+  bool _showCustomHeadersField = false;
   //bool _formSubmitted = false;
 
   final FocusNode _hostFocusNode = FocusNode();
@@ -65,8 +63,7 @@ class _LoginPageState extends State<LoginPage> {
   void dispose() {
     _hostTextController.dispose();
     _keyTextController.dispose();
-    _cfAccessClientIdTextController.dispose();
-    _cfAccessClientSecretTextController.dispose();
+    _customHeadersTextController.dispose();
     _hostFocusNode.dispose();
 
     super.dispose();
@@ -273,30 +270,21 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   AnimatedHeight(
-                    child: _showCloudflareFields
+                    child: _showCustomHeadersField
                         ? Column(
                             children: <Widget>[
                               const SizedBox(height: 12),
                               TextFormField(
-                                controller: _cfAccessClientIdTextController,
+                                controller: _customHeadersTextController,
                                 decoration: const InputDecoration(
                                   filled: true,
-                                  labelText: "CF-Access-Client-Id (optional)",
+                                  labelText: "Custom headers (optional)",
+                                  helperText:
+                                      "One per line: Header-Name: value",
                                 ),
+                                minLines: 3,
+                                maxLines: 8,
                                 autocorrect: false,
-                                autovalidateMode: AutovalidateMode.disabled,
-                              ),
-                              const SizedBox(height: 12),
-                              TextFormField(
-                                controller: _cfAccessClientSecretTextController,
-                                decoration: const InputDecoration(
-                                  filled: true,
-                                  labelText:
-                                      "CF-Access-Client-Secret (optional)",
-                                ),
-                                autocorrect: false,
-                                enableSuggestions: false,
-                                obscureText: true,
                                 autovalidateMode: AutovalidateMode.disabled,
                               ),
                             ],
@@ -325,13 +313,11 @@ class _LoginPageState extends State<LoginPage> {
                       OutlinedButton(
                         onPressed: () {
                           setState(() {
-                            _showCloudflareFields = !_showCloudflareFields;
+                            _showCustomHeadersField = !_showCustomHeadersField;
                           });
                         },
                         child: Text(
-                          _showCloudflareFields
-                              ? "Hide Cloudflare"
-                              : "Cloudflare",
+                          _showCustomHeadersField ? "Hide headers" : "Headers",
                         ),
                       ),
                       FilledButton(
@@ -349,10 +335,8 @@ class _LoginPageState extends State<LoginPage> {
                               builder: (BuildContext context) => SplashPage(
                                 host: _hostTextController.text,
                                 apiKey: _keyTextController.text,
-                                cfAccessClientId:
-                                    _cfAccessClientIdTextController.text,
-                                cfAccessClientSecret:
-                                    _cfAccessClientSecretTextController.text,
+                                customHeadersRaw:
+                                    _customHeadersTextController.text,
                               ),
                             ),
                           );
