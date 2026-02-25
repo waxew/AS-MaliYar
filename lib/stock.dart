@@ -184,8 +184,9 @@ class TransStock with ChangeNotifier {
   }
 
   Future<void> setTransaction(TransactionRead transaction) async {
-    final TransactionRead? oldTransaction =
-        await _singleSoT.reader(transaction.id).first;
+    final TransactionRead? oldTransaction = await _singleSoT
+        .reader(transaction.id)
+        .first;
     // if no old transaction (= new one) or date has changed, clear cache
     if (oldTransaction == null ||
         oldTransaction.attributes.transactions.first.date !=

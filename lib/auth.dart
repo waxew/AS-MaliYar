@@ -12,6 +12,7 @@ import 'package:chopper/chopper.dart'
         StripStringExtension,
         applyHeaders;
 import 'package:cronet_http/cronet_http.dart';
+import 'package:cupertino_http/cupertino_http.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -91,8 +92,20 @@ class AuthErrorNoInstance extends AuthError {
   final String host;
 }
 
-http.Client get httpClient =>
-    CronetClient.fromCronetEngine(CronetEngine.build(), closeEngine: false);
+http.Client get httpClient => Platform.isAndroid
+    ? CronetClient.fromCronetEngine(
+        CronetEngine.build(
+          cacheMode: CacheMode.memory,
+          cacheMaxSize: 2 * 1024 * 1024,
+        ),
+        closeEngine: false,
+      )
+    : Platform.isIOS
+    ? CupertinoClient.fromSessionConfiguration(
+        URLSessionConfiguration.ephemeralSessionConfiguration()
+          ..cache = URLCache.withCapacity(memoryCapacity: 2 * 1024 * 1024),
+      )
+    : http.Client();
 
 class APIRequestInterceptor implements Interceptor {
   APIRequestInterceptor(this.headerFunc);
@@ -299,8 +312,8 @@ class FireflyService with ChangeNotifier {
     _currentUser = await AuthUser.create(host, apiKey);
     if (_currentUser == null || !hasApi) return false;
 
-    final Response<CurrencySingle> currencyInfo =
-        await api.v1CurrenciesPrimaryGet();
+    final Response<CurrencySingle> currencyInfo = await api
+        .v1CurrenciesPrimaryGet();
     defaultCurrency = currencyInfo.body!.data;
 
     final Response<SystemInfo> about = await api.v1AboutGet();

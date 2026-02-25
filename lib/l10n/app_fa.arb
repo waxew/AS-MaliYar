@@ -825,10 +825,6 @@
     "@navigationCategories": {
         "description": "Navigation Label: Categories"
     },
-    "navigationMain": "داشبورد اصلی\n",
-    "@navigationMain": {
-        "description": "Navigation Label: Main Dashboard"
-    },
     "generalSettings": "تنظیمات",
     "@generalSettings": {
         "description": "Label: Settings"

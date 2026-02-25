@@ -56,6 +56,20 @@
             }
         }
     },
+    "billsFrequencySkip": "{frequency, select, weekly{Щотижнєво} monthly{Щомісячно} quarterly{Щоквартально} halfyear{Щопівроку} yearly{Щорічно} other{Невідомо}}{skip, plural, =0{} one{, пропускає {skip} раз} few{, пропускає {skip} рази} many{, пропускає {skip} разів} other{, пропускає {skip} раз}}",
+    "@billsFrequencySkip": {
+        "description": "Subscription frequency",
+        "placeholders": {
+            "frequency": {
+                "type": "String",
+                "example": "yearly"
+            },
+            "skip": {
+                "type": "num",
+                "example": "1"
+            }
+        }
+    },
     "billsInactive": "Неактивний",
     "@billsInactive": {
         "description": "Text: when the subscription is inactive"

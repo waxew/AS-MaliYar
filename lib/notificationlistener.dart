@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:chopper/chopper.dart';
 import 'package:flutter/material.dart';
@@ -54,20 +55,27 @@ final RegExp rFindMoney = RegExp(
 );
 
 Future<NotificationListenerStatus> nlStatus() async {
-  return NotificationListenerStatus(
-    await NotificationServicePlugin.instance.isServicePermissionGranted(),
-    await NotificationServicePlugin.instance.isServiceRunning(),
-    await FlutterLocalNotificationsPlugin()
-            .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin
-            >()!
-            .areNotificationsEnabled() ??
-        false,
-  );
+  if (Platform.isAndroid) {
+    return NotificationListenerStatus(
+      await NotificationServicePlugin.instance.isServicePermissionGranted(),
+      await NotificationServicePlugin.instance.isServiceRunning(),
+      await FlutterLocalNotificationsPlugin()
+              .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin
+              >()!
+              .areNotificationsEnabled() ??
+          false,
+    );
+  } else {
+    return NotificationListenerStatus(false, false, false);
+  }
 }
 
 @pragma('vm:entry-point')
 void nlCallback() {
+  if (!Platform.isAndroid) {
+    return;
+  }
   log.finest(() => "nlCallback()");
   NotificationServicePlugin.instance.executeNotificationListener((
     NotificationEvent? evt,
@@ -136,12 +144,11 @@ void nlCallback() {
         );
 
         // Set date
-        final DateTime date =
-            ffService.tzHandler
-                .notificationTXTime(
-                  DateTime.tryParse(evt.postTime ?? "") ?? DateTime.now(),
-                )
-                .toLocal();
+        final DateTime date = ffService.tzHandler
+            .notificationTXTime(
+              DateTime.tryParse(evt.postTime ?? "") ?? DateTime.now(),
+            )
+            .toLocal();
         String note = "";
         if (appSettings.autoAdd) {
           note = evt.text ?? "";
@@ -193,10 +200,10 @@ void nlCallback() {
 
         unawaited(
           FlutterLocalNotificationsPlugin().show(
-            DateTime.now().millisecondsSinceEpoch ~/ 1000,
-            "Transaction created",
-            "Transaction created based on notification ${evt.title}",
-            const NotificationDetails(
+            id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+            title: "Transaction created",
+            body: "Transaction created based on notification ${evt.title}",
+            notificationDetails: const NotificationDetails(
               android: AndroidNotificationDetails(
                 'extract_transaction_created',
                 'Transaction from Notification Created',
@@ -221,11 +228,12 @@ void nlCallback() {
       // :TODO: l10n
       unawaited(
         FlutterLocalNotificationsPlugin().show(
-          DateTime.now().millisecondsSinceEpoch ~/ 1000,
-          "Create Transaction?",
+          id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          title: "Create Transaction?",
           // :TODO: once we l10n this, a better switch can be implemented...
-          "Click to create a transaction based on the notification ${evt.title ?? evt.packageName ?? ""}",
-          const NotificationDetails(
+          body:
+              "Click to create a transaction based on the notification ${evt.title ?? evt.packageName ?? ""}",
+          notificationDetails: const NotificationDetails(
             android: AndroidNotificationDetails(
               'extract_transaction',
               'Create Transaction from Notification',
@@ -250,6 +258,9 @@ void nlCallback() {
 }
 
 Future<void> nlInit() async {
+  if (!Platform.isAndroid) {
+    return;
+  }
   log.finest(() => "nlInit()");
   await NotificationServicePlugin.instance.initialize(nlCallback);
   nlCallback();
@@ -264,12 +275,11 @@ Future<void> nlNotificationTap(
   }
   await showDialog(
     context: navigatorKey.currentState!.context,
-    builder:
-        (BuildContext context) => TransactionPage(
-          notification: NotificationTransaction.fromJson(
-            jsonDecode(notificationResponse.payload!),
-          ),
-        ),
+    builder: (BuildContext context) => TransactionPage(
+      notification: NotificationTransaction.fromJson(
+        jsonDecode(notificationResponse.payload!),
+      ),
+    ),
   );
 }
 
@@ -325,31 +335,33 @@ Future<(CurrencyRead?, double)> parseNotificationText(
       }
     }
 
-    if (bestMatchIndex != -1) {
-      final RegExpMatch bestMatch = matches.elementAt(bestMatchIndex);
+    if (bestMatchIndex == -1) {
+      bestMatchIndex = 0;
+    }
 
-      String amountStr = (bestMatch.namedGroup("amount") ?? "").replaceAll(
-        RegExp(r"\s+"),
-        "",
-      );
+    final RegExpMatch bestMatch = matches.elementAt(bestMatchIndex);
 
-      if (amountStr.isNotEmpty) {
-        // Find the first non-digit character at the end of the string
-        String separator = amountStr[0];
-        for (int i = amountStr.length - 1; i >= 0; i--) {
-          separator = amountStr[i];
-          if (!RegExp(r'\d').hasMatch(separator)) {
-            break;
-          }
+    String amountStr = (bestMatch.namedGroup("amount") ?? "").replaceAll(
+      RegExp(r"\s+"),
+      "",
+    );
+
+    if (amountStr.isNotEmpty) {
+      // Find the first non-digit character at the end of the string
+      String separator = amountStr[0];
+      for (int i = amountStr.length - 1; i >= 0; i--) {
+        separator = amountStr[i];
+        if (!RegExp(r'\d').hasMatch(separator)) {
+          break;
         }
-
-        // Strip all non-digit characters that are not decimal separators
-        if (separator == "." || separator == ",") {
-          amountStr = amountStr.replaceAll(RegExp('[^0-9$separator]'), '');
-        }
-
-        amount = double.tryParse(amountStr.replaceAll(",", "."))!;
       }
+
+      // Strip all non-digit characters that are not decimal separators
+      if (separator == "." || separator == ",") {
+        amountStr = amountStr.replaceAll(RegExp('[^0-9$separator]'), '');
+      }
+
+      amount = double.tryParse(amountStr.replaceAll(",", "."))!;
     }
   }
 

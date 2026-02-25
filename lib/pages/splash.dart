@@ -89,7 +89,7 @@ class _SplashPageState extends State<SplashPage> {
       log.finer(() => "_loginError null --> show spinner");
       page = Container(
         alignment: const Alignment(0, 0),
-        child: const CircularProgressIndicator(),
+        child: const CircularProgressIndicator.adaptive(),
       );
       const QuickActions().setShortcutItems(<ShortcutItem>[
         ShortcutItem(
@@ -176,12 +176,11 @@ class _SplashPageState extends State<SplashPage> {
                       context.read<FireflyService>().signOut();
                     }
                   },
-                  child:
-                      Navigator.canPop(context)
-                          ? Text(
-                            MaterialLocalizations.of(context).backButtonTooltip,
-                          )
-                          : Text(S.of(context).formButtonResetLogin),
+                  child: Navigator.canPop(context)
+                      ? Text(
+                          MaterialLocalizations.of(context).backButtonTooltip,
+                        )
+                      : Text(S.of(context).formButtonResetLogin),
                 ),
                 FilledButton(
                   onPressed: () {

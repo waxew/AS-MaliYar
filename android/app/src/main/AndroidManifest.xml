@@ -112,6 +112,7 @@
         <package android:name="com.avuscapital.trading212"/>
         <package android:name="com.axis.mobile"/>
         <package android:name="com.b2winc.amedigital"/>
+        <package android:name="com.bancomer.mbanking" />
         <package android:name="com.bankfab.pbg.ae.dubaifirst"/>
         <package android:name="com.barclays.absa.banking"/>
         <package android:name="com.barclays.android.barclaysmobilebanking"/>
@@ -145,6 +146,7 @@
         <package android:name="com.dkbcodefactory.banking"/>
         <package android:name="com.ehorizon.apollo.numobile"/>
         <package android:name="com.esunbank.ESUNWALLET"/>
+        <package android:name="com.expatrio.app" />
         <package android:name="com.finanteq.finance.bgz"/>
         <package android:name="com.fineco.it"/>
         <package android:name="com.firstbank.mbanklite"/>
@@ -166,6 +168,7 @@
         <package android:name="com.grabtaxi.driver"/>
         <package android:name="com.grabtaxi.passenger"/>
         <package android:name="com.grppl.android.shell.CMBlloydsTSB73"/>
+        <package android:name="com.hoosierhillscreditunion4117.mobile" />
         <package android:name="com.hrc.eb.mobile.android.hibismobiledh"/>
         <package android:name="com.idamob.tinkoff.android"/>
         <package android:name="com.ie.capitalone.uk"/>
@@ -201,6 +204,7 @@
         <package android:name="com.opportunitybom.mobile" />
         <package android:name="com.paypal.android.p2pmobile"/>
         <package android:name="com.phonepe.app"/>
+        <package android:name="com.pnc.ecommerce.mobile" />
         <package android:name="com.rappi.restaurants"/>
         <package android:name="com.rbc.mobile.android"/>
         <package android:name="com.rbs.mobile.android.natwest"/>
@@ -226,6 +230,7 @@
         <package android:name="com.sinopac.DaCard"/>
         <package android:name="com.sionpac.app.SinoPac"/>
         <package android:name="com.sixgroup.debixplus"/>
+        <package android:name="com.sofi.mobile" />
         <package android:name="com.softteco.bsbank"/>
         <package android:name="com.starlingbank.android"/>
         <package android:name="com.taxis99"/>
@@ -248,6 +253,7 @@
         <package android:name="de.ingdiba.bankingapp"/>
         <package android:name="de.number26.android"/>
         <package android:name="de.traderepublic.app"/>
+        <package android:name="dif.tech.plata" />
         <package android:name="es.bancosantander.apps"/>
         <package android:name="eu.netinfo.colpatria.system"/>
         <package android:name="fi.danskebank.mobilepay"/>
@@ -270,6 +276,7 @@
         <package android:name="it.beem.app"/>
         <package android:name="it.hype.app"/>
         <package android:name="it.icbpi.mobile"/>
+        <package android:name="it.ing.banking" />
         <package android:name="it.ingdirect.app"/>
         <package android:name="it.nexi.yap"/>
         <package android:name="md.maib.maibank"/>

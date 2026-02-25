@@ -128,17 +128,20 @@ class SUk extends S {
   @override
   String billsFrequencySkip(String frequency, num skip) {
     String _temp0 = intl.Intl.selectLogic(frequency, {
-      'weekly': 'Weekly',
-      'monthly': 'Monthly',
-      'quarterly': 'Quarterly',
-      'halfyear': 'Half-yearly',
-      'yearly': 'Yearly',
-      'other': 'Unknown',
+      'weekly': 'Щотижнєво',
+      'monthly': 'Щомісячно',
+      'quarterly': 'Щоквартально',
+      'halfyear': 'Щопівроку',
+      'yearly': 'Щорічно',
+      'other': 'Невідомо',
     });
     String _temp1 = intl.Intl.pluralLogic(
       skip,
       locale: localeName,
-      other: ', skips over $skip',
+      other: ', пропускає $skip раз',
+      many: ', пропускає $skip разів',
+      few: ', пропускає $skip рази',
+      one: ', пропускає $skip раз',
       zero: '',
     );
     return '$_temp0$_temp1';
@@ -638,7 +641,7 @@ class SUk extends S {
   String get navigationCategories => 'Categories';
 
   @override
-  String get navigationMain => 'Main Dashboard';
+  String get navigationMain => 'Dashboard';
 
   @override
   String get generalSettings => 'Settings';
@@ -648,11 +651,11 @@ class SUk extends S {
 
   @override
   String numPercent(double num) {
-    final intl.NumberFormat numNumberFormat = intl
-        .NumberFormat.decimalPercentPattern(
-      locale: localeName,
-      decimalDigits: 0,
-    );
+    final intl.NumberFormat numNumberFormat =
+        intl.NumberFormat.decimalPercentPattern(
+          locale: localeName,
+          decimalDigits: 0,
+        );
     final String numString = numNumberFormat.format(num);
 
     return '$numString';
@@ -660,11 +663,11 @@ class SUk extends S {
 
   @override
   String numPercentOf(double perc, String of) {
-    final intl.NumberFormat percNumberFormat = intl
-        .NumberFormat.decimalPercentPattern(
-      locale: localeName,
-      decimalDigits: 0,
-    );
+    final intl.NumberFormat percNumberFormat =
+        intl.NumberFormat.decimalPercentPattern(
+          locale: localeName,
+          decimalDigits: 0,
+        );
     final String percString = percNumberFormat.format(perc);
 
     return '$percString of $of';

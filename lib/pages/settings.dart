@@ -1,3 +1,7 @@
+// ignore_for_file: deprecated_member_use
+
+import 'dart:io';
+
 import 'package:animations/animations.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
@@ -67,10 +71,7 @@ class SettingsPageState extends State<SettingsPage>
         ),
         FutureBuilder<CorePalette?>(
           future: DynamicColorPlugin.getCorePalette(),
-          builder: (
-            BuildContext context,
-            AsyncSnapshot<CorePalette?> snapshot,
-          ) {
+          builder: (BuildContext context, AsyncSnapshot<CorePalette?> snapshot) {
             String dynamicColor = "";
             bool dynamicColorAvailable = false;
             if (snapshot.connectionState == ConnectionState.done &&
@@ -91,10 +92,8 @@ class SettingsPageState extends State<SettingsPage>
               onTap: () {
                 showDialog<ThemeMode?>(
                   context: context,
-                  builder:
-                      (BuildContext context) => ThemeDialog(
-                        dynamicColorAvailable: dynamicColorAvailable,
-                      ),
+                  builder: (BuildContext context) =>
+                      ThemeDialog(dynamicColorAvailable: dynamicColorAvailable),
                 ).then((ThemeMode? theme) {
                   if (theme == null) {
                     return;
@@ -105,7 +104,7 @@ class SettingsPageState extends State<SettingsPage>
             );
           },
         ),
-        SwitchListTile(
+        SwitchListTile.adaptive(
           title: Text(S.of(context).settingsUseServerTimezone),
           subtitle: Text(S.of(context).settingsUseServerTimezoneHelp),
           value: context.select((SettingsProvider s) => s.useServerTime),
@@ -124,7 +123,7 @@ class SettingsPageState extends State<SettingsPage>
           },
         ),
         const Divider(),
-        SwitchListTile(
+        SwitchListTile.adaptive(
           title: Text(S.of(context).settingsLockscreen),
           subtitle: Text(S.of(context).settingsLockscreenHelp),
           value: context.select((SettingsProvider s) => s.lock),
@@ -173,58 +172,65 @@ class SettingsPageState extends State<SettingsPage>
           },
         ),
         const Divider(),
-        FutureBuilder<NotificationListenerStatus>(
-          future: nlStatus(),
-          builder: (
-            BuildContext context,
-            AsyncSnapshot<NotificationListenerStatus> snapshot,
-          ) {
-            final S l10n = S.of(context);
+        if (Platform.isAndroid)
+          FutureBuilder<NotificationListenerStatus>(
+            future: nlStatus(),
+            builder:
+                (
+                  BuildContext context,
+                  AsyncSnapshot<NotificationListenerStatus> snapshot,
+                ) {
+                  final S l10n = S.of(context);
 
-            late String subtitle;
-            if (snapshot.connectionState == ConnectionState.done &&
-                snapshot.hasData) {
-              if (!snapshot.data!.servicePermission ||
-                  !snapshot.data!.notificationPermission) {
-                subtitle = l10n.settingsNLPermissionNotGranted;
-              } else if (!snapshot.data!.serviceRunning) {
-                subtitle = l10n.settingsNLServiceStopped;
-              } else {
-                subtitle = l10n.settingsNLServiceRunning;
-              }
-            } else if (snapshot.hasError) {
-              log.severe(
-                "error getting nlStatus",
-                snapshot.error,
-                snapshot.stackTrace,
-              );
-              subtitle = S
-                  .of(context)
-                  .settingsNLServiceCheckingError(snapshot.error.toString());
-            } else {
-              subtitle = S.of(context).settingsNLServiceChecking;
-            }
-            return OpenContainer(
-              openBuilder:
-                  (BuildContext context, Function closedContainer) =>
-                      const SettingsNotifications(),
-              openColor: Theme.of(context).cardColor,
-              closedColor: Theme.of(context).cardColor,
-              closedElevation: 0,
-              closedBuilder:
-                  (BuildContext context, Function openContainer) => ListTile(
-                    title: Text(S.of(context).settingsNotificationListener),
-                    subtitle: Text(subtitle, maxLines: 2),
-                    leading: const CircleAvatar(
-                      child: Icon(Icons.notifications),
-                    ),
-                    onTap: () => openContainer(),
-                  ),
-              onClosed: (_) => setState(() {}),
-            );
-          },
-        ),
-        const Divider(),
+                  late String subtitle;
+                  if (snapshot.connectionState == ConnectionState.done &&
+                      snapshot.hasData) {
+                    if (!snapshot.data!.servicePermission ||
+                        !snapshot.data!.notificationPermission) {
+                      subtitle = l10n.settingsNLPermissionNotGranted;
+                    } else if (!snapshot.data!.serviceRunning) {
+                      subtitle = l10n.settingsNLServiceStopped;
+                    } else {
+                      subtitle = l10n.settingsNLServiceRunning;
+                    }
+                  } else if (snapshot.hasError) {
+                    log.severe(
+                      "error getting nlStatus",
+                      snapshot.error,
+                      snapshot.stackTrace,
+                    );
+                    subtitle = S
+                        .of(context)
+                        .settingsNLServiceCheckingError(
+                          snapshot.error.toString(),
+                        );
+                  } else {
+                    subtitle = S.of(context).settingsNLServiceChecking;
+                  }
+                  return OpenContainer(
+                    openBuilder:
+                        (BuildContext context, Function closedContainer) =>
+                            const SettingsNotifications(),
+                    openColor: Theme.of(context).cardColor,
+                    closedColor: Theme.of(context).cardColor,
+                    closedElevation: 0,
+                    closedBuilder:
+                        (BuildContext context, Function openContainer) =>
+                            ListTile(
+                              title: Text(
+                                S.of(context).settingsNotificationListener,
+                              ),
+                              subtitle: Text(subtitle, maxLines: 2),
+                              leading: const CircleAvatar(
+                                child: Icon(Icons.notifications),
+                              ),
+                              onTap: () => openContainer(),
+                            ),
+                    onClosed: (_) => setState(() {}),
+                  );
+                },
+          ),
+        if (Platform.isAndroid) const Divider(),
         ListTile(
           title: Text(S.of(context).settingsFAQ),
           subtitle: Text(S.of(context).settingsFAQHelp),
@@ -253,11 +259,10 @@ class SettingsPageState extends State<SettingsPage>
               leading: const CircleAvatar(
                 child: Icon(Icons.info_outline_rounded),
               ),
-              onTap:
-                  () => showDialog(
-                    context: context,
-                    builder: (BuildContext context) => const DebugDialog(),
-                  ),
+              onTap: () => showDialog(
+                context: context,
+                builder: (BuildContext context) => const DebugDialog(),
+              ),
             );
           },
         ),
@@ -283,7 +288,7 @@ class LanguageDialog extends StatelessWidget {
           child: Column(
             children: <Widget>[
               ...S.supportedLocales.map(
-                (Locale locale) => RadioListTile<Locale>(
+                (Locale locale) => RadioListTile<Locale>.adaptive(
                   value: locale,
                   title: Text(locale.toLanguageTag()),
                 ),
@@ -308,12 +313,12 @@ class ThemeDialog extends StatelessWidget {
       title: Text(S.of(context).settingsDialogThemeTitle),
       children: <Widget>[
         dynamicColorAvailable
-            ? SwitchListTile(
-              title: Text(S.of(context).settingsThemeDynamicColors),
-              value: context.select((SettingsProvider s) => s.dynamicColors),
-              isThreeLine: false,
-              onChanged: (bool value) => settings.dynamicColors = value,
-            )
+            ? SwitchListTile.adaptive(
+                title: Text(S.of(context).settingsThemeDynamicColors),
+                value: context.select((SettingsProvider s) => s.dynamicColors),
+                isThreeLine: false,
+                onChanged: (bool value) => settings.dynamicColors = value,
+              )
             : const SizedBox.shrink(),
         RadioGroup<ThemeMode>(
           groupValue: settings.theme,
@@ -323,7 +328,7 @@ class ThemeDialog extends StatelessWidget {
           child: Column(
             children: <Widget>[
               ...ThemeMode.values.map(
-                (ThemeMode theme) => RadioListTile<ThemeMode>(
+                (ThemeMode theme) => RadioListTile<ThemeMode>.adaptive(
                   value: theme,
                   title: Text(
                     S

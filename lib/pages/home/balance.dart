@@ -46,7 +46,7 @@ class _HomeBalanceState extends State<HomeBalance>
     super.build(context);
     log.finest(() => "build()");
 
-    return RefreshIndicator(
+    return RefreshIndicator.adaptive(
       onRefresh: _refreshStats,
       child: FutureBuilder<AccountArray>(
         future: _fetchAccounts(),
@@ -126,28 +126,27 @@ class _HomeBalanceState extends State<HomeBalance>
                               children: <InlineSpan>[
                                 TextSpan(
                                   text: currency.fmt(balance),
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleMedium!.copyWith(
-                                    color:
-                                        (balance < 0)
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium!
+                                      .copyWith(
+                                        color: (balance < 0)
                                             ? Colors.red
                                             : Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                    fontFeatures: const <FontFeature>[
-                                      FontFeature.tabularFigures(),
-                                    ],
-                                  ),
+                                        fontWeight: FontWeight.bold,
+                                        fontFeatures: const <FontFeature>[
+                                          FontFeature.tabularFigures(),
+                                        ],
+                                      ),
                                 ),
                                 const TextSpan(text: "\n"),
                                 TextSpan(
-                                  text:
-                                      account.attributes.lastActivity != null
-                                          ? DateFormat.yMd().add_Hms().format(
-                                            account.attributes.lastActivity!
-                                                .toLocal(),
-                                          )
-                                          : S.of(context).generalNever,
+                                  text: account.attributes.lastActivity != null
+                                      ? DateFormat.yMd().add_Hms().format(
+                                          account.attributes.lastActivity!
+                                              .toLocal(),
+                                        )
+                                      : S.of(context).generalNever,
                                 ),
                               ],
                             ),
@@ -168,7 +167,7 @@ class _HomeBalanceState extends State<HomeBalance>
           } else {
             return const Padding(
               padding: EdgeInsets.all(8),
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: CircularProgressIndicator.adaptive()),
             );
           }
         },

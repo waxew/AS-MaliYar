@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import 'package:provider/single_child_widget.dart';
 import 'package:quick_actions/quick_actions.dart';
 import 'package:waterflyiii/auth.dart';
 import 'package:waterflyiii/generated/l10n/app_localizations.dart';
+import 'package:waterflyiii/layout.dart';
 import 'package:waterflyiii/notificationlistener.dart';
 import 'package:waterflyiii/pages/login.dart';
 import 'package:waterflyiii/pages/navigation.dart';
@@ -45,32 +47,36 @@ class _WaterflyAppState extends State<WaterflyApp> {
   bool _requiresAuth = false;
   DateTime? _lcLastOpen;
 
+  final LayoutProvider _layoutProvider = LayoutProvider();
+
   @override
   void initState() {
     super.initState();
 
-    // Notifications
-    FlutterLocalNotificationsPlugin().initialize(
-      const InitializationSettings(
-        android: AndroidInitializationSettings('ic_stat_notification'),
-      ),
-      onDidReceiveNotificationResponse: nlNotificationTap,
-    );
+    // Notifications (Android only)
+    if (Platform.isAndroid) {
+      FlutterLocalNotificationsPlugin().initialize(
+        settings: const InitializationSettings(
+          android: AndroidInitializationSettings('ic_stat_notification'),
+        ),
+        onDidReceiveNotificationResponse: nlNotificationTap,
+      );
 
-    FlutterLocalNotificationsPlugin().getNotificationAppLaunchDetails().then((
-      NotificationAppLaunchDetails? details,
-    ) {
-      log.config("checking NotificationAppLaunchDetails");
-      if ((details?.didNotificationLaunchApp ?? false) &&
-          (details?.notificationResponse?.payload?.isNotEmpty ?? false)) {
-        log.info("Was launched from notification!");
-        _notificationPayload = NotificationTransaction.fromJson(
-          jsonDecode(details!.notificationResponse!.payload!),
-        );
-      }
-    });
+      FlutterLocalNotificationsPlugin().getNotificationAppLaunchDetails().then((
+        NotificationAppLaunchDetails? details,
+      ) {
+        log.config("checking NotificationAppLaunchDetails");
+        if ((details?.didNotificationLaunchApp ?? false) &&
+            (details?.notificationResponse?.payload?.isNotEmpty ?? false)) {
+          log.info("Was launched from notification!");
+          _notificationPayload = NotificationTransaction.fromJson(
+            jsonDecode(details!.notificationResponse!.payload!),
+          );
+        }
+      });
+    }
 
-    // Quick Actions
+    // Quick Actions (Android + iOS)
     const QuickActions quickActions = QuickActions();
     quickActions.initialize((String shortcutType) {
       log.info("Was launched from QuickAction $shortcutType");
@@ -175,6 +181,17 @@ class _WaterflyAppState extends State<WaterflyApp> {
     super.dispose();
   }*/
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Always called after initState() --> can be used to init _layoutProvider.
+    // No separate init needed inside initState()
+    if (mounted) {
+      _layoutProvider.updateSize(context);
+    }
+  }
+
   Future<bool> auth() {
     final LocalAuthentication auth = LocalAuthentication();
     return auth.authenticate(
@@ -188,20 +205,18 @@ class _WaterflyAppState extends State<WaterflyApp> {
     log.fine(() => "WaterflyApp() building");
 
     return DynamicColorBuilder(
-      builder: (
-        ColorScheme? cSchemeDynamicLight,
-        ColorScheme? cSchemeDynamicDark,
-      ) {
+      builder: (ColorScheme? cSchemeDynamicLight, ColorScheme? cSchemeDynamicDark) {
         final ColorScheme cSchemeLight = ColorScheme.fromSeed(
           seedColor: Colors.blue,
         );
-        final ColorScheme cSchemeDark = ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
-        ).copyWith(
-          surfaceContainerHighest: Colors.blueGrey.shade900,
-          onSurfaceVariant: Colors.white,
-        );
+        final ColorScheme cSchemeDark =
+            ColorScheme.fromSeed(
+              seedColor: Colors.blue,
+              brightness: Brightness.dark,
+            ).copyWith(
+              surfaceContainerHighest: Colors.blueGrey.shade900,
+              onSurfaceVariant: Colors.white,
+            );
 
         log.finest(
           () =>
@@ -215,6 +230,9 @@ class _WaterflyAppState extends State<WaterflyApp> {
             ),
             ChangeNotifierProvider<SettingsProvider>(
               create: (_) => SettingsProvider(),
+            ),
+            ChangeNotifierProvider<LayoutProvider>.value(
+              value: _layoutProvider,
             ),
           ],
           builder: (BuildContext context, _) {
@@ -276,8 +294,8 @@ class _WaterflyAppState extends State<WaterflyApp> {
                 brightness: Brightness.light,
                 colorScheme:
                     context.select((SettingsProvider s) => s.dynamicColors)
-                        ? cSchemeDynamicLight?.harmonized() ?? cSchemeLight
-                        : cSchemeLight,
+                    ? cSchemeDynamicLight?.harmonized() ?? cSchemeLight
+                    : cSchemeLight,
                 useMaterial3: true,
                 // See https://github.com/flutter/flutter/issues/131042#issuecomment-1690737834
                 appBarTheme: const AppBarTheme(shape: RoundedRectangleBorder()),
@@ -292,8 +310,8 @@ class _WaterflyAppState extends State<WaterflyApp> {
                 brightness: Brightness.dark,
                 colorScheme:
                     context.select((SettingsProvider s) => s.dynamicColors)
-                        ? cSchemeDynamicDark?.harmonized() ?? cSchemeDark
-                        : cSchemeDark,
+                    ? cSchemeDynamicDark?.harmonized() ?? cSchemeDark
+                    : cSchemeDark,
                 useMaterial3: true,
               ),
               themeMode: context.select((SettingsProvider s) => s.theme),
@@ -303,22 +321,21 @@ class _WaterflyAppState extends State<WaterflyApp> {
               navigatorKey: navigatorKey,
               home:
                   ((_startup || !_authed) ||
-                          context.select(
-                            (FireflyService f) =>
-                                f.storageSignInException != null,
-                          ))
-                      ? const SplashPage()
-                      : signedIn
-                      ? (_notificationPayload != null ||
-                              _quickAction == "action_transaction_add" ||
-                              (_filesSharedToApp != null &&
-                                  _filesSharedToApp!.isNotEmpty))
-                          ? TransactionPage(
+                      context.select(
+                        (FireflyService f) => f.storageSignInException != null,
+                      ))
+                  ? const SplashPage()
+                  : signedIn
+                  ? (_notificationPayload != null ||
+                            _quickAction == "action_transaction_add" ||
+                            (_filesSharedToApp != null &&
+                                _filesSharedToApp!.isNotEmpty))
+                        ? TransactionPage(
                             notification: _notificationPayload,
                             files: _filesSharedToApp,
                           )
-                          : const NavPage()
-                      : const LoginPage(),
+                        : const NavPage()
+                  : const LoginPage(),
             );
           },
         );

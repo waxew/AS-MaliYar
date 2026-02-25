@@ -60,9 +60,8 @@ class CategoryChart extends StatelessWidget {
             dataSource: chartData,
             xValueMapper: (LabelAmountChart data, _) => data.label,
             yValueMapper: (LabelAmountChart data, _) => data.amount.abs(),
-            dataLabelMapper:
-                (LabelAmountChart data, _) =>
-                    data.amount.abs().toStringAsFixed(0),
+            dataLabelMapper: (LabelAmountChart data, _) =>
+                data.amount.abs().toStringAsFixed(0),
             dataLabelSettings: DataLabelSettings(
               isVisible: true,
               textStyle: Theme.of(context).textTheme.labelSmall!.copyWith(
@@ -91,21 +90,18 @@ class CategoryChart extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute<bool>(
-                  builder:
-                      (BuildContext context) => Scaffold(
-                        appBar: AppBar(title: Text(category.name!)),
-                        body: HomeTransactions(
-                          filters: TransactionFilters(
-                            category: CategoryRead(
-                              id: category.id!,
-                              type: "filter-category",
-                              attributes: CategoryProperties(
-                                name: category.name!,
-                              ),
-                            ),
-                          ),
+                  builder: (BuildContext context) => Scaffold(
+                    appBar: AppBar(title: Text(category.name!)),
+                    body: HomeTransactions(
+                      filters: TransactionFilters(
+                        category: CategoryRead(
+                          id: category.id!,
+                          type: "filter-category",
+                          attributes: CategoryProperties(name: category.name!),
                         ),
                       ),
+                    ),
+                  ),
                 ),
               );
             },

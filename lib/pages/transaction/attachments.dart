@@ -132,8 +132,8 @@ class _AttachmentDialogState extends State<AttachmentDialog>
     final FireflyIii api = context.read<FireflyService>().api;
     final bool? ok = await showDialog<bool>(
       context: context,
-      builder:
-          (BuildContext context) => const AttachmentDeletionConfirmDialog(),
+      builder: (BuildContext context) =>
+          const AttachmentDeletionConfirmDialog(),
     );
     if (ok == null || !ok) {
       return;
@@ -282,8 +282,8 @@ class _AttachmentDialogState extends State<AttachmentDialog>
   Future<void> fakeDeleteAttachment(BuildContext context, int i) async {
     final bool? ok = await showDialog<bool>(
       context: context,
-      builder:
-          (BuildContext context) => const AttachmentDeletionConfirmDialog(),
+      builder: (BuildContext context) =>
+          const AttachmentDeletionConfirmDialog(),
     );
     if (ok == null || !ok) {
       return;
@@ -332,19 +332,18 @@ class _AttachmentDialogState extends State<AttachmentDialog>
       }
       childs.add(
         ListTile(
-          enabled:
-              (_dlProgress[i] != null && _dlProgress[i]! < 0) ? false : true,
+          enabled: (_dlProgress[i] != null && _dlProgress[i]! < 0)
+              ? false
+              : true,
           leading: MaterialIconButton(
-            icon:
-                (_dlProgress[i] != null && _dlProgress[i]! < 0)
-                    ? Icons.upload
-                    : Icons.download,
-            onPressed:
-                _dlProgress[i] != null
-                    ? null
-                    : widget.transactionId == null
-                    ? () => fakeDownloadAttachment(context, attachment)
-                    : () => downloadAttachment(context, attachment, i),
+            icon: (_dlProgress[i] != null && _dlProgress[i]! < 0)
+                ? Icons.upload
+                : Icons.download,
+            onPressed: _dlProgress[i] != null
+                ? null
+                : widget.transactionId == null
+                ? () => fakeDownloadAttachment(context, attachment)
+                : () => downloadAttachment(context, attachment, i),
           ),
           title: Text(
             attachment.attributes.title ?? attachment.attributes.filename!,
@@ -359,12 +358,11 @@ class _AttachmentDialogState extends State<AttachmentDialog>
           isThreeLine: false,
           trailing: MaterialIconButton(
             icon: Icons.delete,
-            onPressed:
-                (_dlProgress[i] != null && _dlProgress[i]! < 0)
-                    ? null
-                    : widget.transactionId == null
-                    ? () => fakeDeleteAttachment(context, i)
-                    : () => deleteAttachment(context, attachment, i),
+            onPressed: (_dlProgress[i] != null && _dlProgress[i]! < 0)
+                ? null
+                : widget.transactionId == null
+                ? () => fakeDeleteAttachment(context, i)
+                : () => deleteAttachment(context, attachment, i),
           ),
         ),
       );
@@ -373,14 +371,13 @@ class _AttachmentDialogState extends State<AttachmentDialog>
         SizedBox(
           height: divTheme.space ?? 16,
           child: Center(
-            child:
-                _dlProgress[i] == null
-                    ? const Divider(height: 0)
-                    : LinearProgressIndicator(
-                      value: _dlProgress[i]!.abs(),
-                      //minHeight: divTheme.thickness ?? 4,
-                      //backgroundColor: divTheme.color ?? theme.colorScheme.outlineVariant,
-                    ),
+            child: _dlProgress[i] == null
+                ? const Divider(height: 0)
+                : LinearProgressIndicator(
+                    value: _dlProgress[i]!.abs(),
+                    //minHeight: divTheme.thickness ?? 4,
+                    //backgroundColor: divTheme.color ?? theme.colorScheme.outlineVariant,
+                  ),
           ),
         ),
       );
@@ -425,8 +422,8 @@ class _AttachmentDialogState extends State<AttachmentDialog>
           ),
           FilledButton(
             onPressed: () async {
-              final FilePickerResult? file =
-                  await FilePicker.platform.pickFiles();
+              final FilePickerResult? file = await FilePicker.platform
+                  .pickFiles();
               if (file == null || file.files.first.path == null) {
                 return;
               }

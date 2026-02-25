@@ -345,24 +345,21 @@ class SettingsProvider with ChangeNotifier {
         await prefs.getStringList(settingNLUsedApps) ?? <String>[];
 
     final int? billsLayoutIndex = await prefs.getInt(settingBillsDefaultLayout);
-    _billsLayout =
-        billsLayoutIndex == null
-            ? BillsLayout.grouped
-            : BillsLayout.values[billsLayoutIndex];
+    _billsLayout = billsLayoutIndex == null
+        ? BillsLayout.grouped
+        : BillsLayout.values[billsLayoutIndex];
 
     final int? billsSortIndex = await prefs.getInt(settingBillsDefaultSort);
-    _billsSort =
-        billsSortIndex == null
-            ? BillsSort.name
-            : BillsSort.values[billsSortIndex];
+    _billsSort = billsSortIndex == null
+        ? BillsSort.name
+        : BillsSort.values[billsSortIndex];
 
     final int? billsSortOrderIndex = await prefs.getInt(
       settingBillsDefaultSortOrder,
     );
-    _billsSortOrder =
-        billsSortOrderIndex == null
-            ? SortingOrder.ascending
-            : SortingOrder.values[billsSortOrderIndex];
+    _billsSortOrder = billsSortOrderIndex == null
+        ? SortingOrder.ascending
+        : SortingOrder.values[billsSortOrderIndex];
 
     _categoriesSumExcluded =
         await prefs.getStringList(settingsCategoriesSumExcluded) ?? <String>[];
@@ -409,10 +406,9 @@ class SettingsProvider with ChangeNotifier {
     final int? txDateFilterIndex = await prefs.getInt(
       settingTransactionDateFilter,
     );
-    _transactionDateFilter =
-        txDateFilterIndex == null
-            ? TransactionDateFilter.all
-            : TransactionDateFilter.values[txDateFilterIndex];
+    _transactionDateFilter = txDateFilterIndex == null
+        ? TransactionDateFilter.all
+        : TransactionDateFilter.values[txDateFilterIndex];
 
     _loaded = _loading = true;
     log.finest(() => "notify SettingsProvider->loadSettings()");

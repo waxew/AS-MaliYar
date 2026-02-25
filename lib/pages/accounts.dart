@@ -8,9 +8,10 @@ import 'package:waterflyiii/animations.dart';
 import 'package:waterflyiii/auth.dart';
 import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/generated/swagger_fireflyiii_api/firefly_iii.swagger.dart';
+import 'package:waterflyiii/pages/accounts/search.dart';
 import 'package:waterflyiii/pages/home/accounts/row.dart';
-import 'package:waterflyiii/pages/home/accounts/search.dart';
 import 'package:waterflyiii/pages/navigation.dart';
+import 'package:waterflyiii/widgets/listview_pagedchildbuilder.dart';
 
 final Logger log = Logger("Pages.Accounts");
 
@@ -54,10 +55,8 @@ class _AccountsPageState extends State<AccountsPage>
             log.finest(() => "pressed search button");
             Navigator.of(context).push(
               PageRouteBuilder<Widget>(
-                pageBuilder:
-                    (BuildContext context, _, _) => AccountSearch(
-                      type: _accountTypes[_tabController.index],
-                    ),
+                pageBuilder: (BuildContext context, _, _) =>
+                    AccountSearch(type: _accountTypes[_tabController.index]),
                 transitionDuration: animDurationEmphasizedDecelerate,
                 reverseTransitionDuration: animDurationEmphasizedAccelerate,
                 transitionsBuilder:
@@ -110,10 +109,9 @@ class _AccountsPageState extends State<AccountsPage>
     AccountTypeFilter.revenue,
     AccountTypeFilter.liabilities,
   ];
-  final List<Widget> _tabPages =
-      _accountTypes
-          .map<Widget>((AccountTypeFilter t) => AccountDetails(accountType: t))
-          .toList();
+  final List<Widget> _tabPages = _accountTypes
+      .map<Widget>((AccountTypeFilter t) => AccountDetails(accountType: t))
+      .toList();
 
   @override
   Widget build(BuildContext context) {
@@ -187,30 +185,25 @@ class _AccountDetailsState extends State<AccountDetails>
     super.build(context);
     log.fine(() => "build()");
 
-    return RefreshIndicator(
-      onRefresh:
-          () => Future<void>.sync(
-            () => setState(() {
-              _pagingState = _pagingState.reset();
-            }),
-          ),
+    return RefreshIndicator.adaptive(
+      onRefresh: () => Future<void>.sync(
+        () => setState(() {
+          _pagingState = _pagingState.reset();
+        }),
+      ),
       child: PagedListView<int, AccountRead>(
         state: _pagingState,
         fetchNextPage: _fetchPage,
-        builderDelegate: PagedChildBuilderDelegate<AccountRead>(
-          animateTransitions: true,
-          transitionDuration: animDurationStandard,
-          invisibleItemsThreshold: 10,
-          itemBuilder:
-              (BuildContext context, AccountRead item, int index) =>
-                  accountRowBuilder(
-                    context,
-                    item,
-                    index,
-                    () => setState(() {
-                      _pagingState = _pagingState.reset();
-                    }),
-                  ),
+        builderDelegate: customPagedChildBuilderDelegate<AccountRead>(
+          itemBuilder: (BuildContext context, AccountRead item, int index) =>
+              accountRowBuilder(
+                context,
+                item,
+                index,
+                () => setState(() {
+                  _pagingState = _pagingState.reset();
+                }),
+              ),
         ),
       ),
     );
