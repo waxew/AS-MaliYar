@@ -158,11 +158,6 @@ class AuthErrorNoInstance extends AuthError {
   final String host;
 }
 
-class AuthErrorCloudflareAccess extends AuthError {
-  const AuthErrorCloudflareAccess()
-    : super("Invalid Cloudflare Access service token credentials");
-}
-
 class AuthCredentials {
   const AuthCredentials({this.host, this.apiKey, this.customHeadersRaw});
 
@@ -288,14 +283,6 @@ class AuthUser {
       request.maxRedirects = 5;
       final http.StreamedResponse response = await client.send(request);
       final String stringData = await response.stream.bytesToString();
-      final bool isCloudflareAccessFailure = _isCloudflareAccessFailure(
-        response: response,
-        body: stringData,
-      );
-
-      if (isCloudflareAccessFailure) {
-        throw const AuthErrorCloudflareAccess();
-      }
 
       if (response.statusCode == 401) {
         // 401 from Firefly usually means PAT auth failed.
@@ -324,36 +311,6 @@ class AuthUser {
 
     return AuthUser._create(uri, apiKey, customHeaders: customHeaders);
   }
-}
-
-bool _isCloudflareAccessFailure({
-  required http.StreamedResponse response,
-  required String body,
-}) {
-  final String location = response.headers[HttpHeaders.locationHeader] ?? "";
-  final String setCookie = response.headers['set-cookie'] ?? "";
-  final String bodyLower = body.toLowerCase();
-  final String locationLower = location.toLowerCase();
-
-  if (locationLower.contains("/cdn-cgi/access/") ||
-      locationLower.contains(".cloudflareaccess.com")) {
-    return true;
-  }
-
-  if (response.statusCode != 200 &&
-      setCookie.toLowerCase().contains("cf_authorization=")) {
-    return true;
-  }
-
-  // Access block/login pages and prompts include these markers.
-  if (bodyLower.contains("/cdn-cgi/access/") ||
-      bodyLower.contains("cloudflare access") ||
-      bodyLower.contains("cf-access-client-id") ||
-      bodyLower.contains("that account does not have access")) {
-    return true;
-  }
-
-  return false;
 }
 
 class FireflyService with ChangeNotifier {
