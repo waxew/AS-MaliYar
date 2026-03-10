@@ -369,18 +369,17 @@ class _TransactionPageState extends State<TransactionPage>
           late CurrencyRead? currency;
           late double amount;
 
+          final NotificationAppSettings appSettings = await settings
+              .notificationGetAppSettings(widget.notification!.appName);
+
           (currency, amount) = await parseNotificationText(
             api,
             widget.notification!.body,
             _localCurrency!,
+            userRegex: appSettings.regex,
           );
-
-          // Fallback solution
-          currency ??= defaultCurrency;
-
+          
           // Title & Note
-          final NotificationAppSettings appSettings = await settings
-              .notificationGetAppSettings(widget.notification!.appName);
           if (appSettings.includeTitle) {
             _titleTextController.text = widget.notification!.title;
           } else {
@@ -388,6 +387,9 @@ class _TransactionPageState extends State<TransactionPage>
             _noteTextControllers[0].text =
                 "${widget.notification!.title} - ${_noteTextControllers[0].text}";
           }
+
+          // Fallback solution
+          currency ??= defaultCurrency;
 
           if (!appSettings.emptyNote) {
             _noteTextControllers[0].text = widget.notification!.body;
