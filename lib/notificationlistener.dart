@@ -258,7 +258,7 @@ void nlCallback() {
 Future<void> nlInit() async {
   log.finest(() => "nlInit()");
   await NotificationServicePlugin.instance.initialize(nlCallback);
-  nlCallback();
+  // nlCallback(); // Avoid duplicated notification.
 }
 
 Future<void> nlNotificationTap(
