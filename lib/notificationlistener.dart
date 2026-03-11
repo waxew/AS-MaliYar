@@ -77,20 +77,28 @@ void nlCallback() {
     if (evt == null || evt.packageName == null) {
       return;
     }
-    if (evt.packageName?.startsWith("com.dreautall.waterflyiii") ?? false) {
+    if ((evt.packageName?.startsWith("com.dreautall.waterflyiii") ?? false) ||
+        (evt.packageName?.startsWith("com.waterflyiii.test") ?? false)) {
       return;
     }
-    if (evt.state == NotificationState.remove) {
+    // if (evt.state == NotificationState.remove) {
+    if (evt.state != NotificationState.post) {
       return;
     }
 
     final SettingsProvider settings = SettingsProvider();
 
-    final NotificationAppSettings appSettings =
-        await settings.notificationGetAppSettings(evt.packageName!);
-
     bool isPotentialMatch = false;
     final String text = evt.text ?? "";
+
+    if (text.contains(RegExp(r'\d'))) {
+      unawaited(settings.notificationAddKnownApp(evt.packageName!));
+    } else {
+      return;
+    }
+
+    final NotificationAppSettings appSettings = await settings
+        .notificationGetAppSettings(evt.packageName!);
 
     if (appSettings.regex != null && appSettings.regex!.isNotEmpty) {
       isPotentialMatch = RegExp(appSettings.regex!).hasMatch(text);
@@ -105,12 +113,12 @@ void nlCallback() {
       }
     }
 
+    // await settings.notificationAddKnownApp(evt.packageName!);
+
     if (!isPotentialMatch) {
       log.finer(() => "nlCallback(${evt.packageName}): no match found");
       return;
     }
-
-    await settings.notificationAddKnownApp(evt.packageName!);
 
     if (!(await settings.notificationUsedApps()).contains(evt.packageName)) {
       log.finer(() => "nlCallback(${evt.packageName}): app not used");
@@ -144,7 +152,8 @@ void nlCallback() {
 
       if (appSettings.autoAdd) {
         log.finer(
-          () => "nlCallback(${evt.packageName}): trying to auto-add transaction",
+          () =>
+              "nlCallback(${evt.packageName}): trying to auto-add transaction",
         );
         // Set date
         final DateTime date =
@@ -301,7 +310,9 @@ Future<(CurrencyRead?, double)> parseNotificationText(
     }
   } else {
     // Fallback to legacy
-    final Iterable<RegExpMatch> matches = rFindMoney.allMatches(notificationBody);
+    final Iterable<RegExpMatch> matches = rFindMoney.allMatches(
+      notificationBody,
+    );
 
     if (matches.isNotEmpty) {
       final List<CurrencyRead> currencies =
@@ -331,8 +342,9 @@ Future<(CurrencyRead?, double)> parseNotificationText(
         }
       }
       if (bestMatchIndex != -1) {
-        extractedAmountStr =
-            matches.elementAt(bestMatchIndex).namedGroup("amount");
+        extractedAmountStr = matches
+            .elementAt(bestMatchIndex)
+            .namedGroup("amount");
       }
     }
   }
@@ -346,7 +358,9 @@ Future<(CurrencyRead?, double)> parseNotificationText(
 
       if ('.'.allMatches(cleanAmount).length > 1) {
         int lastDotIndex = cleanAmount.lastIndexOf('.');
-        String beforeDot = cleanAmount.substring(0, lastDotIndex).replaceAll('.', '');
+        String beforeDot = cleanAmount
+            .substring(0, lastDotIndex)
+            .replaceAll('.', '');
         String afterDot = cleanAmount.substring(lastDotIndex + 1);
         cleanAmount = '$beforeDot.$afterDot';
       }
