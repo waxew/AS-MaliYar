@@ -86,7 +86,7 @@ class PastNotification {
   final String title;
   final String body;
   final DateTime time;
-  final PastNotificationMissedReasons? reason;
+  PastNotificationMissedReasons? reason;
 
   PastNotification.fromJson(Map<String, dynamic> json)
     : appName = json['appName'],

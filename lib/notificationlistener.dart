@@ -89,8 +89,21 @@ void nlCallback() {
     if (evt.state == NotificationState.remove) {
       return;
     }
+
+    // Passed initial checks
+    final SettingsProvider settings = SettingsProvider();
+    final PastNotification notif = PastNotification(
+      evt.packageName!,
+      evt.title ?? "",
+      evt.text ?? "",
+      DateTime.now(),
+      null,
+    );
+
     final Iterable<RegExpMatch> matches = rFindMoney.allMatches(evt.text ?? "");
     if (matches.isEmpty) {
+      notif.reason = PastNotificationMissedReasons.noMoney;
+      await settings.notificationHistoryAdd(notif);
       log.finer(() => "nlCallback(${evt.packageName}): no money found");
       return;
     }
@@ -104,20 +117,26 @@ void nlCallback() {
       }
     }
     if (!validMatch) {
+      notif.reason = PastNotificationMissedReasons.noCurrency;
+      await settings.notificationHistoryAdd(notif);
       log.finer(
         () => "nlCallback(${evt.packageName}): no money with currency found",
       );
       return;
     }
 
-    final SettingsProvider settings = SettingsProvider();
+    // Valid notification
     await settings.notificationAddKnownApp(evt.packageName!);
 
     if (!(await settings.notificationUsedApps()).contains(evt.packageName)) {
+      notif.reason = PastNotificationMissedReasons.appNotUsed;
+      await settings.notificationHistoryAdd(notif);
       log.finer(() => "nlCallback(${evt.packageName}): app not used");
       return;
     }
 
+    // Passed, add tx/show add notification
+    await settings.notificationHistoryAdd(notif);
     final NotificationAppSettings appSettings = await settings
         .notificationGetAppSettings(evt.packageName!);
     bool showNotification = true;
