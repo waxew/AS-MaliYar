@@ -92,7 +92,7 @@ class PastNotification {
     : appName = json['appName'],
       title = json['title'],
       body = json['body'],
-      time = DateTime.fromMicrosecondsSinceEpoch(json['time']),
+      time = DateTime.fromMillisecondsSinceEpoch(json['time']),
       reason = (json['reason'] != null && json['reason'] != '')
           ? PastNotificationMissedReasons.values[json['reason']]
           : null;
