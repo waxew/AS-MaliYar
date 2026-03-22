@@ -625,7 +625,20 @@ class SHu extends S {
       'A Waterfly III hatékony használatához saját szerveren futtatott Firefly III-ra vagy Firefly III kiegészítővel ellátott Home Assistant-re van szükség.\n\nKérjük, adja meg alább a teljes URL-t, valamint egy személyes hozzáférési tokent (Beállítások -> Profil -> OAuth -> Személyes hozzáférési tokenek).';
 
   @override
+  String get loginFormButtonHideHeaders => 'Hide Headers';
+
+  @override
+  String get loginFormButtonShowHeaders => 'Custom Headers';
+
+  @override
   String get loginFormLabelAPIKey => 'Érvényes API kulcs';
+
+  @override
+  String get loginFormLabelHeaders => 'Custom Headers (optional)';
+
+  @override
+  String get loginFormLabelHeadersHelp =>
+      'One per line, format: HeaderName: value';
 
   @override
   String get loginFormLabelHost => 'Szerver URL';
@@ -786,6 +799,12 @@ class SHu extends S {
 
   @override
   String get settingsNotificationListener => 'Értesítés Figyelő Szolgáltatás';
+
+  @override
+  String get settingsServerConnection => 'Server Connection';
+
+  @override
+  String get settingsServerConnectionUpdated => 'Connection settings updated.';
 
   @override
   String get settingsTheme => 'Alkalmazás Téma';

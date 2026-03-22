@@ -613,7 +613,20 @@ class SKo extends S {
       'Waterfly III를 사용하려면 Firefly III 인스턴스가 있는 서버나 Home Assistant용 Firefly III 애드온이 필요합니다.\n\n아래에 전체 URL과 개인 액세스 토큰(설정 -> 프로필 -> OAuth -> 개인 액세스 토큰)을 입력하세요.';
 
   @override
+  String get loginFormButtonHideHeaders => 'Hide Headers';
+
+  @override
+  String get loginFormButtonShowHeaders => 'Custom Headers';
+
+  @override
   String get loginFormLabelAPIKey => '유효한 API 키';
+
+  @override
+  String get loginFormLabelHeaders => 'Custom Headers (optional)';
+
+  @override
+  String get loginFormLabelHeadersHelp =>
+      'One per line, format: HeaderName: value';
 
   @override
   String get loginFormLabelHost => '호스트 URL';
@@ -768,6 +781,12 @@ class SKo extends S {
 
   @override
   String get settingsNotificationListener => '알림 리스너 서비스';
+
+  @override
+  String get settingsServerConnection => 'Server Connection';
+
+  @override
+  String get settingsServerConnectionUpdated => 'Connection settings updated.';
 
   @override
   String get settingsTheme => '테마변경';

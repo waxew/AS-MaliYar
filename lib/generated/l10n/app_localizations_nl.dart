@@ -619,7 +619,20 @@ class SNl extends S {
       'Om Waterfly III productief te gebruiken, heb je je eigen server nodig met een Firefly III-installatie of de Firefly III-add-on voor Home Assistant.\n\nVoer de volledige URL en ook een persoonlijke toegangstoken in (Instellingen -> Profiel -> OAuth -> Persoonlijke Toegang) hieronder in.';
 
   @override
+  String get loginFormButtonHideHeaders => 'Hide Headers';
+
+  @override
+  String get loginFormButtonShowHeaders => 'Custom Headers';
+
+  @override
   String get loginFormLabelAPIKey => 'Geldige API-sleutel';
+
+  @override
+  String get loginFormLabelHeaders => 'Custom Headers (optional)';
+
+  @override
+  String get loginFormLabelHeadersHelp =>
+      'One per line, format: HeaderName: value';
 
   @override
   String get loginFormLabelHost => 'Host-URL';
@@ -779,6 +792,12 @@ class SNl extends S {
 
   @override
   String get settingsNotificationListener => 'Notificatie Luister Service';
+
+  @override
+  String get settingsServerConnection => 'Server Connection';
+
+  @override
+  String get settingsServerConnectionUpdated => 'Connection settings updated.';
 
   @override
   String get settingsTheme => 'Applicatie thema';

@@ -620,7 +620,20 @@ class SId extends S {
       'Untuk menggunakan Waterfly III secara produktif anda memerlukan server sendiri dengan instansi Firefly III atau tambahan Firefly III untuk Home Assistant.\n\nSilahkan masukkan URL penuh serta token akses pribadi (Pengaturan -> Profil -> OAuth -> Token Akses Pribadi) di bawah.';
 
   @override
+  String get loginFormButtonHideHeaders => 'Hide Headers';
+
+  @override
+  String get loginFormButtonShowHeaders => 'Custom Headers';
+
+  @override
   String get loginFormLabelAPIKey => 'Kunci API Valid';
+
+  @override
+  String get loginFormLabelHeaders => 'Custom Headers (optional)';
+
+  @override
+  String get loginFormLabelHeadersHelp =>
+      'One per line, format: HeaderName: value';
 
   @override
   String get loginFormLabelHost => 'URL Host';
@@ -780,6 +793,12 @@ class SId extends S {
 
   @override
   String get settingsNotificationListener => 'Layanan Pendengar Notifikasi';
+
+  @override
+  String get settingsServerConnection => 'Server Connection';
+
+  @override
+  String get settingsServerConnectionUpdated => 'Connection settings updated.';
 
   @override
   String get settingsTheme => 'Tema Aplikasi';

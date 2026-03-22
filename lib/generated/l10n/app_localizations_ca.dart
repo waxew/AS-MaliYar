@@ -625,7 +625,20 @@ class SCa extends S {
       'Per a fer servir Waterfly III adequadament cal que tingues el teu propi servidor de Firefly III o l\'add-on de Firefly III a Home Assistant.\n\nPer favor, introdueix la URL completa a més del token d\'accés (Configuració -> Perfil -> OAuth -> Token d\'Accés Personal) a sota.';
 
   @override
+  String get loginFormButtonHideHeaders => 'Hide Headers';
+
+  @override
+  String get loginFormButtonShowHeaders => 'Custom Headers';
+
+  @override
   String get loginFormLabelAPIKey => 'Clau d\'API vàlida';
+
+  @override
+  String get loginFormLabelHeaders => 'Custom Headers (optional)';
+
+  @override
+  String get loginFormLabelHeadersHelp =>
+      'One per line, format: HeaderName: value';
 
   @override
   String get loginFormLabelHost => 'URL d\'allotjament';
@@ -787,6 +800,12 @@ class SCa extends S {
   @override
   String get settingsNotificationListener =>
       'Servei d\'escolta de notificacions';
+
+  @override
+  String get settingsServerConnection => 'Server Connection';
+
+  @override
+  String get settingsServerConnectionUpdated => 'Connection settings updated.';
 
   @override
   String get settingsTheme => 'Tema de l\'aplicació';

@@ -622,7 +622,20 @@ class SPl extends S {
       'Aby wydajnie korzystać z Waterfly III, potrzebujesz własnego serwera z instancją Firefly III lub dodatkiem Firefly III dla asystenta domowego.\n\nWprowadź pełny adres URL oraz osobisty token dostępu (Ustawienia -> Profil -> OAuth -> Osobisty token dostępu) poniżej.';
 
   @override
+  String get loginFormButtonHideHeaders => 'Hide Headers';
+
+  @override
+  String get loginFormButtonShowHeaders => 'Custom Headers';
+
+  @override
   String get loginFormLabelAPIKey => 'Prawidłowy klucz API';
+
+  @override
+  String get loginFormLabelHeaders => 'Custom Headers (optional)';
+
+  @override
+  String get loginFormLabelHeadersHelp =>
+      'One per line, format: HeaderName: value';
 
   @override
   String get loginFormLabelHost => 'Adres URL hosta';
@@ -783,6 +796,12 @@ class SPl extends S {
 
   @override
   String get settingsNotificationListener => 'Usługa nasłuchiwania powiadomień';
+
+  @override
+  String get settingsServerConnection => 'Server Connection';
+
+  @override
+  String get settingsServerConnectionUpdated => 'Connection settings updated.';
 
   @override
   String get settingsTheme => 'Motyw aplikacji';

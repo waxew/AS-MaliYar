@@ -625,7 +625,20 @@ class SFr extends S {
       'Pour utiliser Waterfly III, vous avez besoin de votre propre serveur avec une instance Firefly III ou le module complémentaire Firefly III pour Home Assistant.\n\nVeuillez renseigner l\'URL complète ainsi qu\'un jeton d\'accès personnel (Options -> Profil -> OAuth -> Jetons d\'accès personnel) ci-dessous.';
 
   @override
+  String get loginFormButtonHideHeaders => 'Hide Headers';
+
+  @override
+  String get loginFormButtonShowHeaders => 'Custom Headers';
+
+  @override
   String get loginFormLabelAPIKey => 'Clé API valide';
+
+  @override
+  String get loginFormLabelHeaders => 'Custom Headers (optional)';
+
+  @override
+  String get loginFormLabelHeadersHelp =>
+      'One per line, format: HeaderName: value';
 
   @override
   String get loginFormLabelHost => 'URL du serveur';
@@ -788,6 +801,12 @@ class SFr extends S {
   @override
   String get settingsNotificationListener =>
       'Service d\'écoute des notifications';
+
+  @override
+  String get settingsServerConnection => 'Server Connection';
+
+  @override
+  String get settingsServerConnectionUpdated => 'Connection settings updated.';
 
   @override
   String get settingsTheme => 'Thème de l\'appli';

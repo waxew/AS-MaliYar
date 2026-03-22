@@ -621,7 +621,20 @@ class SCs extends S {
       'Pro používání Waterfly III potřebujete vlastní server s instancí Firefly III nebo doplněk Firefly III v rámci služby Home Assistant.\n\nZadejte celou adresu URL spolu s vaším osobním přístupovým tokenem (Možnosti -> Profil -> OAuth -> Osobní přístupový token) níže.';
 
   @override
+  String get loginFormButtonHideHeaders => 'Hide Headers';
+
+  @override
+  String get loginFormButtonShowHeaders => 'Custom Headers';
+
+  @override
   String get loginFormLabelAPIKey => 'Platný klíč API';
+
+  @override
+  String get loginFormLabelHeaders => 'Custom Headers (optional)';
+
+  @override
+  String get loginFormLabelHeadersHelp =>
+      'One per line, format: HeaderName: value';
 
   @override
   String get loginFormLabelHost => 'URL serveru';
@@ -781,6 +794,12 @@ class SCs extends S {
 
   @override
   String get settingsNotificationListener => 'Služba pro čtení oznámení';
+
+  @override
+  String get settingsServerConnection => 'Server Connection';
+
+  @override
+  String get settingsServerConnectionUpdated => 'Connection settings updated.';
 
   @override
   String get settingsTheme => 'Motiv aplikace';

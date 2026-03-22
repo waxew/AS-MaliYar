@@ -1038,11 +1038,35 @@ abstract class S {
   /// **'To use Waterfly III productively you need your own server with a Firefly III instance or the Firefly III add-on for Home Assistant.\n\nPlease enter the full URL as well as a personal access token (Settings -> Profile -> OAuth -> Personal Access Token) below.'**
   String get loginAbout;
 
+  /// Login Form: Label for button to hide Custom Headers field - should be similar length than show custom headers button
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Headers'**
+  String get loginFormButtonHideHeaders;
+
+  /// Login Form: Label for button to show Custom Headers field - should be similar length than hide custom headers button
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Headers'**
+  String get loginFormButtonShowHeaders;
+
   /// Login Form: Label for API Key field
   ///
   /// In en, this message translates to:
   /// **'Valid API Key'**
   String get loginFormLabelAPIKey;
+
+  /// Login Form: Label for Custom Headers field
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Headers (optional)'**
+  String get loginFormLabelHeaders;
+
+  /// Login Form: Helper text for Custom Headers field
+  ///
+  /// In en, this message translates to:
+  /// **'One per line, format: HeaderName: value'**
+  String get loginFormLabelHeadersHelp;
 
   /// Login Form: Label for Host field
   ///
@@ -1301,6 +1325,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Notification Listener Service'**
   String get settingsNotificationListener;
+
+  /// Settings for the server connection
+  ///
+  /// In en, this message translates to:
+  /// **'Server Connection'**
+  String get settingsServerConnection;
+
+  /// Server connection settings have been updated
+  ///
+  /// In en, this message translates to:
+  /// **'Connection settings updated.'**
+  String get settingsServerConnectionUpdated;
 
   /// App theme (dark or light)
   ///
