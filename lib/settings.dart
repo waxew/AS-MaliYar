@@ -814,7 +814,7 @@ class SettingsProvider with ChangeNotifier {
     return prefs.setStringList(settingNLHistory, notifs);
   }
 
-  Future<List<PastNotification>> notificatinHistoryGet() async {
+  Future<List<PastNotification>> notificationHistoryGet() async {
     final List<String> notifsStr =
         await SharedPreferencesAsync().getStringList(settingNLHistory) ??
         <String>[];
