@@ -26,7 +26,6 @@ import 'package:waterflyiii/timezonehandler.dart';
 
 final Logger log = Logger("Auth");
 final Version minApiVersion = Version(6, 3, 2);
-const String customHeadersStorageKey = "api_custom_headers";
 final RegExp _httpHeaderNamePattern = RegExp(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$");
 
 String _stripWrappingQuotes(String value) {
@@ -39,15 +38,10 @@ String _stripWrappingQuotes(String value) {
 }
 
 Map<String, String> parseCustomHeaders(String rawInput) {
-  final String text = rawInput.replaceAll('\r', '').strip();
-  if (text.isEmpty) {
-    return <String, String>{};
-  }
-
   final Map<String, String> headers = <String, String>{};
-  final List<String> lines = text.split('\n');
+
+  final List<String> lines = rawInput.replaceAll('\r', '').strip().split('\n');
   for (int i = 0; i < lines.length; i++) {
-    final int lineNumber = i + 1;
     final String line = lines[i].strip();
     if (line.isEmpty) {
       continue;
@@ -55,7 +49,7 @@ Map<String, String> parseCustomHeaders(String rawInput) {
 
     final int separator = line.indexOf(':');
     if (separator <= 0 || separator == line.length - 1) {
-      throw AuthErrorCustomHeaders(lineNumber);
+      throw AuthErrorCustomHeaders(i + 1);
     }
 
     final String name = line.substring(0, separator).strip();
@@ -64,7 +58,7 @@ Map<String, String> parseCustomHeaders(String rawInput) {
     if (name.isEmpty ||
         !_httpHeaderNamePattern.hasMatch(name) ||
         value.isEmpty) {
-      throw AuthErrorCustomHeaders(lineNumber);
+      throw AuthErrorCustomHeaders(i + 1);
     }
 
     headers[name] = value;
@@ -127,9 +121,7 @@ class AuthErrorApiKey extends AuthError {
 
 class AuthErrorCustomHeaders extends AuthError {
   const AuthErrorCustomHeaders(this.lineNumber)
-    : super(
-        "Invalid custom header on line $lineNumber. Use Header-Name: value",
-      );
+    : super("Invalid custom headers");
 
   final int lineNumber;
 }
@@ -207,7 +199,7 @@ class AuthUser {
   late Uri _host;
   late String _apiKey;
   late FireflyIii _api;
-  final Map<String, String> _customHeaders;
+  late Map<String, String> _customHeaders;
 
   //late FireflyIiiV2 _apiV2;
 
@@ -220,15 +212,13 @@ class AuthUser {
 
   AuthUser._create(
     Uri host,
-    String apiKey, {
+    String apiKey,
     Map<String, String>? customHeaders,
-  }) : _customHeaders = Map<String, String>.unmodifiable(
-         customHeaders ?? const <String, String>{},
-       ) {
+  ) {
     log.config("AuthUser->_create($host)");
-    _apiKey = apiKey;
-
     _host = host.replace(pathSegments: <String>[...host.pathSegments, "api"]);
+    _apiKey = apiKey;
+    _customHeaders = customHeaders ?? const <String, String>{};
 
     _api = FireflyIii.create(
       baseUrl: _host,
@@ -244,12 +234,11 @@ class AuthUser {
   }
 
   Map<String, String> headers() {
-    final Map<String, String> headers = <String, String>{
+    return <String, String>{
       HttpHeaders.authorizationHeader: "Bearer $_apiKey",
       HttpHeaders.acceptHeader: "application/json",
+      ..._customHeaders,
     };
-    headers.addAll(_customHeaders);
-    return headers;
   }
 
   static Future<AuthUser> create(
@@ -277,15 +266,15 @@ class AuthUser {
     try {
       final http.Request request = http.Request(HttpMethod.Get, aboutUri);
       request.headers[HttpHeaders.authorizationHeader] = "Bearer $apiKey";
-      request.headers.addAll(customHeaders ?? const <String, String>{});
+      if (customHeaders?.isNotEmpty ?? false) {
+        request.headers.addAll(customHeaders!);
+      }
       // See #497, redirect is a bad way to check for (un)successful login.
       request.followRedirects = true;
       request.maxRedirects = 5;
       final http.StreamedResponse response = await client.send(request);
-      final String stringData = await response.stream.bytesToString();
 
       if (response.statusCode == 401) {
-        // 401 from Firefly usually means PAT auth failed.
         throw const AuthErrorApiKey();
       }
       if (response.statusCode != 200) {
@@ -300,6 +289,7 @@ class AuthUser {
         throw const AuthErrorApiKey();
       }
 
+      final String stringData = await response.stream.bytesToString();
       try {
         SystemInfo.fromJson(json.decode(stringData));
       } on FormatException {
@@ -309,7 +299,7 @@ class AuthUser {
       client.close();
     }
 
-    return AuthUser._create(uri, apiKey, customHeaders: customHeaders);
+    return AuthUser._create(uri, apiKey, customHeaders);
   }
 }
 
@@ -362,7 +352,7 @@ class FireflyService with ChangeNotifier {
     return AuthCredentials(
       host: await storage.read(key: 'api_host'),
       apiKey: await storage.read(key: 'api_key'),
-      customHeadersRaw: await storage.read(key: customHeadersStorageKey),
+      customHeadersRaw: await storage.read(key: 'api_headers'),
     );
   }
 
@@ -372,11 +362,10 @@ class FireflyService with ChangeNotifier {
     final String? apiHost = storedCredentials.host;
     final String? apiKey = storedCredentials.apiKey;
     final String? customHeadersRaw = storedCredentials.customHeadersRaw;
-    final bool customHeadersSet = customHeadersRaw?.isNotEmpty ?? false;
 
     log.config(
       "storage: $apiHost, apiKey ${apiKey?.isEmpty ?? true ? "unset" : "set"}, "
-      "customHeaders ${customHeadersSet ? "set" : "unset"}",
+      "customHeaders ${(customHeadersRaw?.isNotEmpty ?? false) ? "set" : "unset"}",
     );
 
     if (apiHost == null || apiKey == null) {
@@ -415,11 +404,11 @@ class FireflyService with ChangeNotifier {
     log.config("FireflyService->signIn($host)");
     host = host.strip().rightStrip('/');
     apiKey = apiKey.strip();
+
     _lastTriedHost = host;
     final Map<String, String> customHeaders = parseCustomHeaders(
       customHeadersRaw ?? "",
     );
-    final String customHeadersToStore = encodeCustomHeaders(customHeaders);
 
     final AuthUser nextUser = await AuthUser.create(
       host,
@@ -479,13 +468,11 @@ class FireflyService with ChangeNotifier {
 
     await storage.write(key: 'api_host', value: host);
     await storage.write(key: 'api_key', value: apiKey);
-    if (customHeadersToStore.isNotEmpty) {
+    if (customHeaders.isNotEmpty) {
       await storage.write(
-        key: customHeadersStorageKey,
-        value: customHeadersToStore,
+        key: 'api_headers',
+        value: encodeCustomHeaders(customHeaders),
       );
-    } else {
-      await storage.delete(key: customHeadersStorageKey);
     }
 
     return true;

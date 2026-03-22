@@ -17,6 +17,7 @@ import 'package:waterflyiii/auth.dart';
 import 'package:waterflyiii/extensions.dart';
 import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/notificationlistener.dart';
+import 'package:waterflyiii/pages/settings/connection.dart';
 import 'package:waterflyiii/pages/settings/debug.dart';
 import 'package:waterflyiii/pages/settings/notifications.dart';
 import 'package:waterflyiii/settings.dart';
@@ -104,6 +105,31 @@ class SettingsPageState extends State<SettingsPage>
             );
           },
         ),
+        const Divider(),
+        ListTile(
+          title: Text(S.of(context).settingsServerConnection),
+          subtitle: Text(
+            context.select((FireflyService f) {
+              final Uri? host = f.user?.host;
+              if (host == null) {
+                return "";
+              }
+              final List<String> segments = <String>[...host.pathSegments];
+              if (segments.isNotEmpty && segments.last == "api") {
+                segments.removeLast();
+              }
+              return host.replace(pathSegments: segments).toString();
+            }),
+            maxLines: 2,
+          ),
+          leading: const CircleAvatar(child: Icon(Icons.cloud_outlined)),
+          onTap: () {
+            showDialog<void>(
+              context: context,
+              builder: (BuildContext context) => const ConnectionDialog(),
+            );
+          },
+        ),
         SwitchListTile.adaptive(
           title: Text(S.of(context).settingsUseServerTimezone),
           subtitle: Text(S.of(context).settingsUseServerTimezoneHelp),
@@ -120,30 +146,6 @@ class SettingsPageState extends State<SettingsPage>
               value,
             );
             settings.useServerTime = value;
-          },
-        ),
-        ListTile(
-          title: const Text("Server connection"),
-          subtitle: Text(
-            context.select((FireflyService f) {
-              final Uri? host = f.user?.host;
-              if (host == null) {
-                return "-";
-              }
-              final List<String> segments = <String>[...host.pathSegments];
-              if (segments.isNotEmpty && segments.last == "api") {
-                segments.removeLast();
-              }
-              return host.replace(pathSegments: segments).toString();
-            }),
-            maxLines: 2,
-          ),
-          leading: const CircleAvatar(child: Icon(Icons.cloud_outlined)),
-          onTap: () {
-            showDialog<void>(
-              context: context,
-              builder: (BuildContext context) => const ConnectionDialog(),
-            );
           },
         ),
         const Divider(),
@@ -363,248 +365,6 @@ class ThemeDialog extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ],
-    );
-  }
-}
-
-class ConnectionDialog extends StatefulWidget {
-  const ConnectionDialog({super.key});
-
-  @override
-  State<ConnectionDialog> createState() => _ConnectionDialogState();
-}
-
-class _ConnectionDialogState extends State<ConnectionDialog> {
-  final TextEditingController _hostTextController = TextEditingController();
-  final TextEditingController _keyTextController = TextEditingController();
-  final TextEditingController _customHeadersTextController =
-      TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  bool _loading = true;
-  bool _saving = false;
-  bool _showCustomHeadersField = false;
-  String? _submitError;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCredentials();
-  }
-
-  @override
-  void dispose() {
-    _hostTextController.dispose();
-    _keyTextController.dispose();
-    _customHeadersTextController.dispose();
-    super.dispose();
-  }
-
-  static bool _hostValid(String value) {
-    final Uri? uri = Uri.tryParse(value);
-    if (uri == null || uri.host.isEmpty) {
-      return false;
-    }
-    return uri.scheme == "https" || uri.scheme == "http";
-  }
-
-  Future<void> _loadCredentials() async {
-    final FireflyService ff = context.read<FireflyService>();
-    final AuthCredentials creds = await ff.readStoredCredentials();
-    final Uri? currentHost = ff.user?.host;
-
-    String host = creds.host ?? "";
-    if (host.isEmpty && currentHost != null) {
-      final List<String> segments = <String>[...currentHost.pathSegments];
-      if (segments.isNotEmpty && segments.last == "api") {
-        segments.removeLast();
-      }
-      host = currentHost.replace(pathSegments: segments).toString();
-    }
-    if (host.isEmpty) {
-      host = "https://";
-    }
-
-    if (!mounted) {
-      return;
-    }
-
-    _hostTextController.text = host;
-    _keyTextController.text = creds.apiKey ?? "";
-    _customHeadersTextController.text = creds.customHeadersRaw ?? "";
-
-    setState(() {
-      _showCustomHeadersField = _customHeadersTextController.text.isNotEmpty;
-      _loading = false;
-    });
-  }
-
-  String _errorDescription(Object error, BuildContext context) {
-    if (error is AuthErrorStatusCode) {
-      return "${error.cause}\n${S.of(context).errorStatusCode(error.code)}";
-    }
-    if (error is AuthErrorVersionTooLow) {
-      return "${error.cause}\n${S.of(context).errorMinAPIVersion(error.requiredVersion.toString())}";
-    }
-    if (error is AuthError) {
-      return error.cause;
-    }
-    return S.of(context).errorUnknown;
-  }
-
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-    setState(() {
-      _saving = true;
-      _submitError = null;
-    });
-
-    try {
-      await context.read<FireflyService>().signIn(
-        _hostTextController.text,
-        _keyTextController.text,
-        customHeadersRaw: _customHeadersTextController.text,
-      );
-      if (!mounted) {
-        return;
-      }
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Connection settings updated."),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } catch (error, stackTrace) {
-      log.warning("failed to update server credentials", error, stackTrace);
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _submitError = _errorDescription(error, context);
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _saving = false;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text("Server connection"),
-      content: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 150),
-        child: _loading
-            ? const SizedBox(
-                height: 96,
-                child: Center(child: CircularProgressIndicator.adaptive()),
-              )
-            : Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      TextFormField(
-                        controller: _hostTextController,
-                        decoration: InputDecoration(
-                          filled: true,
-                          labelText: S.of(context).loginFormLabelHost,
-                        ),
-                        validator: (String? value) {
-                          if (value == null || value.isEmpty) {
-                            return S.of(context).errorFieldRequired;
-                          }
-                          if (!_hostValid(value)) {
-                            return S.of(context).errorInvalidURL;
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _keyTextController,
-                        decoration: InputDecoration(
-                          filled: true,
-                          labelText: S.of(context).loginFormLabelAPIKey,
-                        ),
-                        obscureText: true,
-                        enableSuggestions: false,
-                        autocorrect: false,
-                        validator: (String? value) {
-                          if (value == null || value.isEmpty) {
-                            return S.of(context).errorFieldRequired;
-                          }
-                          return null;
-                        },
-                      ),
-                      if (_showCustomHeadersField) ...<Widget>[
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _customHeadersTextController,
-                          decoration: const InputDecoration(
-                            filled: true,
-                            labelText: "Custom headers (optional)",
-                            helperText: "One per line: Header-Name: value",
-                          ),
-                          minLines: 3,
-                          maxLines: 8,
-                          autocorrect: false,
-                          enableSuggestions: false,
-                        ),
-                      ],
-                      if (_submitError != null) ...<Widget>[
-                        const SizedBox(height: 12),
-                        Card(
-                          elevation: 0,
-                          color: Theme.of(context).colorScheme.errorContainer,
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Text(
-                              _submitError!,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-      ),
-      actions: <Widget>[
-        TextButton(
-          onPressed: _saving ? null : () => Navigator.pop(context),
-          child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
-        ),
-        OutlinedButton(
-          onPressed: _loading || _saving
-              ? null
-              : () {
-                  setState(() {
-                    _showCustomHeadersField = !_showCustomHeadersField;
-                  });
-                },
-          child: Text(_showCustomHeadersField ? "Hide headers" : "Headers"),
-        ),
-        FilledButton(
-          onPressed: _loading || _saving ? null : _save,
-          child: _saving
-              ? const SizedBox.square(
-                  dimension: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text("Save"),
         ),
       ],
     );

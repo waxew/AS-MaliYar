@@ -270,24 +270,25 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   AnimatedHeight(
+                    child: (_showCustomHeadersField)
+                        ? const SizedBox(height: 12)
+                        : const SizedBox.shrink(),
+                  ),
+                  AnimatedHeight(
                     child: _showCustomHeadersField
-                        ? Column(
-                            children: <Widget>[
-                              const SizedBox(height: 12),
-                              TextFormField(
-                                controller: _customHeadersTextController,
-                                decoration: const InputDecoration(
-                                  filled: true,
-                                  labelText: "Custom headers (optional)",
-                                  helperText:
-                                      "One per line: Header-Name: value",
-                                ),
-                                minLines: 3,
-                                maxLines: 8,
-                                autocorrect: false,
-                                autovalidateMode: AutovalidateMode.disabled,
-                              ),
-                            ],
+                        ? TextFormField(
+                            controller: _customHeadersTextController,
+                            decoration: InputDecoration(
+                              filled: true,
+                              labelText: S.of(context).loginFormLabelHeaders,
+                              helperText: S
+                                  .of(context)
+                                  .loginFormLabelHeadersHelp,
+                            ),
+                            minLines: 2,
+                            maxLines: 5,
+                            autocorrect: false,
+                            autovalidateMode: AutovalidateMode.disabled,
                           )
                         : const SizedBox.shrink(),
                   ),
@@ -317,7 +318,9 @@ class _LoginPageState extends State<LoginPage> {
                           });
                         },
                         child: Text(
-                          _showCustomHeadersField ? "Hide headers" : "Headers",
+                          _showCustomHeadersField
+                              ? S.of(context).loginFormButtonHideHeaders
+                              : S.of(context).loginFormButtonShowHeaders,
                         ),
                       ),
                       FilledButton(
@@ -328,6 +331,9 @@ class _LoginPageState extends State<LoginPage> {
                           if ((_keyError != null && _keyError!.isNotEmpty) ||
                               (_hostError != null && _hostError!.isNotEmpty)) {
                             return;
+                          }
+                          if (_showCustomHeadersField == false) {
+                            _customHeadersTextController.text = "";
                           }
                           Navigator.push(
                             context,
