@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:appcheck/appcheck.dart';
 import 'package:chopper/chopper.dart' show Response;
 import 'package:flutter/material.dart';
@@ -43,6 +44,40 @@ class _SettingsNotificationsState extends State<SettingsNotifications> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(S.of(context).settingsNLDescription),
+          ),
+          const Divider(),
+          ListTile(
+            title: const Text(":DEBUG: List Notifs"),
+            leading: const CircleAvatar(child: Icon(Icons.bug_report)),
+            onTap: () async {
+              final SettingsProvider settings = context
+                  .read<SettingsProvider>();
+              final List<PastNotification> a = await settings
+                  .notificationHistoryGet();
+              for (PastNotification e in a) {
+                debugPrint(e.appName);
+                debugPrint(e.toJson().toString());
+                debugPrint(e.reason.toString());
+                debugPrint(e.time.toString());
+                debugPrint("---");
+              }
+            },
+          ),
+          ListTile(
+            title: const Text(":DEBUG: Add Notif"),
+            leading: const CircleAvatar(child: Icon(Icons.bug_report_outlined)),
+            onTap: () async {
+              final SettingsProvider settings = context
+                  .read<SettingsProvider>();
+              final PastNotification test = PastNotification(
+                "a.b.c",
+                "Missed this",
+                "somehow?",
+                DateTime.now(),
+                PastNotificationMissedReasons.appNotUsed,
+              );
+              await settings.notificationHistoryAdd(test);
+            },
           ),
           const Divider(),
           FutureBuilder<NotificationListenerStatus>(
@@ -173,6 +208,27 @@ class _SettingsNotificationsState extends State<SettingsNotifications> {
           if (status != null &&
               status!.serviceRunning &&
               status!.notificationPermission) ...<Widget>[
+            const Divider(),
+            OpenContainer(
+              openBuilder: (BuildContext context, Function closedContainer) =>
+                  const NotificationHistory(),
+              openColor: Theme.of(context).cardColor,
+              closedColor: Theme.of(context).cardColor,
+              closedElevation: 0,
+              closedBuilder: (BuildContext context, Function openContainer) =>
+                  ListTile(
+                    title: const Text("Notification History"),
+                    leading: const CircleAvatar(
+                      child: Icon(Icons.notifications),
+                    ),
+                    subtitle: const Text(
+                      "List previous notifications",
+                      maxLines: 1,
+                    ),
+                    isThreeLine: false,
+                    onTap: () => openContainer(),
+                  ),
+            ),
             const Divider(),
             ListTile(
               title: Text(S.of(context).settingsNLAppAdd),
@@ -546,6 +602,60 @@ class AppDialogEntry extends StatelessWidget {
           return const CircularProgressIndicator.adaptive();
         }
       },
+    );
+  }
+}
+
+class NotificationHistory extends StatefulWidget {
+  const NotificationHistory({super.key});
+
+  @override
+  State<NotificationHistory> createState() => _NotificationHistoryState();
+}
+
+class _NotificationHistoryState extends State<NotificationHistory> {
+  final Logger log = Logger("Notifications.History");
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Notification History")),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        primary: true,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              "This is a history of the last 15 notifications received by the app. $log",
+            ),
+          ),
+          const Divider(),
+          FutureBuilder<List<PastNotification>>(
+            future: context.read<SettingsProvider>().notificationHistoryGet(),
+            builder:
+                (
+                  BuildContext context,
+                  AsyncSnapshot<List<PastNotification>> snapshot,
+                ) {
+                  if (snapshot.connectionState != ConnectionState.done ||
+                      !snapshot.hasData) {
+                    if (snapshot.hasError) {
+                      log.severe(
+                        "error getting past notifications",
+                        snapshot.error,
+                      );
+                    }
+                    return const Center(
+                      child: CircularProgressIndicator.adaptive(),
+                    );
+                  }
+
+                  return Placeholder();
+                },
+          ),
+        ],
+      ),
     );
   }
 }
