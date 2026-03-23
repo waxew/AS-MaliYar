@@ -3,6 +3,7 @@ import 'package:appcheck/appcheck.dart';
 import 'package:chopper/chopper.dart' show Response;
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:notifications_listener_service/notifications_listener_service.dart';
 import 'package:provider/provider.dart';
@@ -627,7 +628,7 @@ class _NotificationHistoryState extends State<NotificationHistory> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
-              "This is a history of the last 15 notifications received by the app. $log",
+              "This is a history of the last 15 notifications received by the app. blabla explanation $log",
             ),
           ),
           const Divider(),
@@ -651,7 +652,128 @@ class _NotificationHistoryState extends State<NotificationHistory> {
                     );
                   }
 
-                  return Placeholder();
+                  final List<Widget> childs = <Widget>[];
+
+                  for (PastNotification n in snapshot.data!.reversed) {
+                    debugPrint(n.toJson().toString());
+                    final Widget child = FutureBuilder<AppInfo?>(
+                      future: AppCheck().checkAvailability(n.appName),
+                      builder:
+                          (
+                            BuildContext context,
+                            AsyncSnapshot<AppInfo?> snapshot,
+                          ) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              if (snapshot.data == null ||
+                                  snapshot.data!.appName == null) {
+                                return const SizedBox.shrink();
+                              }
+                              late Widget leading;
+                              try {
+                                if (snapshot.data!.icon == null) {
+                                  throw Exception(); // will be caught below
+                                }
+                                leading = Image.memory(snapshot.data!.icon!);
+                              } catch (e) {
+                                leading = const Icon(Icons.api);
+                              }
+                              return Card(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                child: InkWell(
+                                  onTap: n.reason == null
+                                      ? () {
+                                          debugPrint(":TODO: stuff");
+                                        }
+                                      : null,
+                                  child: Padding(
+                                    padding: const EdgeInsetsGeometry.all(12),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        CircleAvatar(child: leading),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Text(
+                                                "${snapshot.data!.appName}・${DateFormat.yMd().add_Hms().format(n.time)}",
+                                                style: Theme.of(
+                                                  context,
+                                                ).textTheme.bodySmall,
+                                              ),
+                                              Text(
+                                                n.title,
+                                                style: Theme.of(
+                                                  context,
+                                                ).textTheme.labelLarge,
+                                              ),
+                                              Text(n.body),
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                n.reason.toString(),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelMedium!
+                                                    .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.normal,
+                                                      fontStyle:
+                                                          FontStyle.italic,
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            } else if (snapshot.hasError) {
+                              log.severe(
+                                "error getting app details",
+                                snapshot.error,
+                                snapshot.stackTrace,
+                              );
+                              return const SizedBox.shrink();
+                            } else {
+                              return const CircularProgressIndicator.adaptive();
+                            }
+                          },
+                    );
+                    childs.add(child);
+                  }
+
+                  if (childs.isEmpty) {
+                    return Center(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          const Padding(
+                            padding: EdgeInsetsGeometry.only(top: 36),
+                          ),
+                          const Icon(
+                            Icons.notifications_off_outlined,
+                            size: 200,
+                          ),
+                          Text(
+                            "No notifications recorded so far.",
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  childs.add(
+                    const Padding(padding: EdgeInsetsGeometry.only(bottom: 18)),
+                  );
+                  return Column(children: childs);
                 },
           ),
         ],
