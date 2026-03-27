@@ -73,7 +73,7 @@ class _CategoryAddEditDialogState extends State<CategoryAddEditDialog> {
             ? S.of(context).categoryTitleAdd
             : S.of(context).categoryTitleEdit,
       ),
-      clipBehavior: Clip.hardEdge,
+      clipBehavior: .hardEdge,
       actions: <Widget>[
         if (widget.category != null)
           OutlinedButton(
@@ -179,7 +179,7 @@ class _CategoryAddEditDialogState extends State<CategoryAddEditDialog> {
       ],
       content: SingleChildScrollView(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: <Widget>[
             SizedBox(
               width: inputWidth,
@@ -238,7 +238,7 @@ class DeletionConfirmDialog extends StatelessWidget {
     return AlertDialog(
       icon: const Icon(Icons.delete),
       title: Text(S.of(context).categoryTitleDelete),
-      clipBehavior: Clip.hardEdge,
+      clipBehavior: .hardEdge,
       actions: <Widget>[
         TextButton(
           child: Text(MaterialLocalizations.of(context).cancelButtonLabel),

@@ -187,7 +187,7 @@ void nlCallback() {
           groupTitle: null,
           transactions: <TransactionSplitStore>[
             TransactionSplitStore(
-              type: TransactionTypeProperty.withdrawal,
+              type: .withdrawal,
               date: date,
               amount: amount.toString(),
               description: evt.title!,
@@ -228,8 +228,8 @@ void nlCallback() {
                 'Transaction from Notification Created',
                 channelDescription:
                     'Notification that a Transaction has been created from another Notification.',
-                importance: Importance.low, // Android 8.0 and higher
-                priority: Priority.low, // Android 7.1 and lower
+                importance: .low, // Android 8.0 and higher
+                priority: .low, // Android 7.1 and lower
               ),
             ),
             payload: "",
@@ -258,8 +258,8 @@ void nlCallback() {
               'Create Transaction from Notification',
               channelDescription:
                   'Notification asking to create a transaction from another Notification.',
-              importance: Importance.low, // Android 8.0 and higher
-              priority: Priority.low, // Android 7.1 and lower
+              importance: .low, // Android 8.0 and higher
+              priority: .low, // Android 7.1 and lower
             ),
           ),
           payload: jsonEncode(

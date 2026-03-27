@@ -206,11 +206,9 @@ class _WaterflyAppState extends State<WaterflyApp> {
 
     return DynamicColorBuilder(
       builder: (ColorScheme? cSchemeDynamicLight, ColorScheme? cSchemeDynamicDark) {
-        final ColorScheme cSchemeLight = ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-        );
+        final ColorScheme cSchemeLight = .fromSeed(seedColor: Colors.blue);
         final ColorScheme cSchemeDark =
-            ColorScheme.fromSeed(
+            .fromSeed(
               seedColor: Colors.blue,
               brightness: Brightness.dark,
             ).copyWith(
@@ -291,7 +289,7 @@ class _WaterflyAppState extends State<WaterflyApp> {
             return MaterialApp(
               title: 'Waterfly III',
               theme: ThemeData(
-                brightness: Brightness.light,
+                brightness: .light,
                 colorScheme:
                     context.select((SettingsProvider s) => s.dynamicColors)
                     ? cSchemeDynamicLight?.harmonized() ?? cSchemeLight
@@ -307,7 +305,7 @@ class _WaterflyAppState extends State<WaterflyApp> {
                 ),
               ),
               darkTheme: ThemeData(
-                brightness: Brightness.dark,
+                brightness: .dark,
                 colorScheme:
                     context.select((SettingsProvider s) => s.dynamicColors)
                     ? cSchemeDynamicDark?.harmonized() ?? cSchemeDark

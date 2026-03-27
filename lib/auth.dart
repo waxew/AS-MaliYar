@@ -94,10 +94,7 @@ class AuthErrorNoInstance extends AuthError {
 
 http.Client get httpClient => Platform.isAndroid
     ? CronetClient.fromCronetEngine(
-        CronetEngine.build(
-          cacheMode: CacheMode.memory,
-          cacheMaxSize: 2 * 1024 * 1024,
-        ),
+        CronetEngine.build(cacheMode: .memory, cacheMaxSize: 2 * 1024 * 1024),
         closeEngine: false,
       )
     : Platform.isIOS
