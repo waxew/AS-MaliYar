@@ -160,7 +160,7 @@ class _NetEarningsChartPopupState extends State<NetEarningsChartPopup> {
 
     return SimpleDialog(
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: .spaceBetween,
         children: <Widget>[
           Text(DateFormat.yMMMM().format(currentMonth)),
           Row(
@@ -185,7 +185,7 @@ class _NetEarningsChartPopupState extends State<NetEarningsChartPopup> {
           ),
         ],
       ),
-      clipBehavior: Clip.hardEdge,
+      clipBehavior: .hardEdge,
       insetPadding: const EdgeInsets.all(12),
       children: <Widget>[
         FutureBuilder<Map<String, double>>(
@@ -225,7 +225,7 @@ class _NetEarningsChartPopupState extends State<NetEarningsChartPopup> {
                   return Column(
                     children: <Widget>[
                       Padding(
-                        padding: const EdgeInsets.only(left: 12),
+                        padding: const .only(left: 12),
                         child: SizedBox(
                           height: 400,
                           width: MediaQuery.of(context).size.width,
@@ -285,13 +285,13 @@ class _NetEarningsChartPopupState extends State<NetEarningsChartPopup> {
                                 dataLabelSettings: DataLabelSettings(
                                   isVisible: true,
                                   angle: 90,
-                                  alignment: ChartAlignment.center,
-                                  labelAlignment: ChartDataLabelAlignment.outer,
-                                  labelPosition: ChartDataLabelPosition.outside,
+                                  alignment: .center,
+                                  labelAlignment: .outer,
+                                  labelPosition: .outside,
                                   textStyle: Theme.of(context)
                                       .textTheme
                                       .labelSmall
-                                      ?.copyWith(fontWeight: FontWeight.normal),
+                                      ?.copyWith(fontWeight: .normal),
                                 ),
                               ),
                             ],
@@ -302,7 +302,7 @@ class _NetEarningsChartPopupState extends State<NetEarningsChartPopup> {
                             zoomPanBehavior: ZoomPanBehavior(
                               enablePanning: true,
                               enablePinching: true,
-                              zoomMode: ZoomMode.x,
+                              zoomMode: .x,
                               enableDoubleTapZooming: true,
                             ),
                           ),
@@ -335,7 +335,7 @@ class _NetEarningsChartPopupState extends State<NetEarningsChartPopup> {
                   return const SizedBox.shrink();
                 } else {
                   return const Padding(
-                    padding: EdgeInsets.all(8),
+                    padding: .all(8),
                     child: Center(child: CircularProgressIndicator.adaptive()),
                   );
                 }

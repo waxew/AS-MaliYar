@@ -23,11 +23,11 @@ class _NotificationHistoryState extends State<NotificationHistory> {
     return Scaffold(
       appBar: AppBar(title: Text(S.of(context).settingsNLHistory)),
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const .symmetric(horizontal: 24),
         primary: true,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const .symmetric(horizontal: 12),
             child: Text(
               S
                   .of(context)
@@ -44,8 +44,7 @@ class _NotificationHistoryState extends State<NotificationHistory> {
                   BuildContext context,
                   AsyncSnapshot<List<PastNotification>> snapshot,
                 ) {
-                  if (snapshot.connectionState != ConnectionState.done ||
-                      !snapshot.hasData) {
+                  if (snapshot.connectionState != .done || !snapshot.hasData) {
                     if (snapshot.hasError) {
                       log.severe(
                         "error getting past notifications",
@@ -64,7 +63,7 @@ class _NotificationHistoryState extends State<NotificationHistory> {
                     final Widget child = FutureBuilder<AppInfo?>(
                       future: AppCheck().checkAvailability(n.appName),
                       builder: (BuildContext context, AsyncSnapshot<AppInfo?> snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
+                        if (snapshot.connectionState == .done) {
                           if (snapshot.data == null ||
                               snapshot.data!.appName == null) {
                             return const SizedBox.shrink();
@@ -79,7 +78,7 @@ class _NotificationHistoryState extends State<NotificationHistory> {
                             leading = const Icon(Icons.api);
                           }
                           return Card(
-                            margin: const EdgeInsets.only(bottom: 8),
+                            margin: const .only(bottom: 8),
                             child: InkWell(
                               onTap: n.reason == null
                                   ? () => showDialog(
@@ -97,20 +96,18 @@ class _NotificationHistoryState extends State<NotificationHistory> {
                                     )
                                   : null,
                               child: Padding(
-                                padding: const EdgeInsetsGeometry.all(12),
+                                padding: const .all(12),
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: .start,
                                   children: <Widget>[
                                     CircleAvatar(child: leading),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: .start,
                                         children: <Widget>[
                                           Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                            mainAxisAlignment: .spaceBetween,
                                             children: <Widget>[
                                               Text(
                                                 "${snapshot.data!.appName}・${DateFormat.yMd().add_Hms().format(n.time)}",
@@ -147,10 +144,8 @@ class _NotificationHistoryState extends State<NotificationHistory> {
                                                       .textTheme
                                                       .labelMedium!
                                                       .copyWith(
-                                                        fontWeight:
-                                                            FontWeight.normal,
-                                                        fontStyle:
-                                                            FontStyle.italic,
+                                                        fontWeight: .normal,
+                                                        fontStyle: .italic,
                                                       ),
                                                 )
                                               : const SizedBox.shrink(),
@@ -180,12 +175,10 @@ class _NotificationHistoryState extends State<NotificationHistory> {
                   if (childs.isEmpty) {
                     return Center(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: .center,
+                        mainAxisAlignment: .center,
                         children: <Widget>[
-                          const Padding(
-                            padding: EdgeInsetsGeometry.only(top: 36),
-                          ),
+                          const Padding(padding: .only(top: 36)),
                           const Icon(
                             Icons.notifications_off_outlined,
                             size: 200,
@@ -199,9 +192,7 @@ class _NotificationHistoryState extends State<NotificationHistory> {
                     );
                   }
 
-                  childs.add(
-                    const Padding(padding: EdgeInsetsGeometry.only(bottom: 18)),
-                  );
+                  childs.add(const Padding(padding: .only(bottom: 18)));
                   return Column(children: childs);
                 },
           ),

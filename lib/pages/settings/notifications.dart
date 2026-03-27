@@ -39,11 +39,11 @@ class _SettingsNotificationsState extends State<SettingsNotifications> {
     return Scaffold(
       appBar: AppBar(title: Text(S.of(context).settingsNotificationListener)),
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const .symmetric(horizontal: 24),
         primary: false,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const .symmetric(horizontal: 12),
             child: Text(S.of(context).settingsNLDescription),
           ),
           const Divider(),
@@ -61,8 +61,7 @@ class _SettingsNotificationsState extends State<SettingsNotifications> {
 
                   late String subtitle;
                   late Function clickFn;
-                  if (snapshot.connectionState == ConnectionState.done &&
-                      snapshot.hasData) {
+                  if (snapshot.connectionState == .done && snapshot.hasData) {
                     if (!snapshot.data!.servicePermission) {
                       subtitle = l10n.settingsNLPermissionGrant;
                       clickFn = () async {
@@ -79,7 +78,7 @@ class _SettingsNotificationsState extends State<SettingsNotifications> {
                               content: Text(
                                 l10n.settingsNLPermissionNotGranted,
                               ),
-                              behavior: SnackBarBehavior.floating,
+                              behavior: .floating,
                             ),
                           );
                           return;
@@ -112,7 +111,7 @@ class _SettingsNotificationsState extends State<SettingsNotifications> {
                             title: Text(
                               S.of(context).settingsNLPermissionRemove,
                             ),
-                            clipBehavior: Clip.hardEdge,
+                            clipBehavior: .hardEdge,
                             actions: <Widget>[
                               TextButton(
                                 child: Text(
@@ -238,7 +237,7 @@ class NotificationApps extends StatelessWidget {
 
     // Accounts
     final Response<AccountArray> respAccounts = await api.v1AccountsGet(
-      type: AccountTypeFilter.assetAccount,
+      type: .assetAccount,
     );
     apiThrowErrorIfEmpty(respAccounts, context.mounted ? context : null);
 
@@ -252,10 +251,9 @@ class NotificationApps extends StatelessWidget {
     return FutureBuilder<AccountArray>(
       future: _getAccounts(context),
       builder: (BuildContext context, AsyncSnapshot<AccountArray> snapshot) {
-        if (snapshot.connectionState == ConnectionState.done &&
-            snapshot.hasData) {
+        if (snapshot.connectionState == .done && snapshot.hasData) {
           return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: .stretch,
             children: <Widget>[
               ...context.watch<SettingsProvider>().notificationApps.map((
                 String app,
@@ -269,8 +267,7 @@ class NotificationApps extends StatelessWidget {
                         BuildContext context,
                         AsyncSnapshot<NotificationAppSettings> snap,
                       ) {
-                        if (snap.connectionState == ConnectionState.done &&
-                            snap.hasData) {
+                        if (snap.connectionState == .done && snap.hasData) {
                           return AppCard(
                             app: app,
                             accounts: snapshot.data!,
@@ -342,7 +339,7 @@ class _AppCardState extends State<AppCard> {
               type: "dummy",
               attributes: AccountProperties(
                 name: S.of(context).settingsNLAppAccountDynamic,
-                type: ShortAccountTypeProperty.swaggerGeneratedUnknown,
+                type: .swaggerGeneratedUnknown,
               ),
             ),
             label: S.of(context).settingsNLAppAccountDynamic,
@@ -358,14 +355,14 @@ class _AppCardState extends State<AppCard> {
       }
     }
     return Card(
-      clipBehavior: Clip.hardEdge,
+      clipBehavior: .hardEdge,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const .all(12),
         child: Row(
           children: <Widget>[
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 children: <Widget>[
                   Text(
                     widget.settings.appName,
@@ -454,7 +451,7 @@ class _AppCardState extends State<AppCard> {
             SizedBox(
               width: 48,
               child: Align(
-                alignment: Alignment.centerRight,
+                alignment: .centerRight,
                 child: IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () {
@@ -482,7 +479,7 @@ class AppDialog extends StatelessWidget {
 
     return SimpleDialog(
       title: Text(S.of(context).settingsNLAppAdd),
-      clipBehavior: Clip.hardEdge,
+      clipBehavior: .hardEdge,
       children: <Widget>[
         FutureBuilder<List<String>>(
           future: context.read<SettingsProvider>().notificationKnownApps(
@@ -494,17 +491,14 @@ class AppDialog extends StatelessWidget {
                   final List<Widget> child = <Widget>[];
                   child.add(
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      padding: const .symmetric(horizontal: 24),
                       child: Text(S.of(context).settingsNLAppAddInfo),
                     ),
                   );
                   for (String app in snapshot.data!) {
                     child.add(AppDialogEntry(app: app));
                   }
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: child,
-                  );
+                  return Column(crossAxisAlignment: .start, children: child);
                 } else if (snapshot.hasError) {
                   log.severe(
                     "error getting app settings",
@@ -537,7 +531,7 @@ class AppDialogEntry extends StatelessWidget {
     return FutureBuilder<AppInfo?>(
       future: AppCheck().checkAvailability(app),
       builder: (BuildContext context, AsyncSnapshot<AppInfo?> snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
+        if (snapshot.connectionState == .done) {
           if (snapshot.data == null || snapshot.data!.appName == null) {
             return const SizedBox.shrink();
           }
