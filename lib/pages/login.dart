@@ -97,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   SizedBox(
-                    width: double.infinity,
+                    width: .infinity,
                     child: Card(
                       elevation: 0,
                       color: Theme.of(

@@ -128,7 +128,7 @@ class _SplashPageState extends State<SplashPage> {
         return S.of(context).errorUnknown;
       }();
       page = SizedBox(
-        width: double.infinity,
+        width: .infinity,
         child: Column(
           children: <Widget>[
             AnimatedHeight(
@@ -136,7 +136,7 @@ class _SplashPageState extends State<SplashPage> {
                 elevation: 0,
                 color: Theme.of(context).colorScheme.errorContainer,
                 child: Padding(
-                  padding: const EdgeInsets.all(12),
+                  padding: const .all(12),
                   child: Text(
                     errorDescription,
                     style: TextStyle(
@@ -152,7 +152,7 @@ class _SplashPageState extends State<SplashPage> {
                 elevation: 0,
                 color: Theme.of(context).colorScheme.errorContainer,
                 child: Padding(
-                  padding: const EdgeInsets.all(12),
+                  padding: const .all(12),
                   child: Text(
                     errorDetails,
                     style: TextStyle(
@@ -165,7 +165,7 @@ class _SplashPageState extends State<SplashPage> {
             ),
             const SizedBox(height: 12),
             OverflowBar(
-              alignment: MainAxisAlignment.center,
+              alignment: .center,
               spacing: 12,
               children: <Widget>[
                 OutlinedButton(
@@ -203,7 +203,7 @@ class _SplashPageState extends State<SplashPage> {
         child: Center(
           child: ListView(
             shrinkWrap: true,
-            padding: const EdgeInsets.all(24),
+            padding: const .all(24),
             children: <Widget>[
               Column(
                 children: <Widget>[
