@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
+import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/notificationlistener.dart';
 import 'package:waterflyiii/pages/transaction.dart';
 import 'package:waterflyiii/settings.dart';
@@ -20,7 +21,7 @@ class _NotificationHistoryState extends State<NotificationHistory> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Notification History")),
+      appBar: AppBar(title: Text(S.of(context).settingsNLHistory)),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         primary: true,
@@ -28,7 +29,11 @@ class _NotificationHistoryState extends State<NotificationHistory> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
-              "This is a history of the last 15 notifications received by the app. blabla explanation $log",
+              S
+                  .of(context)
+                  .settingsNLHistoryLongDescription(
+                    SettingsProvider.settingNLHistoryLength,
+                  ),
             ),
           ),
           const Divider(),
@@ -58,118 +63,116 @@ class _NotificationHistoryState extends State<NotificationHistory> {
                     debugPrint(n.toJson().toString());
                     final Widget child = FutureBuilder<AppInfo?>(
                       future: AppCheck().checkAvailability(n.appName),
-                      builder:
-                          (
-                            BuildContext context,
-                            AsyncSnapshot<AppInfo?> snapshot,
-                          ) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.done) {
-                              if (snapshot.data == null ||
-                                  snapshot.data!.appName == null) {
-                                return const SizedBox.shrink();
-                              }
-                              late Widget leading;
-                              try {
-                                if (snapshot.data!.icon == null) {
-                                  throw Exception(); // will be caught below
-                                }
-                                leading = Image.memory(snapshot.data!.icon!);
-                              } catch (e) {
-                                leading = const Icon(Icons.api);
-                              }
-                              return Card(
-                                margin: const EdgeInsets.only(bottom: 8),
-                                child: InkWell(
-                                  onTap: n.reason == null
-                                      ? () => showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) =>
-                                              TransactionPage(
-                                                notification:
-                                                    NotificationTransaction(
-                                                      n.appName,
-                                                      n.title,
-                                                      n.body,
-                                                      n.time,
-                                                    ),
-                                              ),
-                                        )
-                                      : null,
-                                  child: Padding(
-                                    padding: const EdgeInsetsGeometry.all(12),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        CircleAvatar(child: leading),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                      builder: (BuildContext context, AsyncSnapshot<AppInfo?> snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          if (snapshot.data == null ||
+                              snapshot.data!.appName == null) {
+                            return const SizedBox.shrink();
+                          }
+                          late Widget leading;
+                          try {
+                            if (snapshot.data!.icon == null) {
+                              throw Exception(); // will be caught below
+                            }
+                            leading = Image.memory(snapshot.data!.icon!);
+                          } catch (e) {
+                            leading = const Icon(Icons.api);
+                          }
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            child: InkWell(
+                              onTap: n.reason == null
+                                  ? () => showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          TransactionPage(
+                                            notification:
+                                                NotificationTransaction(
+                                                  n.appName,
+                                                  n.title,
+                                                  n.body,
+                                                  n.time,
+                                                ),
+                                          ),
+                                    )
+                                  : null,
+                              child: Padding(
+                                padding: const EdgeInsetsGeometry.all(12),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    CircleAvatar(child: leading),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
                                             children: <Widget>[
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: <Widget>[
-                                                  Text(
-                                                    "${snapshot.data!.appName}・${DateFormat.yMd().add_Hms().format(n.time)}",
-                                                    style: Theme.of(
-                                                      context,
-                                                    ).textTheme.bodySmall,
-                                                  ),
-                                                  n.reason == null
-                                                      ? Icon(
-                                                          Icons
-                                                              .touch_app_outlined,
-                                                          color: Theme.of(context)
-                                                              .colorScheme
-                                                              .outlineVariant,
-                                                        )
-                                                      : const SizedBox.shrink(),
-                                                ],
-                                              ),
                                               Text(
-                                                n.title,
+                                                "${snapshot.data!.appName}・${DateFormat.yMd().add_Hms().format(n.time)}",
                                                 style: Theme.of(
                                                   context,
-                                                ).textTheme.labelLarge,
+                                                ).textTheme.bodySmall,
                                               ),
-                                              Text(n.body),
-                                              const SizedBox(height: 6),
-                                              Text(
-                                                n.reason.toString(),
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .labelMedium!
-                                                    .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.normal,
-                                                      fontStyle:
-                                                          FontStyle.italic,
-                                                    ),
-                                              ),
+                                              n.reason == null
+                                                  ? Icon(
+                                                      Icons.touch_app_outlined,
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .outlineVariant,
+                                                    )
+                                                  : const SizedBox.shrink(),
                                             ],
                                           ),
-                                        ),
-                                      ],
+                                          Text(
+                                            n.title,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.labelLarge,
+                                          ),
+                                          Text(n.body),
+                                          const SizedBox(height: 6),
+                                          n.reason != null
+                                              ? Text(
+                                                  S
+                                                      .of(context)
+                                                      .settingsNLHistoryRejectedReason(
+                                                        n.reason.toString(),
+                                                      ),
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .labelMedium!
+                                                      .copyWith(
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                        fontStyle:
+                                                            FontStyle.italic,
+                                                      ),
+                                                )
+                                              : const SizedBox.shrink(),
+                                        ],
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              );
-                            } else if (snapshot.hasError) {
-                              log.severe(
-                                "error getting app details",
-                                snapshot.error,
-                                snapshot.stackTrace,
-                              );
-                              return const SizedBox.shrink();
-                            } else {
-                              return const CircularProgressIndicator.adaptive();
-                            }
-                          },
+                              ),
+                            ),
+                          );
+                        } else if (snapshot.hasError) {
+                          log.severe(
+                            "error getting app details",
+                            snapshot.error,
+                            snapshot.stackTrace,
+                          );
+                          return const SizedBox.shrink();
+                        } else {
+                          return const CircularProgressIndicator.adaptive();
+                        }
+                      },
                     );
                     childs.add(child);
                   }
@@ -188,7 +191,7 @@ class _NotificationHistoryState extends State<NotificationHistory> {
                             size: 200,
                           ),
                           Text(
-                            "No notifications recorded so far.",
+                            S.of(context).settingsNLHistoryEmpty,
                             style: Theme.of(context).textTheme.bodyLarge,
                           ),
                         ],

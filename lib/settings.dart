@@ -161,6 +161,7 @@ class SettingsProvider with ChangeNotifier {
   static const String settingNLUsedApps = "NL_USEDAPPS";
   static const String settingNLAppPrefix = "NL_APP_";
   static const String settingNLHistory = "NL_HISTORY";
+  static const int settingNLHistoryLength = 15;
   static const String settingTheme = "THEME";
   static const String settingThemeDark = "DARK";
   static const String settingThemeLight = "LIGHT";
@@ -805,7 +806,7 @@ class SettingsProvider with ChangeNotifier {
     final List<String> notifs =
         await prefs.getStringList(settingNLHistory) ?? <String>[];
 
-    if (notifs.length > 15) {
+    if (notifs.length > settingNLHistoryLength) {
       notifs.removeAt(0);
     }
 

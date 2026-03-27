@@ -184,12 +184,12 @@ class _SettingsNotificationsState extends State<SettingsNotifications> {
               closedElevation: 0,
               closedBuilder: (BuildContext context, Function openContainer) =>
                   ListTile(
-                    title: const Text("Notification History"),
+                    title: Text(S.of(context).settingsNLHistory),
                     leading: const CircleAvatar(
                       child: Icon(Icons.notifications),
                     ),
-                    subtitle: const Text(
-                      "List previous notifications",
+                    subtitle: Text(
+                      S.of(context).settingsNLHistoryShortDescription,
                       maxLines: 1,
                     ),
                     isThreeLine: false,
