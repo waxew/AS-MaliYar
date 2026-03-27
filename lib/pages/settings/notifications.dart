@@ -11,6 +11,7 @@ import 'package:waterflyiii/auth.dart';
 import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/generated/swagger_fireflyiii_api/firefly_iii.swagger.dart';
 import 'package:waterflyiii/notificationlistener.dart';
+import 'package:waterflyiii/pages/transaction.dart';
 import 'package:waterflyiii/settings.dart';
 
 class SettingsNotifications extends StatefulWidget {
@@ -682,9 +683,19 @@ class _NotificationHistoryState extends State<NotificationHistory> {
                                 margin: const EdgeInsets.only(bottom: 8),
                                 child: InkWell(
                                   onTap: n.reason == null
-                                      ? () {
-                                          debugPrint(":TODO: stuff");
-                                        }
+                                      ? () => showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) =>
+                                              TransactionPage(
+                                                notification:
+                                                    NotificationTransaction(
+                                                      n.appName,
+                                                      n.title,
+                                                      n.body,
+                                                      n.time,
+                                                    ),
+                                              ),
+                                        )
                                       : null,
                                   child: Padding(
                                     padding: const EdgeInsetsGeometry.all(12),
@@ -699,11 +710,27 @@ class _NotificationHistoryState extends State<NotificationHistory> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
-                                              Text(
-                                                "${snapshot.data!.appName}・${DateFormat.yMd().add_Hms().format(n.time)}",
-                                                style: Theme.of(
-                                                  context,
-                                                ).textTheme.bodySmall,
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: <Widget>[
+                                                  Text(
+                                                    "${snapshot.data!.appName}・${DateFormat.yMd().add_Hms().format(n.time)}",
+                                                    style: Theme.of(
+                                                      context,
+                                                    ).textTheme.bodySmall,
+                                                  ),
+                                                  n.reason == null
+                                                      ? Icon(
+                                                          Icons
+                                                              .touch_app_outlined,
+                                                          color: Theme.of(context)
+                                                              .colorScheme
+                                                              .outlineVariant,
+                                                        )
+                                                      : const SizedBox.shrink(),
+                                                ],
                                               ),
                                               Text(
                                                 n.title,
