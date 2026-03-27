@@ -79,6 +79,35 @@ enum TransactionDateFilter {
   all,
 }
 
+class PastNotification {
+  PastNotification(this.appName, this.title, this.body, this.time, this.reason);
+
+  final String appName;
+  final String title;
+  final String body;
+  final DateTime time;
+  PastNotificationMissedReasons? reason;
+
+  PastNotification.fromJson(Map<String, dynamic> json)
+    : appName = json['appName'],
+      title = json['title'],
+      body = json['body'],
+      time = DateTime.fromMillisecondsSinceEpoch(json['time']),
+      reason = (json['reason'] != null && json['reason'] != '')
+          ? PastNotificationMissedReasons.values[json['reason']]
+          : null;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'appName': appName,
+    'title': title,
+    'body': body,
+    'time': time.millisecondsSinceEpoch,
+    'reason': reason?.index,
+  };
+}
+
+enum PastNotificationMissedReasons { noMoney, noCurrency, appNotUsed }
+
 class SettingsBitmask {
   int _value;
 
@@ -131,6 +160,8 @@ class SettingsProvider with ChangeNotifier {
   static const String settingNLKnownApps = "NL_KNOWNAPPS";
   static const String settingNLUsedApps = "NL_USEDAPPS";
   static const String settingNLAppPrefix = "NL_APP_";
+  static const String settingNLHistory = "NL_HISTORY";
+  static const int settingNLHistoryLength = 15;
   static const String settingTheme = "THEME";
   static const String settingThemeDark = "DARK";
   static const String settingThemeLight = "LIGHT";
@@ -580,7 +611,6 @@ class SettingsProvider with ChangeNotifier {
     _notificationApps = apps;
 
     log.finest(() => "notify SettingsProvider->notificationRemoveUsedApp()");
-
     notifyListeners();
     return true;
   }
@@ -769,6 +799,32 @@ class SettingsProvider with ChangeNotifier {
 
     log.finest(() => "notify SettingsProvider->setTransactionDateFilter()");
     notifyListeners();
+  }
+
+  Future<void> notificationHistoryAdd(PastNotification notification) async {
+    final SharedPreferencesAsync prefs = SharedPreferencesAsync();
+    final List<String> notifs =
+        await prefs.getStringList(settingNLHistory) ?? <String>[];
+
+    if (notifs.length > settingNLHistoryLength) {
+      notifs.removeAt(0);
+    }
+
+    notifs.add(jsonEncode(notification));
+
+    return prefs.setStringList(settingNLHistory, notifs);
+  }
+
+  Future<List<PastNotification>> notificationHistoryGet() async {
+    final List<String> notifsStr =
+        await SharedPreferencesAsync().getStringList(settingNLHistory) ??
+        <String>[];
+
+    final List<PastNotification> notifs = notifsStr
+        .map((String e) => PastNotification.fromJson(jsonDecode(e)))
+        .toList();
+
+    return notifs;
   }
 }
 

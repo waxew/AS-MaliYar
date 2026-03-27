@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:appcheck/appcheck.dart';
 import 'package:chopper/chopper.dart' show Response;
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:waterflyiii/auth.dart';
 import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/generated/swagger_fireflyiii_api/firefly_iii.swagger.dart';
 import 'package:waterflyiii/notificationlistener.dart';
+import 'package:waterflyiii/pages/settings/notifications/history.dart';
 import 'package:waterflyiii/settings.dart';
 
 class SettingsNotifications extends StatefulWidget {
@@ -173,6 +175,27 @@ class _SettingsNotificationsState extends State<SettingsNotifications> {
           if (status != null &&
               status!.serviceRunning &&
               status!.notificationPermission) ...<Widget>[
+            const Divider(),
+            OpenContainer(
+              openBuilder: (BuildContext context, Function closedContainer) =>
+                  const NotificationHistory(),
+              openColor: Theme.of(context).cardColor,
+              closedColor: Theme.of(context).cardColor,
+              closedElevation: 0,
+              closedBuilder: (BuildContext context, Function openContainer) =>
+                  ListTile(
+                    title: Text(S.of(context).settingsNLHistory),
+                    leading: const CircleAvatar(
+                      child: Icon(Icons.notifications),
+                    ),
+                    subtitle: Text(
+                      S.of(context).settingsNLHistoryShortDescription,
+                      maxLines: 1,
+                    ),
+                    isThreeLine: false,
+                    onTap: () => openContainer(),
+                  ),
+            ),
             const Divider(),
             ListTile(
               title: Text(S.of(context).settingsNLAppAdd),
