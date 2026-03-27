@@ -1219,7 +1219,7 @@ class _TransactionPageState extends State<TransactionPage>
         ),
       ),
     );
-    if (context.read<LayoutProvider>().currentSize >= ScreenSize.expanded &&
+    if (context.read<LayoutProvider>().currentSize >= .expanded &&
         _newTX &&
         !widget.clone) {
       // Via FAB opened in a dialog

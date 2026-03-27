@@ -98,18 +98,18 @@ class CurrencyDialogOption extends StatelessWidget {
         Navigator.pop(context, currency);
       },
       /*child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: .stretch,
         children: <Widget>[
           Text(
             currencyWithSymbol ?? currency.attributes.code,
             style: const TextStyle(
-              fontWeight: FontWeight.bold,
+              fontWeight: .bold,
             ),
           ),
           Text(currency.attributes.name),
         ],
       ),*/
-      padding: EdgeInsets.zero,
+      padding: .zero,
       child: */ ListTile(
       leading: CircleAvatar(child: Text(optionCurrency.attributes.symbol)),
       title: Text(optionCurrency.attributes.code),

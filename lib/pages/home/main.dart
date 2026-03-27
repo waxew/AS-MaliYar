@@ -771,7 +771,7 @@ class _HomeMainState extends State<HomeMain>
                         const SizedBox.shrink(),
                         Text(
                           S.of(context).generalSum,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: .bold),
                         ),
                         ...lastMonthsIncome.entries.toList().reversed.map((
                           MapEntry<DateTime, InsightTotalEntry> e,
@@ -973,7 +973,7 @@ class _HomeMainState extends State<HomeMain>
                           }
                           return Card(
                             clipBehavior: .hardEdge,
-                            margin: const EdgeInsets.fromLTRB(4, 4, 4, 12),
+                            margin: const .fromLTRB(4, 4, 4, 12),
                             child: Column(
                               crossAxisAlignment: .start,
                               children: <Widget>[
@@ -1195,7 +1195,7 @@ class BudgetList extends StatelessWidget {
               );
               stackWidgets.add(
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: .spaceBetween,
                   children: <Widget>[
                     Text(
                       S.of(context).numPercent(spent / available),
@@ -1275,7 +1275,7 @@ class BillList extends StatelessWidget {
 
     return SizedBox(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        padding: const .fromLTRB(12, 0, 12, 12),
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             final List<Widget> widgets = <Widget>[];
@@ -1423,7 +1423,7 @@ class ChartCard extends StatelessWidget {
                   summaryWidgets.add(const Divider(indent: 16, endIndent: 16));
                   summaryWidgets.add(
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                      padding: const .fromLTRB(12, 0, 12, 12),
                       child: summary!(),
                     ),
                   );

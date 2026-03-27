@@ -51,8 +51,7 @@ class _HomeBalanceState extends State<HomeBalance>
       child: FutureBuilder<AccountArray>(
         future: _fetchAccounts(),
         builder: (BuildContext context, AsyncSnapshot<AccountArray> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done &&
-              snapshot.hasData) {
+          if (snapshot.connectionState == .done && snapshot.hasData) {
             return ListView(
               cacheExtent: 1000,
               padding: const .all(8),

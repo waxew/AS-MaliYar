@@ -156,8 +156,7 @@ class _SummaryChartPopupState extends State<SummaryChartPopup> {
                 BuildContext context,
                 AsyncSnapshot<List<ChartDataSet>> snapshot,
               ) {
-                if (snapshot.connectionState == ConnectionState.done &&
-                    snapshot.hasData) {
+                if (snapshot.connectionState == .done && snapshot.hasData) {
                   final List<CartesianSeries<TimeSeriesChart, DateTime>>
                   chartData = <CartesianSeries<TimeSeriesChart, DateTime>>[];
 

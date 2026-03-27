@@ -146,7 +146,7 @@ Widget accountRowBuilder(
               text: currency.fmt(currentAmount),
               style: Theme.of(context).textTheme.titleMedium!.copyWith(
                 color: (currentAmount < 0) ? Colors.red : Colors.green,
-                fontWeight: FontWeight.bold,
+                fontWeight: .bold,
                 fontFeatures: const <FontFeature>[.tabularFigures()],
               ),
             ),

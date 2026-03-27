@@ -359,7 +359,7 @@ class _BillsPageState extends State<BillsPage>
                 S.of(context).billsLayoutGroupTitle,
                 style: Theme.of(
                   context,
-                ).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold),
+                ).textTheme.bodyLarge!.copyWith(fontWeight: .bold),
               ),
               subtitle: Text(
                 S.of(context).billsLayoutGroupSubtitle,

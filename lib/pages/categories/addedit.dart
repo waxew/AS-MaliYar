@@ -136,10 +136,9 @@ class _CategoryAddEditDialogState extends State<CategoryAddEditDialog> {
             if (!resp.isSuccessful || resp.body == null) {
               late String error;
               try {
-                final ValidationErrorResponse valError =
-                    ValidationErrorResponse.fromJson(
-                      json.decode(resp.error.toString()),
-                    );
+                final ValidationErrorResponse valError = .fromJson(
+                  json.decode(resp.error.toString()),
+                );
                 error =
                     valError.message ??
                     (context.mounted

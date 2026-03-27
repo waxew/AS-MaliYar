@@ -207,10 +207,9 @@ void nlCallback() {
         );
         if (!resp.isSuccessful || resp.body == null) {
           try {
-            final ValidationErrorResponse valError =
-                ValidationErrorResponse.fromJson(
-                  json.decode(resp.error.toString()),
-                );
+            final ValidationErrorResponse valError = .fromJson(
+              json.decode(resp.error.toString()),
+            );
             throw Exception("nlCallBack PostTransaction: ${valError.message}");
           } catch (_) {
             throw Exception("nlCallBack PostTransaction: unknown");
@@ -295,9 +294,7 @@ Future<void> nlNotificationTap(
   await showDialog(
     context: navigatorKey.currentState!.context,
     builder: (BuildContext context) => TransactionPage(
-      notification: NotificationTransaction.fromJson(
-        jsonDecode(notificationResponse.payload!),
-      ),
+      notification: .fromJson(jsonDecode(notificationResponse.payload!)),
     ),
   );
 }

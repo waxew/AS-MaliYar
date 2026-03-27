@@ -574,8 +574,7 @@ class _PiggyDetailsState extends State<PiggyDetails> {
                   BuildContext context,
                   AsyncSnapshot<List<PiggyBankEventRead>> snapshot,
                 ) {
-                  if (snapshot.connectionState == ConnectionState.done &&
-                      snapshot.hasData) {
+                  if (snapshot.connectionState == .done && snapshot.hasData) {
                     if (snapshot.data!.isEmpty) {
                       return Padding(
                         padding: const .fromLTRB(24, 12, 24, 0),

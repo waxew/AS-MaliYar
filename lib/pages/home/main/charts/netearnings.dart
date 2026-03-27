@@ -46,7 +46,7 @@ class NetEarningsChart extends StatelessWidget {
     expenseChartData = expenseChartData.reversed.toList();
 
     return Padding(
-      padding: const EdgeInsets.only(left: 12),
+      padding: const .only(left: 12),
       child: charts.BarChart(
         <charts.Series<LabelAmountChart, String>>[
           charts.Series<LabelAmountChart, String>(
@@ -186,7 +186,7 @@ class _NetEarningsChartPopupState extends State<NetEarningsChartPopup> {
         ],
       ),
       clipBehavior: .hardEdge,
-      insetPadding: const EdgeInsets.all(12),
+      insetPadding: const .all(12),
       children: <Widget>[
         FutureBuilder<Map<String, double>>(
           future: _fetchData(context),
@@ -195,8 +195,7 @@ class _NetEarningsChartPopupState extends State<NetEarningsChartPopup> {
                 BuildContext context,
                 AsyncSnapshot<Map<String, double>> snapshot,
               ) {
-                if (snapshot.connectionState == ConnectionState.done &&
-                    snapshot.hasData) {
+                if (snapshot.connectionState == .done && snapshot.hasData) {
                   final List<WFChartData> chartData = <WFChartData>[];
 
                   double min = 0;
@@ -233,7 +232,7 @@ class _NetEarningsChartPopupState extends State<NetEarningsChartPopup> {
                             primaryXAxis: CategoryAxis(
                               labelRotation: 90,
                               labelStyle: Theme.of(context).textTheme.labelSmall
-                                  ?.copyWith(fontWeight: FontWeight.normal),
+                                  ?.copyWith(fontWeight: .normal),
                               axisLine: AxisLine(
                                 color: Theme.of(
                                   context,
@@ -245,7 +244,7 @@ class _NetEarningsChartPopupState extends State<NetEarningsChartPopup> {
                               labelStyle: Theme.of(context)
                                   .textTheme
                                   .labelMedium
-                                  ?.copyWith(fontWeight: FontWeight.normal),
+                                  ?.copyWith(fontWeight: .normal),
                               axisLine: AxisLine(
                                 color: Theme.of(
                                   context,
@@ -309,7 +308,7 @@ class _NetEarningsChartPopupState extends State<NetEarningsChartPopup> {
                         ),
                       ),
                       /*Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                    padding: const .fromLTRB(12, 12, 12, 0),
                     child: ValueListenableBuilder<DateTime?>(
                       valueListenable: date,
                       builder: (BuildContext context, DateTime? value,

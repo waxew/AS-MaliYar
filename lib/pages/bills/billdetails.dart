@@ -201,7 +201,7 @@ class _BillDetailsState extends State<BillDetails> {
           future: _fetchFullTx(transaction.id),
           builder:
               (BuildContext context, AsyncSnapshot<TransactionRead> snapshot) {
-                if (snapshot.connectionState == ConnectionState.done &&
+                if (snapshot.connectionState == .done &&
                     snapshot.hasData &&
                     snapshot.data != null) {
                   return TransactionPage(transaction: snapshot.data);
@@ -239,7 +239,7 @@ class _BillDetailsState extends State<BillDetails> {
             text: _getTransactionAmount(transaction),
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
               color: Colors.red,
-              fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+              fontFeatures: const <FontFeature>[.tabularFigures()],
             ),
             children: <InlineSpan>[
               const TextSpan(text: "\n"),

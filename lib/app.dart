@@ -69,7 +69,7 @@ class _WaterflyAppState extends State<WaterflyApp> {
         if ((details?.didNotificationLaunchApp ?? false) &&
             (details?.notificationResponse?.payload?.isNotEmpty ?? false)) {
           log.info("Was launched from notification!");
-          _notificationPayload = NotificationTransaction.fromJson(
+          _notificationPayload = .fromJson(
             jsonDecode(details!.notificationResponse!.payload!),
           );
         }

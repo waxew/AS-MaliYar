@@ -343,7 +343,7 @@ class FireflyService with ChangeNotifier {
         tzUri,
         headers: user!.headers(),
       );
-      final APITZReply reply = APITZReply.fromJson(json.decode(response.body));
+      final APITZReply reply = .fromJson(json.decode(response.body));
       tzHandler = TimeZoneHandler(reply.data.value);
     } finally {
       client.close();

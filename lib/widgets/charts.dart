@@ -57,7 +57,7 @@ class TextSymbolRenderer extends charts.CircleSymbolRenderer {
     this.printFunc,
     this.context, {
     this.marginBottom = 8,
-    this.padding = const EdgeInsets.all(8),
+    this.padding = const .all(8),
   });
 
   final String Function() printFunc;

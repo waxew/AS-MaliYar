@@ -42,7 +42,7 @@ class CategoryChart extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(left: 12),
+      padding: const .only(left: 12),
       child: SfCircularChart(
         legend: Legend(
           isVisible: true,

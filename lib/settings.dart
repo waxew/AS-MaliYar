@@ -638,7 +638,7 @@ class SettingsProvider with ChangeNotifier {
         ) ??
         "";
     try {
-      return NotificationAppSettings.fromJson(jsonDecode(json));
+      return .fromJson(jsonDecode(json));
     } on FormatException catch (_) {
       return NotificationAppSettings(packageName);
     }
