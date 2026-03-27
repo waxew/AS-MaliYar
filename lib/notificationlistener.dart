@@ -89,8 +89,21 @@ void nlCallback() {
     if (evt.state == NotificationState.remove) {
       return;
     }
+
+    // Passed initial checks
+    final SettingsProvider settings = SettingsProvider();
+    final PastNotification notif = PastNotification(
+      evt.packageName!,
+      evt.title ?? "",
+      evt.text ?? "",
+      DateTime.now(),
+      null,
+    );
+
     final Iterable<RegExpMatch> matches = rFindMoney.allMatches(evt.text ?? "");
     if (matches.isEmpty) {
+      notif.reason = PastNotificationMissedReasons.noMoney;
+      await settings.notificationHistoryAdd(notif);
       log.finer(() => "nlCallback(${evt.packageName}): no money found");
       return;
     }
@@ -104,20 +117,26 @@ void nlCallback() {
       }
     }
     if (!validMatch) {
+      notif.reason = PastNotificationMissedReasons.noCurrency;
+      await settings.notificationHistoryAdd(notif);
       log.finer(
         () => "nlCallback(${evt.packageName}): no money with currency found",
       );
       return;
     }
 
-    final SettingsProvider settings = SettingsProvider();
+    // Valid notification
     await settings.notificationAddKnownApp(evt.packageName!);
 
     if (!(await settings.notificationUsedApps()).contains(evt.packageName)) {
+      notif.reason = PastNotificationMissedReasons.appNotUsed;
+      await settings.notificationHistoryAdd(notif);
       log.finer(() => "nlCallback(${evt.packageName}): app not used");
       return;
     }
 
+    // Passed, add tx/show add notification
+    await settings.notificationHistoryAdd(notif);
     final NotificationAppSettings appSettings = await settings
         .notificationGetAppSettings(evt.packageName!);
     bool showNotification = true;
@@ -168,7 +187,7 @@ void nlCallback() {
           groupTitle: null,
           transactions: <TransactionSplitStore>[
             TransactionSplitStore(
-              type: TransactionTypeProperty.withdrawal,
+              type: .withdrawal,
               date: date,
               amount: amount.toString(),
               description: evt.title!,
@@ -188,10 +207,9 @@ void nlCallback() {
         );
         if (!resp.isSuccessful || resp.body == null) {
           try {
-            final ValidationErrorResponse valError =
-                ValidationErrorResponse.fromJson(
-                  json.decode(resp.error.toString()),
-                );
+            final ValidationErrorResponse valError = .fromJson(
+              json.decode(resp.error.toString()),
+            );
             throw Exception("nlCallBack PostTransaction: ${valError.message}");
           } catch (_) {
             throw Exception("nlCallBack PostTransaction: unknown");
@@ -209,8 +227,8 @@ void nlCallback() {
                 'Transaction from Notification Created',
                 channelDescription:
                     'Notification that a Transaction has been created from another Notification.',
-                importance: Importance.low, // Android 8.0 and higher
-                priority: Priority.low, // Android 7.1 and lower
+                importance: .low, // Android 8.0 and higher
+                priority: .low, // Android 7.1 and lower
               ),
             ),
             payload: "",
@@ -239,8 +257,8 @@ void nlCallback() {
               'Create Transaction from Notification',
               channelDescription:
                   'Notification asking to create a transaction from another Notification.',
-              importance: Importance.low, // Android 8.0 and higher
-              priority: Priority.low, // Android 7.1 and lower
+              importance: .low, // Android 8.0 and higher
+              priority: .low, // Android 7.1 and lower
             ),
           ),
           payload: jsonEncode(
@@ -276,9 +294,7 @@ Future<void> nlNotificationTap(
   await showDialog(
     context: navigatorKey.currentState!.context,
     builder: (BuildContext context) => TransactionPage(
-      notification: NotificationTransaction.fromJson(
-        jsonDecode(notificationResponse.payload!),
-      ),
+      notification: .fromJson(jsonDecode(notificationResponse.payload!)),
     ),
   );
 }

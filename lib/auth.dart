@@ -160,10 +160,7 @@ class AuthCredentials {
 
 http.Client get httpClient => Platform.isAndroid
     ? CronetClient.fromCronetEngine(
-        CronetEngine.build(
-          cacheMode: CacheMode.memory,
-          cacheMaxSize: 2 * 1024 * 1024,
-        ),
+        CronetEngine.build(cacheMode: .memory, cacheMaxSize: 2 * 1024 * 1024),
         closeEngine: false,
       )
     : Platform.isIOS
@@ -451,7 +448,7 @@ class FireflyService with ChangeNotifier {
         tzUri,
         headers: nextUser.headers(),
       );
-      final APITZReply reply = APITZReply.fromJson(json.decode(response.body));
+      final APITZReply reply = .fromJson(json.decode(response.body));
       nextTzHandler = TimeZoneHandler(reply.data.value);
     } finally {
       client.close();

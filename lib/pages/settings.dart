@@ -42,7 +42,7 @@ class SettingsPageState extends State<SettingsPage>
     final SettingsProvider settings = context.read<SettingsProvider>();
 
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const .symmetric(horizontal: 24),
       primary: false,
       children: <Widget>[
         ListTile(
@@ -75,7 +75,7 @@ class SettingsPageState extends State<SettingsPage>
           builder: (BuildContext context, AsyncSnapshot<CorePalette?> snapshot) {
             String dynamicColor = "";
             bool dynamicColorAvailable = false;
-            if (snapshot.connectionState == ConnectionState.done &&
+            if (snapshot.connectionState == .done &&
                 snapshot.hasData &&
                 snapshot.data != null) {
               // Dynamic color support available
@@ -183,7 +183,7 @@ class SettingsPageState extends State<SettingsPage>
                 msg.showSnackBar(
                   SnackBar(
                     content: Text(l10n.errorUnknown),
-                    behavior: SnackBarBehavior.floating,
+                    behavior: .floating,
                   ),
                 );
                 return;
@@ -209,8 +209,7 @@ class SettingsPageState extends State<SettingsPage>
                   final S l10n = S.of(context);
 
                   late String subtitle;
-                  if (snapshot.connectionState == ConnectionState.done &&
-                      snapshot.hasData) {
+                  if (snapshot.connectionState == .done && snapshot.hasData) {
                     if (!snapshot.data!.servicePermission ||
                         !snapshot.data!.notificationPermission) {
                       subtitle = l10n.settingsNLPermissionNotGranted;

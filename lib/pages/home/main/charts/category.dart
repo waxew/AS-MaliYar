@@ -42,17 +42,17 @@ class CategoryChart extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(left: 12),
+      padding: const .only(left: 12),
       child: SfCircularChart(
         legend: Legend(
           isVisible: true,
-          position: LegendPosition.right,
+          position: .right,
           itemPadding: 4,
           textStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
-            fontWeight: FontWeight.normal,
+            fontWeight: .normal,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          alignment: ChartAlignment.center,
+          alignment: .center,
           isResponsive: false,
         ),
         series: <CircularSeries<LabelAmountChart, String>>[
@@ -65,7 +65,7 @@ class CategoryChart extends StatelessWidget {
             dataLabelSettings: DataLabelSettings(
               isVisible: true,
               textStyle: Theme.of(context).textTheme.labelSmall!.copyWith(
-                fontWeight: FontWeight.normal,
+                fontWeight: .normal,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               connectorLineSettings: ConnectorLineSettings(
@@ -110,7 +110,7 @@ class CategoryChart extends StatelessWidget {
           ),
         ],
         palette: possibleChartColorsDart,
-        margin: EdgeInsets.zero,
+        margin: .zero,
       ),
     );
   }

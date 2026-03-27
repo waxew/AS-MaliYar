@@ -30,11 +30,11 @@ class LayoutProvider with ChangeNotifier {
 
   ScreenSize getSize(double width) {
     if (width < 600) {
-      return ScreenSize.compact;
+      return .compact;
     } else if (width < 840) {
-      return ScreenSize.medium;
+      return .medium;
     } else {
-      return ScreenSize.expanded;
+      return .expanded;
     }
   }
 

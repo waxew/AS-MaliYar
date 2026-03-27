@@ -1260,6 +1260,36 @@ abstract class S {
   /// **'Keep note field empty'**
   String get settingsNLEmptyNote;
 
+  /// Label: Notification History view
+  ///
+  /// In en, this message translates to:
+  /// **'Notification History'**
+  String get settingsNLHistory;
+
+  /// Notification history is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications recorded so far.'**
+  String get settingsNLHistoryEmpty;
+
+  /// Long description of the notification history feature.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a history of the last {notificationHistorySize} notifications received by the app. Additionally, you can create transactions from (valid) notifications or see the reason why a notification could not be processed.'**
+  String settingsNLHistoryLongDescription(int notificationHistorySize);
+
+  /// Reason why a notification was not selected. Valid reasons: noMoney (no monetary value found in transaction), noCurrency (no valid currency found in transaction), appNotUsed (app not on the list)
+  ///
+  /// In en, this message translates to:
+  /// **'Notification skipped: {reason, select, noMoney{No monetary value found} noCurrency{No currency found} appNotUsed{App not listened to} other{Unknown reason}}.'**
+  String settingsNLHistoryRejectedReason(String reason);
+
+  /// Short description of the notification history feature (for the settings navigation)
+  ///
+  /// In en, this message translates to:
+  /// **'List previous notifications'**
+  String get settingsNLHistoryShortDescription;
+
   /// Indicates user should tap the text to grant certain permissions (notification access).
   ///
   /// In en, this message translates to:

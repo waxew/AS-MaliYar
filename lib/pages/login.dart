@@ -87,28 +87,28 @@ class _LoginPageState extends State<LoginPage> {
           key: _formKey,
           child: ListView(
             shrinkWrap: true,
-            padding: const EdgeInsets.all(24),
+            padding: const .all(24),
             children: <Widget>[
               Column(
                 children: <Widget>[
                   const SizedBox(height: 20),
                   const AppLogo(),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
+                    padding: const .fromLTRB(0, 20, 0, 20),
                     child: Text(
                       S.of(context).loginWelcome,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ),
                   SizedBox(
-                    width: double.infinity,
+                    width: .infinity,
                     child: Card(
                       elevation: 0,
                       color: Theme.of(
                         context,
                       ).colorScheme.surfaceContainerHighest,
                       child: Padding(
-                        padding: const EdgeInsets.all(12),
+                        padding: const .all(12),
                         child: Text(
                           S.of(context).loginAbout,
                           style: const TextStyle(height: 2),
@@ -294,7 +294,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 12),
                   OverflowBar(
-                    alignment: MainAxisAlignment.end,
+                    alignment: .end,
                     spacing: 12,
                     overflowSpacing: 12,
                     children: <Widget>[
