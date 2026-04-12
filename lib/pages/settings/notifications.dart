@@ -184,9 +184,7 @@ class _SettingsNotificationsState extends State<SettingsNotifications> {
               closedBuilder: (BuildContext context, Function openContainer) =>
                   ListTile(
                     title: Text(S.of(context).settingsNLHistory),
-                    leading: const CircleAvatar(
-                      child: Icon(Icons.notifications),
-                    ),
+                    leading: const CircleAvatar(child: Icon(Icons.history)),
                     subtitle: Text(
                       S.of(context).settingsNLHistoryShortDescription,
                       maxLines: 1,
