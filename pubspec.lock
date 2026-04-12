@@ -69,10 +69,10 @@ packages:
     dependency: "direct main"
     description:
       name: badges
-      sha256: a7b6bbd60dce418df0db3058b53f9d083c22cdb5132a052145dc267494df0b84
+      sha256: cf1c88fb3777df69ccd630b80de5267f54efa4a39381b0404a7c03d56cb7c041
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.2"
+    version: "3.2.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -649,10 +649,10 @@ packages:
     dependency: transitive
     description:
       name: image_picker_android
-      sha256: "9eae0cbd672549dacc18df855c2a23782afe4854ada5190b7d63b30ee0b0d3fd"
+      sha256: "66810af8e99b2657ee98e5c6f02064f69bb63f7a70e343937f70946c5f8c6622"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.13+15"
+    version: "0.8.13+16"
   image_picker_for_web:
     dependency: transitive
     description:
@@ -1083,10 +1083,10 @@ packages:
     dependency: transitive
     description:
       name: qs_dart
-      sha256: "92ac0f9e5cebdf9c44b4eeea3cc6014e74f1fe8b7f7610b427c9377369b2e23e"
+      sha256: "7b9707b495b415ba96fa607b0f5791c618c8d99b1797b043fd1fc3ae8f24e71d"
       url: "https://pub.dev"
     source: hosted
-    version: "1.7.3"
+    version: "1.7.4"
   quick_actions:
     dependency: "direct main"
     description:
@@ -1336,18 +1336,18 @@ packages:
     dependency: "direct main"
     description:
       name: syncfusion_flutter_charts
-      sha256: "95eb44257e08dd769e449cd445a35ff38749337a7a37e47b44c30a45d357edb9"
+      sha256: "6da1e92f98793adde04b53ac2e739adc3c589bfc10a89b999b8463ddb2e35167"
       url: "https://pub.dev"
     source: hosted
-    version: "33.1.46"
+    version: "33.1.47"
   syncfusion_flutter_core:
     dependency: transitive
     description:
       name: syncfusion_flutter_core
-      sha256: "6d2505a8a8f9fcc6a070e07715d7fab06868725bb15b5eaf9432ece807ccd93b"
+      sha256: de852c5edf050171c9eebda54a6454fce3a259278cbe687c2c231ed0c2d9d4f5
       url: "https://pub.dev"
     source: hosted
-    version: "33.1.46"
+    version: "33.1.47"
   term_glyph:
     dependency: transitive
     description:
@@ -1472,10 +1472,10 @@ packages:
     dependency: transitive
     description:
       name: vector_graphics
-      sha256: "7076216a10d5c390315fbe536a30f1254c341e7543e6c4c8a815e591307772b1"
+      sha256: "81da85e9ca8885ade47f9685b953cb098970d11be4821ac765580a6607ea4373"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.20"
+    version: "1.1.21"
   vector_graphics_codec:
     dependency: transitive
     description:
