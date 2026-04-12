@@ -614,7 +614,20 @@ class SFa extends S {
       'برای استفاده مؤثر از Waterfly III به سرور خود با نمونه Firefly III یا افزونه Firefly III برای Home Assistant نیاز دارید.\n\nلطفاً URL کامل و همچنین یک نشانه دسترسی شخصی (تنظیمات -> نمایه -> OAuth -> رمز دسترسی شخصی) را در زیر وارد کنید.\n';
 
   @override
+  String get loginFormButtonHideHeaders => 'Hide Headers';
+
+  @override
+  String get loginFormButtonShowHeaders => 'Custom Headers';
+
+  @override
   String get loginFormLabelAPIKey => 'کلید API معتبر\n';
+
+  @override
+  String get loginFormLabelHeaders => 'Custom Headers (optional)';
+
+  @override
+  String get loginFormLabelHeadersHelp =>
+      'One per line, format: HeaderName: value';
 
   @override
   String get loginFormLabelHost => 'URL میزبان\n';
@@ -799,6 +812,12 @@ class SFa extends S {
 
   @override
   String get settingsNotificationListener => 'سرویس شنونده اعلان\n';
+
+  @override
+  String get settingsServerConnection => 'Server Connection';
+
+  @override
+  String get settingsServerConnectionUpdated => 'Connection settings updated.';
 
   @override
   String get settingsTheme => 'تم برنامه\n';

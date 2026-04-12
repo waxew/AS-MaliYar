@@ -38,6 +38,8 @@ class _LoginPageState extends State<LoginPage> {
 
   final TextEditingController _hostTextController = TextEditingController();
   final TextEditingController _keyTextController = TextEditingController();
+  final TextEditingController _customHeadersTextController =
+      TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   String _uriScheme = UriScheme.https;
@@ -45,6 +47,7 @@ class _LoginPageState extends State<LoginPage> {
   ErrorIcon _hostErrorIcon = const ErrorIcon(false);
   String? _keyError;
   ErrorIcon _keyErrorIcon = const ErrorIcon(false);
+  bool _showCustomHeadersField = false;
   //bool _formSubmitted = false;
 
   final FocusNode _hostFocusNode = FocusNode();
@@ -60,6 +63,7 @@ class _LoginPageState extends State<LoginPage> {
   void dispose() {
     _hostTextController.dispose();
     _keyTextController.dispose();
+    _customHeadersTextController.dispose();
     _hostFocusNode.dispose();
 
     super.dispose();
@@ -265,6 +269,29 @@ class _LoginPageState extends State<LoginPage> {
                       },
                     ),
                   ),
+                  AnimatedHeight(
+                    child: (_showCustomHeadersField)
+                        ? const SizedBox(height: 12)
+                        : const SizedBox.shrink(),
+                  ),
+                  AnimatedHeight(
+                    child: _showCustomHeadersField
+                        ? TextFormField(
+                            controller: _customHeadersTextController,
+                            decoration: InputDecoration(
+                              filled: true,
+                              labelText: S.of(context).loginFormLabelHeaders,
+                              helperText: S
+                                  .of(context)
+                                  .loginFormLabelHeadersHelp,
+                            ),
+                            minLines: 2,
+                            maxLines: 5,
+                            autocorrect: false,
+                            autovalidateMode: AutovalidateMode.disabled,
+                          )
+                        : const SizedBox.shrink(),
+                  ),
                   const SizedBox(height: 12),
                   OverflowBar(
                     alignment: .end,
@@ -284,6 +311,18 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         child: Text(S.of(context).formButtonHelp),
                       ),
+                      OutlinedButton(
+                        onPressed: () {
+                          setState(() {
+                            _showCustomHeadersField = !_showCustomHeadersField;
+                          });
+                        },
+                        child: Text(
+                          _showCustomHeadersField
+                              ? S.of(context).loginFormButtonHideHeaders
+                              : S.of(context).loginFormButtonShowHeaders,
+                        ),
+                      ),
                       FilledButton(
                         onPressed: /*_formSubmitted
                             ? null
@@ -293,12 +332,17 @@ class _LoginPageState extends State<LoginPage> {
                               (_hostError != null && _hostError!.isNotEmpty)) {
                             return;
                           }
+                          if (_showCustomHeadersField == false) {
+                            _customHeadersTextController.text = "";
+                          }
                           Navigator.push(
                             context,
                             MaterialPageRoute<Widget>(
                               builder: (BuildContext context) => SplashPage(
                                 host: _hostTextController.text,
                                 apiKey: _keyTextController.text,
+                                customHeadersRaw:
+                                    _customHeadersTextController.text,
                               ),
                             ),
                           );

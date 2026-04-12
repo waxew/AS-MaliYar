@@ -626,7 +626,20 @@ class SRu extends S {
       'Для эффективного использования Waterfly III Вам необходим собственный сервер с установленным Firefly III или аддоном Firefly III для Home Assistant.\n\nПожалуйста, введите полный URL-адрес и персональный ключ доступа (Настройки -> Профиль -> OAuth -> Персональный ключ доступа).';
 
   @override
+  String get loginFormButtonHideHeaders => 'Hide Headers';
+
+  @override
+  String get loginFormButtonShowHeaders => 'Custom Headers';
+
+  @override
   String get loginFormLabelAPIKey => 'Действительный ключ API';
+
+  @override
+  String get loginFormLabelHeaders => 'Custom Headers (optional)';
+
+  @override
+  String get loginFormLabelHeadersHelp =>
+      'One per line, format: HeaderName: value';
 
   @override
   String get loginFormLabelHost => 'URL-адрес хоста';
@@ -811,6 +824,12 @@ class SRu extends S {
 
   @override
   String get settingsNotificationListener => 'Сервис прослушивания уведомлений';
+
+  @override
+  String get settingsServerConnection => 'Server Connection';
+
+  @override
+  String get settingsServerConnectionUpdated => 'Connection settings updated.';
 
   @override
   String get settingsTheme => 'Тема приложения';

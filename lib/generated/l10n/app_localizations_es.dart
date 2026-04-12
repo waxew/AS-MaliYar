@@ -622,7 +622,20 @@ class SEs extends S {
       'Para usar Waterfly III es necesario disponer de un servidor con una instancia de Firefly III o del add-on de Firefly III para Home Assistant.\n\nPor favor, introduzca la URL completa y el token de acceso personal (Ajustes -> Perfil -> OAuth -> Token de Acceso Personal) debajo.';
 
   @override
+  String get loginFormButtonHideHeaders => 'Hide Headers';
+
+  @override
+  String get loginFormButtonShowHeaders => 'Custom Headers';
+
+  @override
   String get loginFormLabelAPIKey => 'Clave API válida';
+
+  @override
+  String get loginFormLabelHeaders => 'Custom Headers (optional)';
+
+  @override
+  String get loginFormLabelHeadersHelp =>
+      'One per line, format: HeaderName: value';
 
   @override
   String get loginFormLabelHost => 'URL del servidor';
@@ -808,6 +821,12 @@ class SEs extends S {
   @override
   String get settingsNotificationListener =>
       'Servicio de escucha de notificaciones';
+
+  @override
+  String get settingsServerConnection => 'Server Connection';
+
+  @override
+  String get settingsServerConnectionUpdated => 'Connection settings updated.';
 
   @override
   String get settingsTheme => 'Tema de la aplicación';

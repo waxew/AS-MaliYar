@@ -619,7 +619,20 @@ class SRo extends S {
       'Pentru a folosi Waterfly III în mod productiv ai nevoie de propriul server cu o instanță Firefly III sau cu suplimentul Firefly III pentru asistentul la domiciliu.\n\nVă rugăm să introduceți adresa URL completă, precum și un token personal de acces (Setări -> Profile -> OAuth -> Personal Access Token) de mai jos.';
 
   @override
+  String get loginFormButtonHideHeaders => 'Hide Headers';
+
+  @override
+  String get loginFormButtonShowHeaders => 'Custom Headers';
+
+  @override
   String get loginFormLabelAPIKey => 'Cheie API validă';
+
+  @override
+  String get loginFormLabelHeaders => 'Custom Headers (optional)';
+
+  @override
+  String get loginFormLabelHeadersHelp =>
+      'One per line, format: HeaderName: value';
 
   @override
   String get loginFormLabelHost => 'URL Host';
@@ -807,6 +820,12 @@ class SRo extends S {
   @override
   String get settingsNotificationListener =>
       'Serviciul de clasificare a notificărilor';
+
+  @override
+  String get settingsServerConnection => 'Server Connection';
+
+  @override
+  String get settingsServerConnectionUpdated => 'Connection settings updated.';
 
   @override
   String get settingsTheme => 'Tema aplicației';
