@@ -415,8 +415,7 @@ class _AttachmentDialogState extends State<AttachmentDialog>
           ),
           FilledButton(
             onPressed: () async {
-              final FilePickerResult? file = await FilePicker.platform
-                  .pickFiles();
+              final FilePickerResult? file = await FilePicker.pickFiles();
               if (file == null || file.files.first.path == null) {
                 return;
               }
