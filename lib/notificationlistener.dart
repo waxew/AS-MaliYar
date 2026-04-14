@@ -85,8 +85,7 @@ void nlCallback() {
     if (evt == null || evt.packageName == null) {
       return;
     }
-    if ((evt.packageName?.startsWith("com.dreautall.waterflyiii") ?? false) ||
-        (evt.packageName?.startsWith("com.waterflyiii.test") ?? false)) {
+    if (evt.packageName?.startsWith("com.dreautall.waterflyiii") ?? false) {
       return;
     }
     // if (evt.state == NotificationState.remove) {
@@ -96,16 +95,17 @@ void nlCallback() {
 
     // Passed initial checks
     final SettingsProvider settings = SettingsProvider();
+    final String notifText = evt.text ?? "";
     final PastNotification notif = PastNotification(
       evt.packageName!,
       evt.title ?? "",
-      evt.text ?? "",
+      notifText,
       DateTime.now(),
       null,
     );
 
     bool isPotentialMatch = false;
-    if (evt.text?.contains(RegExp(r'\d')) ?? false) {
+    if (notifText.contains(RegExp(r'\d'))) {
       unawaited(settings.notificationAddKnownApp(evt.packageName!));
     } else {
       notif.reason = PastNotificationMissedReasons.noMoney;
@@ -118,9 +118,9 @@ void nlCallback() {
         .notificationGetAppSettings(evt.packageName!);
 
     if (appSettings.regex != null && appSettings.regex!.isNotEmpty) {
-      isPotentialMatch = RegExp(appSettings.regex!).hasMatch(text);
+      isPotentialMatch = RegExp(appSettings.regex!).hasMatch(notifText);
     } else {
-      final Iterable<RegExpMatch> matches = rFindMoney.allMatches(text);
+      final Iterable<RegExpMatch> matches = rFindMoney.allMatches(notifText);
       for (RegExpMatch match in matches) {
         if ((match.namedGroup("postCurrency")?.isNotEmpty ?? false) ||
             (match.namedGroup("preCurrency")?.isNotEmpty ?? false)) {
@@ -133,9 +133,7 @@ void nlCallback() {
     if (!isPotentialMatch) {
       notif.reason = PastNotificationMissedReasons.noCurrency; // :TODO: noMatch
       await settings.notificationHistoryAdd(notif);
-      log.finer(
-        () => "nlCallback(${evt.packageName}): no match found",
-      );
+      log.finer(() => "nlCallback(${evt.packageName}): no match found");
       return;
     }
 
@@ -166,7 +164,7 @@ void nlCallback() {
 
       (currency, amount) = await parseNotificationText(
         api,
-        evt.text ?? "",
+        notifText,
         localCurrency,
         userRegex: appSettings.regex,
       );
@@ -187,7 +185,6 @@ void nlCallback() {
               DateTime.tryParse(evt.postTime ?? "") ?? DateTime.now(),
             )
             .toLocal();
-        String note = evt.text ?? "";
 
         // Check currency
         if (currency?.id != localCurrency.id) {
@@ -207,7 +204,7 @@ void nlCallback() {
               date: date,
               amount: amount.toString(),
               description: evt.title ?? "Notification Transaction",
-              notes: note,
+              notes: notifText,
               order: 0,
               sourceId: appSettings.defaultAccountId,
             ),
@@ -279,7 +276,7 @@ void nlCallback() {
             NotificationTransaction(
               evt.packageName ?? "",
               evt.title ?? "",
-              text,
+              notifText,
               DateTime.tryParse(evt.postTime ?? "") ?? DateTime.now(),
             ),
           ),
@@ -342,7 +339,7 @@ Future<(CurrencyRead?, double)> parseNotificationText(
     if (matches.isNotEmpty) {
       final List<CurrencyRead> currencies =
           (await api.v1CurrenciesGet()).body!.data;
-      currencies.removeWhere((c) => c.attributes.enabled != true);
+      currencies.removeWhere((CurrencyRead c) => c.attributes.enabled != true);
       currencies.add(localCurrency);
 
       int bestMatchIndex = -1;
@@ -382,14 +379,16 @@ Future<(CurrencyRead?, double)> parseNotificationText(
       cleanAmount = cleanAmount.replaceAll(',', '.');
 
       if ('.'.allMatches(cleanAmount).length > 1) {
-        int lastDotIndex = cleanAmount.lastIndexOf('.');
-        String beforeDot = cleanAmount
+        final int lastDotIndex = cleanAmount.lastIndexOf('.');
+        final String beforeDot = cleanAmount
             .substring(0, lastDotIndex)
             .replaceAll('.', '');
-        String afterDot = cleanAmount.substring(lastDotIndex + 1);
+        final String afterDot = cleanAmount.substring(lastDotIndex + 1);
         cleanAmount = '$beforeDot.$afterDot';
-    }
+      }
+
       amount = double.tryParse(cleanAmount) ?? 0.0;
+    }
   }
 
   return (currency ?? localCurrency, amount);
