@@ -292,7 +292,6 @@ Future<void> nlInit() async {
   }
   log.finest(() => "nlInit()");
   await NotificationServicePlugin.instance.initialize(nlCallback);
-  // nlCallback(); // Avoid duplicated notification.
 }
 
 Future<void> nlNotificationTap(
@@ -343,32 +342,41 @@ Future<(CurrencyRead?, double)> parseNotificationText(
       currencies.add(localCurrency);
 
       int bestMatchIndex = -1;
-      for (int i = 0; i < matches.length; ++i) {
-        final RegExpMatch match = matches.elementAt(i);
-        final String pre = match.namedGroup("preCurrency") ?? "";
-        final String post = match.namedGroup("postCurrency") ?? "";
 
-        if (pre.isNotEmpty || post.isNotEmpty) {
-          if (bestMatchIndex == -1) bestMatchIndex = i;
+      matchesloop:
+      for (int i = 0; i < matches.length; i++) {
+        final RegExpMatch match = matches.elementAt(i);
+        final String preCurrency = match.namedGroup("preCurrency") ?? "";
+        final String postCurrency = match.namedGroup("postCurrency") ?? "";
+
+        if (preCurrency.isNotEmpty || postCurrency.isNotEmpty) {
+          // If we haven't found any good match (meaning a match with some valid
+          // pre or post currency) then we should regard the current one as the
+          // best one so far
+          if (bestMatchIndex == -1) {
+            bestMatchIndex = i;
+          }
           for (CurrencyRead apiCurrency in currencies) {
-            if (apiCurrency.attributes.code == pre ||
-                apiCurrency.attributes.symbol == pre ||
-                apiCurrency.attributes.code == post ||
-                apiCurrency.attributes.symbol == post) {
+            if (apiCurrency.attributes.code == preCurrency ||
+                apiCurrency.attributes.symbol == preCurrency ||
+                apiCurrency.attributes.code == postCurrency ||
+                apiCurrency.attributes.symbol == postCurrency) {
               bestMatchIndex = i;
               currency = apiCurrency;
-              break;
+              break matchesloop;
             }
           }
-          if (currency != null) break;
         }
       }
-      if (bestMatchIndex != -1) {
-        extractedAmountStr = matches
-            .elementAt(bestMatchIndex)
-            .namedGroup("amount");
+
+      if (bestMatchIndex == -1) {
+        bestMatchIndex = 0;
       }
-    }
+
+      extractedAmountStr = matches
+          .elementAt(bestMatchIndex)
+          .namedGroup("amount");
+    } // end if legacy
   }
 
   String? cleanAmount;
@@ -391,5 +399,5 @@ Future<(CurrencyRead?, double)> parseNotificationText(
     }
   }
 
-  return (currency ?? localCurrency, amount);
+  return (currency, amount);
 }
