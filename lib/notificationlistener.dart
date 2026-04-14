@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:chopper/chopper.dart';
 import 'package:flutter/material.dart';
@@ -54,20 +55,27 @@ final RegExp rFindMoney = RegExp(
 );
 
 Future<NotificationListenerStatus> nlStatus() async {
-  return NotificationListenerStatus(
-    await NotificationServicePlugin.instance.isServicePermissionGranted(),
-    await NotificationServicePlugin.instance.isServiceRunning(),
-    await FlutterLocalNotificationsPlugin()
-            .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin
-            >()!
-            .areNotificationsEnabled() ??
-        false,
-  );
+  if (Platform.isAndroid) {
+    return NotificationListenerStatus(
+      await NotificationServicePlugin.instance.isServicePermissionGranted(),
+      await NotificationServicePlugin.instance.isServiceRunning(),
+      await FlutterLocalNotificationsPlugin()
+              .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin
+              >()!
+              .areNotificationsEnabled() ??
+          false,
+    );
+  } else {
+    return NotificationListenerStatus(false, false, false);
+  }
 }
 
 @pragma('vm:entry-point')
 void nlCallback() {
+  if (!Platform.isAndroid) {
+    return;
+  }
   log.finest(() => "nlCallback()");
   NotificationServicePlugin.instance.executeNotificationListener((
     NotificationEvent? evt,
@@ -86,14 +94,23 @@ void nlCallback() {
       return;
     }
 
+    // Passed initial checks
     final SettingsProvider settings = SettingsProvider();
+    final PastNotification notif = PastNotification(
+      evt.packageName!,
+      evt.title ?? "",
+      evt.text ?? "",
+      DateTime.now(),
+      null,
+    );
 
     bool isPotentialMatch = false;
-    final String text = evt.text ?? "";
-
-    if (text.contains(RegExp(r'\d'))) {
+    if (evt.text?.contains(RegExp(r'\d')) ?? false) {
       unawaited(settings.notificationAddKnownApp(evt.packageName!));
     } else {
+      notif.reason = PastNotificationMissedReasons.noMoney;
+      await settings.notificationHistoryAdd(notif);
+      log.finer(() => "nlCallback(${evt.packageName}): no money found");
       return;
     }
 
@@ -113,18 +130,27 @@ void nlCallback() {
       }
     }
 
-    // await settings.notificationAddKnownApp(evt.packageName!);
-
     if (!isPotentialMatch) {
-      log.finer(() => "nlCallback(${evt.packageName}): no match found");
+      notif.reason = PastNotificationMissedReasons.noCurrency; // :TODO: noMatch
+      await settings.notificationHistoryAdd(notif);
+      log.finer(
+        () => "nlCallback(${evt.packageName}): no match found",
+      );
       return;
     }
 
+    // Valid notification
+    await settings.notificationAddKnownApp(evt.packageName!);
+
     if (!(await settings.notificationUsedApps()).contains(evt.packageName)) {
+      notif.reason = PastNotificationMissedReasons.appNotUsed;
+      await settings.notificationHistoryAdd(notif);
       log.finer(() => "nlCallback(${evt.packageName}): app not used");
       return;
     }
 
+    // Passed, add tx/show add notification
+    await settings.notificationHistoryAdd(notif);
     bool showNotification = true;
 
     tz.initializeTimeZones();
@@ -140,7 +166,7 @@ void nlCallback() {
 
       (currency, amount) = await parseNotificationText(
         api,
-        text,
+        evt.text ?? "",
         localCurrency,
         userRegex: appSettings.regex,
       );
@@ -156,13 +182,12 @@ void nlCallback() {
               "nlCallback(${evt.packageName}): trying to auto-add transaction",
         );
         // Set date
-        final DateTime date =
-            ffService.tzHandler
-                .notificationTXTime(
-                  DateTime.tryParse(evt.postTime ?? "") ?? DateTime.now(),
-                )
-                .toLocal();
-        String note = text;
+        final DateTime date = ffService.tzHandler
+            .notificationTXTime(
+              DateTime.tryParse(evt.postTime ?? "") ?? DateTime.now(),
+            )
+            .toLocal();
+        String note = evt.text ?? "";
 
         // Check currency
         if (currency?.id != localCurrency.id) {
@@ -178,7 +203,7 @@ void nlCallback() {
           groupTitle: null,
           transactions: <TransactionSplitStore>[
             TransactionSplitStore(
-              type: TransactionTypeProperty.withdrawal,
+              type: .withdrawal,
               date: date,
               amount: amount.toString(),
               description: evt.title ?? "Notification Transaction",
@@ -196,10 +221,9 @@ void nlCallback() {
         );
         if (!resp.isSuccessful || resp.body == null) {
           try {
-            final ValidationErrorResponse valError =
-                ValidationErrorResponse.fromJson(
-                  json.decode(resp.error.toString()),
-                );
+            final ValidationErrorResponse valError = .fromJson(
+              json.decode(resp.error.toString()),
+            );
             throw Exception("nlCallBack PostTransaction: ${valError.message}");
           } catch (_) {
             throw Exception("nlCallBack PostTransaction: unknown");
@@ -208,17 +232,17 @@ void nlCallback() {
 
         unawaited(
           FlutterLocalNotificationsPlugin().show(
-            DateTime.now().millisecondsSinceEpoch ~/ 1000,
-            "Transaction created",
-            "Transaction created based on notification ${evt.title}",
-            const NotificationDetails(
+            id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+            title: "Transaction created",
+            body: "Transaction created based on notification ${evt.title}",
+            notificationDetails: const NotificationDetails(
               android: AndroidNotificationDetails(
                 'extract_transaction_created',
                 'Transaction from Notification Created',
                 channelDescription:
                     'Notification that a Transaction has been created from another Notification.',
-                importance: Importance.low, // Android 8.0 and higher
-                priority: Priority.low, // Android 7.1 and lower
+                importance: .low, // Android 8.0 and higher
+                priority: .low, // Android 7.1 and lower
               ),
             ),
             payload: "",
@@ -236,18 +260,19 @@ void nlCallback() {
       // :TODO: l10n
       unawaited(
         FlutterLocalNotificationsPlugin().show(
-          DateTime.now().millisecondsSinceEpoch ~/ 1000,
-          "Create Transaction?",
+          id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          title: "Create Transaction?",
           // :TODO: once we l10n this, a better switch can be implemented...
-          "Click to create a transaction based on the notification ${evt.title ?? evt.packageName ?? ""}",
-          const NotificationDetails(
+          body:
+              "Click to create a transaction based on the notification ${evt.title ?? evt.packageName ?? ""}",
+          notificationDetails: const NotificationDetails(
             android: AndroidNotificationDetails(
               'extract_transaction',
               'Create Transaction from Notification',
               channelDescription:
                   'Notification asking to create a transaction from another Notification.',
-              importance: Importance.low, // Android 8.0 and higher
-              priority: Priority.low, // Android 7.1 and lower
+              importance: .low, // Android 8.0 and higher
+              priority: .low, // Android 7.1 and lower
             ),
           ),
           payload: jsonEncode(
@@ -265,6 +290,9 @@ void nlCallback() {
 }
 
 Future<void> nlInit() async {
+  if (!Platform.isAndroid) {
+    return;
+  }
   log.finest(() => "nlInit()");
   await NotificationServicePlugin.instance.initialize(nlCallback);
   // nlCallback(); // Avoid duplicated notification.
@@ -279,12 +307,9 @@ Future<void> nlNotificationTap(
   }
   await showDialog(
     context: navigatorKey.currentState!.context,
-    builder:
-        (BuildContext context) => TransactionPage(
-          notification: NotificationTransaction.fromJson(
-            jsonDecode(notificationResponse.payload!),
-          ),
-        ),
+    builder: (BuildContext context) => TransactionPage(
+      notification: .fromJson(jsonDecode(notificationResponse.payload!)),
+    ),
   );
 }
 
@@ -363,9 +388,8 @@ Future<(CurrencyRead?, double)> parseNotificationText(
             .replaceAll('.', '');
         String afterDot = cleanAmount.substring(lastDotIndex + 1);
         cleanAmount = '$beforeDot.$afterDot';
-      }
-      amount = double.tryParse(cleanAmount) ?? 0.0;
     }
+      amount = double.tryParse(cleanAmount) ?? 0.0;
   }
 
   return (currency ?? localCurrency, amount);

@@ -37,7 +37,7 @@ class TransStock with ChangeNotifier {
     );
     _getStock = Stock<String, List<String>>(
       fetcher: Fetcher.ofFuture<String, List<String>>((String id) {
-        final _getOptions query = _getOptions.fromJson(jsonDecode(id));
+        final _getOptions query = .fromJson(jsonDecode(id));
         return api
             .v1TransactionsGet(
               xTraceId: query.xTraceId,
@@ -53,7 +53,7 @@ class TransStock with ChangeNotifier {
     );
     _getAccountStock = Stock<String, List<String>>(
       fetcher: Fetcher.ofFuture<String, List<String>>((String id) {
-        final _getOptions query = _getOptions.fromJson(jsonDecode(id));
+        final _getOptions query = .fromJson(jsonDecode(id));
         return api
             .v1AccountsIdTransactionsGet(
               xTraceId: query.xTraceId,
@@ -70,7 +70,7 @@ class TransStock with ChangeNotifier {
     );
     _getSearchStock = Stock<String, List<String>>(
       fetcher: Fetcher.ofFuture<String, List<String>>((String id) {
-        final _getOptions query = _getOptions.fromJson(jsonDecode(id));
+        final _getOptions query = .fromJson(jsonDecode(id));
         return api
             .v1SearchTransactionsGet(
               xTraceId: query.xTraceId,
@@ -184,8 +184,9 @@ class TransStock with ChangeNotifier {
   }
 
   Future<void> setTransaction(TransactionRead transaction) async {
-    final TransactionRead? oldTransaction =
-        await _singleSoT.reader(transaction.id).first;
+    final TransactionRead? oldTransaction = await _singleSoT
+        .reader(transaction.id)
+        .first;
     // if no old transaction (= new one) or date has changed, clear cache
     if (oldTransaction == null ||
         oldTransaction.attributes.transactions.first.date !=
