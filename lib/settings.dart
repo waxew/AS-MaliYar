@@ -40,7 +40,7 @@ class NotificationAppSettings {
       includeTitle = json['includeTitle'] ?? true,
       autoAdd = json['autoAdd'] ?? false,
       emptyNote = json['emptyNote'] ?? false,
-      regex = RegExp(json['regex']);
+      regex = (json['regex'] != null) ? RegExp(json['regex']) : null;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'appName': appName,
@@ -48,7 +48,7 @@ class NotificationAppSettings {
     'includeTitle': includeTitle,
     'autoAdd': autoAdd,
     'emptyNote': emptyNote,
-    'regex': regex.toString(),
+    'regex': regex?.pattern,
   };
 }
 

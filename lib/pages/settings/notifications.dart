@@ -12,6 +12,7 @@ import 'package:waterflyiii/generated/swagger_fireflyiii_api/firefly_iii.swagger
 import 'package:waterflyiii/notificationlistener.dart';
 import 'package:waterflyiii/pages/settings/notifications/history.dart';
 import 'package:waterflyiii/settings.dart';
+import 'package:waterflyiii/widgets/erroricon.dart';
 
 class SettingsNotifications extends StatefulWidget {
   const SettingsNotifications({super.key});
@@ -266,12 +267,14 @@ class NotificationApps extends StatelessWidget {
                         AsyncSnapshot<NotificationAppSettings> snap,
                       ) {
                         if (snap.connectionState == .done && snap.hasData) {
+                          debugPrint("trying to make AppCard for $app");
                           return AppCard(
                             app: app,
                             accounts: snapshot.data!,
                             settings: snap.data!,
                           );
-                        } else if (snapshot.hasError) {
+                        } else if (snap.hasError) {
+                          debugPrint("erroring out");
                           log.severe(
                             "error getting app settings",
                             snapshot.error,
@@ -279,6 +282,7 @@ class NotificationApps extends StatelessWidget {
                           );
                           return const SizedBox.shrink();
                         } else {
+                          debugPrint("waiting");
                           return const CircularProgressIndicator.adaptive();
                         }
                       },
@@ -324,6 +328,7 @@ class AppCard extends StatefulWidget {
 class _AppCardState extends State<AppCard> {
   final TextEditingController accountTextController = TextEditingController();
   final FocusNode accountFocusNode = FocusNode();
+  ErrorIcon _regexErrorIcon = const ErrorIcon(false);
 
   String? appAccountId;
 
@@ -450,14 +455,21 @@ class _AppCardState extends State<AppCard> {
                       label: const Text("Regex"), // :TODO: l10n
                       icon: const Icon(Icons.code),
                       border: const OutlineInputBorder(),
-                      hintText:
-                          "Leave blank to use general regex method", // :TODO: l10n
+                      hintText: "(optional)",
+                      // :TODO: l10n
+                      suffixIcon: _regexErrorIcon,
+                      errorText: _regexErrorIcon.isError
+                          ? "Invalid Regex"
+                          : null, // :TODO: l10n
                     ),
-                    initialValue: widget.settings.regex?.toString(),
+                    initialValue: widget.settings.regex?.pattern,
                     onChanged: (String value) async {
                       value = value.trim();
                       if (value.isEmpty) {
-                        widget.settings.regex = null;
+                        setState(() {
+                          widget.settings.regex = null;
+                          _regexErrorIcon = const ErrorIcon(false);
+                        });
                         await context
                             .read<SettingsProvider>()
                             .notificationSetAppSettings(
@@ -467,19 +479,28 @@ class _AppCardState extends State<AppCard> {
                         return;
                       }
                       try {
+                        debugPrint("trying");
                         final RegExp validRegex = RegExp(
                           value,
                           caseSensitive: false,
                         );
-                        widget.settings.regex = validRegex;
+                        setState(() {
+                          widget.settings.regex = validRegex;
+                          _regexErrorIcon = const ErrorIcon(false);
+                        });
+
                         await context
                             .read<SettingsProvider>()
                             .notificationSetAppSettings(
                               widget.app,
                               widget.settings,
                             );
+                        debugPrint("settings updated with $value");
                       } on FormatException catch (_) {
-                        // :TODO:
+                        debugPrint("showing error");
+                        setState(() {
+                          _regexErrorIcon = const ErrorIcon(true);
+                        });
                       }
                     },
                   ),
