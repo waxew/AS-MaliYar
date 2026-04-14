@@ -117,8 +117,8 @@ void nlCallback() {
     final NotificationAppSettings appSettings = await settings
         .notificationGetAppSettings(evt.packageName!);
 
-    if (appSettings.regex != null && appSettings.regex!.isNotEmpty) {
-      isPotentialMatch = RegExp(appSettings.regex!).hasMatch(notifText);
+    if (appSettings.regex != null) {
+      isPotentialMatch = appSettings.regex!.hasMatch(notifText);
     } else {
       final Iterable<RegExpMatch> matches = rFindMoney.allMatches(notifText);
       for (RegExpMatch match in matches) {
@@ -313,16 +313,15 @@ Future<(CurrencyRead?, double)> parseNotificationText(
   FireflyIii api,
   String notificationBody,
   CurrencyRead localCurrency, {
-  String? userRegex,
+  RegExp? userRegex,
 }) async {
   CurrencyRead? currency;
   double amount = 0;
   String? extractedAmountStr;
 
   // Prioritizes userRegex
-  if (userRegex != null && userRegex.isNotEmpty) {
-    final RegExp reg = RegExp(userRegex);
-    final RegExpMatch? match = reg.firstMatch(notificationBody);
+  if (userRegex != null) {
+    final RegExpMatch? match = userRegex.firstMatch(notificationBody);
     if (match != null) {
       extractedAmountStr = match.namedGroup("amount");
       if (extractedAmountStr == null && match.groupCount > 0) {

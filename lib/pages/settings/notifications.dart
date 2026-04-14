@@ -453,15 +453,34 @@ class _AppCardState extends State<AppCard> {
                       hintText:
                           "Leave blank to use general regex method", // :TODO: l10n
                     ),
-                    initialValue: widget.settings.regex,
+                    initialValue: widget.settings.regex?.toString(),
                     onChanged: (String value) async {
-                      widget.settings.regex = value.isEmpty ? null : value;
-                      await context
-                          .read<SettingsProvider>()
-                          .notificationSetAppSettings(
-                            widget.app,
-                            widget.settings,
-                          );
+                      value = value.trim();
+                      if (value.isEmpty) {
+                        widget.settings.regex = null;
+                        await context
+                            .read<SettingsProvider>()
+                            .notificationSetAppSettings(
+                              widget.app,
+                              widget.settings,
+                            );
+                        return;
+                      }
+                      try {
+                        final RegExp validRegex = RegExp(
+                          value,
+                          caseSensitive: false,
+                        );
+                        widget.settings.regex = validRegex;
+                        await context
+                            .read<SettingsProvider>()
+                            .notificationSetAppSettings(
+                              widget.app,
+                              widget.settings,
+                            );
+                      } on FormatException catch (_) {
+                        // :TODO:
+                      }
                     },
                   ),
                 ],
