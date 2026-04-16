@@ -53,30 +53,45 @@ class _WaterflyAppState extends State<WaterflyApp> {
   void initState() {
     super.initState();
 
+    _initializePlatformServices();
+  }
+
+  void _initializePlatformServices() {
     // Notifications (Android only)
     if (Platform.isAndroid) {
-      FlutterLocalNotificationsPlugin().initialize(
-        settings: const InitializationSettings(
-          android: AndroidInitializationSettings('ic_stat_notification'),
-        ),
-        onDidReceiveNotificationResponse: nlNotificationTap,
-      );
-
-      FlutterLocalNotificationsPlugin().getNotificationAppLaunchDetails().then((
-        NotificationAppLaunchDetails? details,
-      ) {
-        log.config("checking NotificationAppLaunchDetails");
-        if ((details?.didNotificationLaunchApp ?? false) &&
-            (details?.notificationResponse?.payload?.isNotEmpty ?? false)) {
-          log.info("Was launched from notification!");
-          _notificationPayload = .fromJson(
-            jsonDecode(details!.notificationResponse!.payload!),
-          );
-        }
-      });
+      _initNotifications();
     }
-
     // Quick Actions (Android + iOS)
+    _initQuickActions();
+    // Share to Waterfly III
+    _initSharingIntent();
+    // App Lifecycle State
+    _initLifecycleListener();
+  }
+
+  void _initNotifications() {
+    FlutterLocalNotificationsPlugin().initialize(
+      settings: const InitializationSettings(
+        android: AndroidInitializationSettings('ic_stat_notification'),
+      ),
+      onDidReceiveNotificationResponse: nlNotificationTap,
+    );
+
+    FlutterLocalNotificationsPlugin().getNotificationAppLaunchDetails().then((
+      NotificationAppLaunchDetails? details,
+    ) {
+      log.config("checking NotificationAppLaunchDetails");
+      if ((details?.didNotificationLaunchApp ?? false) &&
+          (details?.notificationResponse?.payload?.isNotEmpty ?? false)) {
+        log.info("Was launched from notification!");
+        _notificationPayload = .fromJson(
+          jsonDecode(details!.notificationResponse!.payload!),
+        );
+      }
+    });
+  }
+
+  void _initQuickActions() {
     const QuickActions quickActions = QuickActions();
     quickActions.initialize((String shortcutType) {
       log.info("Was launched from QuickAction $shortcutType");
@@ -91,8 +106,39 @@ class _WaterflyAppState extends State<WaterflyApp> {
       }
     });
     quickActions.clearShortcutItems();
+  }
 
-    // App Lifecycle State
+  void _initSharingIntent() {
+    // While the app is open...
+    /* Sharing while app is open is currently not supported :(
+       The fix from https://github.com/bhagat-techind/flutter_sharing_intent/issues/33
+       does not seem to work, unfortunately.
+
+    _intentDataStreamSubscription = FlutterSharingIntent.instance
+        .getMediaStream()
+        .listen((List<SharedFile> value) {
+      setState(() {
+        list = value;
+      });
+      debugPrint(
+          "Shared: getMediaStream ${value.map((SharedFile f) => f.value).join(",")}");
+    }, onError: (Object err) {
+      debugPrint("getIntentDataStream error: $err");
+    });*/
+
+    // For sharing images coming from outside the app while the app is closed
+    FlutterSharingIntent.instance.getInitialSharing().then((
+      List<SharedFile> value,
+    ) {
+      log.config("App was opened via file sharing");
+      log.finest(
+        () => "files: ${value.map((SharedFile f) => f.value).join(",")}",
+      );
+      _filesSharedToApp = value;
+    });
+  }
+
+  void _initLifecycleListener() {
     AppLifecycleListener(
       onResume: () {
         if (_requiresAuth &&
@@ -142,35 +188,6 @@ class _WaterflyAppState extends State<WaterflyApp> {
         }
       },
     );
-
-    // Share to Waterfly III
-    // While the app is open...
-    /* Sharing while app is open is currently not supported :(
-       The fix from https://github.com/bhagat-techind/flutter_sharing_intent/issues/33
-       does not seem to work, unfortunately.
-       
-    _intentDataStreamSubscription = FlutterSharingIntent.instance
-        .getMediaStream()
-        .listen((List<SharedFile> value) {
-      setState(() {
-        list = value;
-      });
-      debugPrint(
-          "Shared: getMediaStream ${value.map((SharedFile f) => f.value).join(",")}");
-    }, onError: (Object err) {
-      debugPrint("getIntentDataStream error: $err");
-    });*/
-
-    // For sharing images coming from outside the app while the app is closed
-    FlutterSharingIntent.instance.getInitialSharing().then((
-      List<SharedFile> value,
-    ) {
-      log.config("App was opened via file sharing");
-      log.finest(
-        () => "files: ${value.map((SharedFile f) => f.value).join(",")}",
-      );
-      _filesSharedToApp = value;
-    });
   }
 
   /* Not needed right now, as sharing while the app is open does not work
