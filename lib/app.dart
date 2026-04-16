@@ -14,6 +14,7 @@ import 'package:waterflyiii/auth.dart';
 import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/layout.dart';
 import 'package:waterflyiii/notificationlistener.dart';
+import 'package:waterflyiii/pages/lock.dart';
 import 'package:waterflyiii/pages/login.dart';
 import 'package:waterflyiii/pages/navigation.dart';
 import 'package:waterflyiii/pages/splash.dart';
@@ -203,8 +204,7 @@ class _WaterflyAppState extends State<WaterflyApp> {
     // 2. Show LockPage if security is enabled and user isn't authenticated
     if (settings.lock && !_authed) {
       log.finest(() => "_getHome: showing lockpage (authed: $_authed)");
-      return const Placeholder();
-      //return LockPage(onSuccess: () => setState(() => _authed = true));
+      return LockPage(onSuccess: () => setState(() => _authed = true));
     }
     _authed = true;
 
