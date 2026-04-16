@@ -36,7 +36,6 @@ class WaterflyApp extends StatefulWidget {
 
 class _WaterflyAppState extends State<WaterflyApp> {
   bool _startup = true;
-  bool _authed = false;
   String? _quickAction;
   NotificationTransaction? _notificationPayload;
   // Not needed right now, as sharing while the app is open does not work
@@ -149,10 +148,10 @@ class _WaterflyAppState extends State<WaterflyApp> {
                 ) ??
                 false)) {
           log.finest(() => "App resuming, timeout reached. Requiring re-auth.");
-          setState(() {
-            _authed = false;
-            _lcLastOpen = null;
-          });
+          _settingsProvider.sessionLock();
+          if (mounted) {
+            setState(() => _lcLastOpen = null);
+          }
         }
       },
       onPause: () {
@@ -204,11 +203,13 @@ class _WaterflyAppState extends State<WaterflyApp> {
     }
 
     // 2. Show LockPage if security is enabled and user isn't authenticated
-    if (settings.lock && !_authed) {
-      log.finest(() => "_getHome: showing lockpage (authed: $_authed)");
-      return LockPage(onSuccess: () => setState(() => _authed = true));
+    if (settings.lock && !settings.isSessionAuthed) {
+      log.finest(
+        () =>
+            "_getHome: showing lockpage (authed: ${settings.isSessionAuthed})",
+      );
+      return LockPage(onSuccess: settings.sessionAuthed);
     }
-    _authed = true;
 
     // 3. Handle Login/Errors
     if (firefly.storageSignInException != null) {
