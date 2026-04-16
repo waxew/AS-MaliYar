@@ -141,6 +141,7 @@ class _WaterflyAppState extends State<WaterflyApp> {
   void _initLifecycleListener() {
     AppLifecycleListener(
       onResume: () {
+        log.finest(() => "Lifecycle: Resume");
         // If lock is enabled, check if we need to re-authenticate based on timeout (10 mins)
         if (_settingsProvider.lock &&
             (_lcLastOpen?.isBefore(
@@ -155,6 +156,7 @@ class _WaterflyAppState extends State<WaterflyApp> {
         }
       },
       onPause: () {
+        log.finest(() => "Lifecycle: Pause");
         if (_settingsProvider.lock) {
           _lcLastOpen ??= DateTime.now();
         }
