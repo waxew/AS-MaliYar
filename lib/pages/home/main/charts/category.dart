@@ -5,12 +5,14 @@ import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/generated/swagger_fireflyiii_api/firefly_iii.swagger.dart';
 import 'package:waterflyiii/pages/home/transactions.dart';
 import 'package:waterflyiii/pages/home/transactions/filter.dart';
+import 'package:waterflyiii/pages/transaction/tags.dart';
 import 'package:waterflyiii/widgets/charts.dart';
 
 class CategoryChart extends StatelessWidget {
-  const CategoryChart({super.key, required this.data});
+  const CategoryChart({super.key, required this.data, this.isTag = false});
 
   final List<InsightGroupEntry> data;
+  final bool isTag;
 
   @override
   Widget build(BuildContext context) {
@@ -94,11 +96,16 @@ class CategoryChart extends StatelessWidget {
                     appBar: AppBar(title: Text(category.name!)),
                     body: HomeTransactions(
                       filters: TransactionFilters(
-                        category: CategoryRead(
-                          id: category.id!,
-                          type: "filter-category",
-                          attributes: CategoryProperties(name: category.name!),
-                        ),
+                        tags: !isTag ? null : Tags(<String>[category.name!]),
+                        category: isTag
+                            ? null
+                            : CategoryRead(
+                                id: category.id!,
+                                type: "filter-category",
+                                attributes: CategoryProperties(
+                                  name: category.name!,
+                                ),
+                              ),
                       ),
                     ),
                   ),
