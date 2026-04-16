@@ -47,6 +47,8 @@ class _WaterflyAppState extends State<WaterflyApp> {
   bool _requiresAuth = false;
   DateTime? _lcLastOpen;
 
+  final FireflyService _fireflyService = FireflyService();
+  final SettingsProvider _settingsProvider = SettingsProvider();
   final LayoutProvider _layoutProvider = LayoutProvider();
 
   @override
@@ -54,6 +56,7 @@ class _WaterflyAppState extends State<WaterflyApp> {
     super.initState();
 
     _initializePlatformServices();
+    _handleStartup();
   }
 
   void _initializePlatformServices() {
@@ -190,20 +193,52 @@ class _WaterflyAppState extends State<WaterflyApp> {
     );
   }
 
-  /* Not needed right now, as sharing while the app is open does not work
+  Future<void> _handleStartup() async {
+    // Step 1: Load Settings
+    log.finer(() => "Load Step 1: Loading Settings");
+    await _settingsProvider.loadSettings();
+
+    // Step 2: Handle local auth if required
+    log.finer(() => "Load Step 2: Handle Authentication");
+    if (_settingsProvider.lock) {
+      log.fine(() => "... awaiting authentication");
+      final bool authed = await auth();
+      if (!authed) {
+        log.shout(() => "!!! authentication failed");
+        // close app
+        await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+        return;
+      }
+      log.finest(() => "... authentication succeeded");
+    } else {
+      log.finest(() => "... not required");
+    }
+    if (mounted) {
+      setState(() => _authed = true);
+    }
+
+    // Step 3: Sign In
+    log.finer(() => "Load Step 3: Sign in");
+    await _fireflyService.signInFromStorage();
+
+    if (mounted) {
+      setState(() => _startup = false);
+    }
+  }
+
   @override
   void dispose() {
-    _intentDataStreamSubscription.cancel();
+    _fireflyService.dispose();
+    _settingsProvider.dispose();
+    _layoutProvider.dispose();
 
     super.dispose();
-  }*/
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Always called after initState() --> can be used to init _layoutProvider.
-    // No separate init needed inside initState()
     if (mounted) {
       _layoutProvider.updateSize(context);
     }
@@ -240,11 +275,11 @@ class _WaterflyAppState extends State<WaterflyApp> {
 
         return MultiProvider(
           providers: <SingleChildWidget>[
-            ChangeNotifierProvider<FireflyService>(
-              create: (_) => FireflyService(),
+            ChangeNotifierProvider<FireflyService>.value(
+              value: _fireflyService,
             ),
-            ChangeNotifierProvider<SettingsProvider>(
-              create: (_) => SettingsProvider(),
+            ChangeNotifierProvider<SettingsProvider>.value(
+              value: _settingsProvider,
             ),
             ChangeNotifierProvider<LayoutProvider>.value(
               value: _layoutProvider,
