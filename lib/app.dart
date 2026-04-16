@@ -221,6 +221,7 @@ class _WaterflyAppState extends State<WaterflyApp> {
     log.finer(() => "Load Step 3: Sign in");
     await _fireflyService.signInFromStorage();
 
+    log.finer(() => "Loading done.");
     if (mounted) {
       setState(() => _startup = false);
     }
@@ -250,6 +251,39 @@ class _WaterflyAppState extends State<WaterflyApp> {
       localizedReason: "Waterfly III",
       persistAcrossBackgrounding: true,
     );
+  }
+
+  Widget _getHome(SettingsProvider settings, FireflyService firefly) {
+    if (_startup || !_authed || !settings.loaded) {
+      log.finest(
+        () =>
+            "_getHome: showing splash (startup: $_startup, authed: $_authed, settings: ${settings.loaded})",
+      );
+      return const SplashPage();
+    }
+
+    if (firefly.storageSignInException != null) {
+      log.finest(() => "_getHome: showing splash (storageSignInException)");
+      return const SplashPage();
+    }
+
+    if (!firefly.signedIn) {
+      log.finest(() => "_getHome: showing login");
+      return const LoginPage();
+    }
+
+    if (_notificationPayload != null ||
+        _quickAction == "action_transaction_add" ||
+        (_filesSharedToApp?.isNotEmpty ?? false)) {
+      log.finest(() => "_getHome: showing transaction");
+      return TransactionPage(
+        notification: _notificationPayload,
+        files: _filesSharedToApp,
+      );
+    }
+
+    log.finest(() => "_getHome: showing navpage");
+    return const NavPage();
   }
 
   @override
@@ -285,109 +319,42 @@ class _WaterflyAppState extends State<WaterflyApp> {
               value: _layoutProvider,
             ),
           ],
-          builder: (BuildContext context, _) {
-            late bool signedIn;
-            log.finest(() => "_startup = $_startup");
-            _requiresAuth = context.watch<SettingsProvider>().lock;
-            log.finest(() => "_requiresAuth = $_requiresAuth");
-            if (_startup) {
-              signedIn = false;
-
-              if (!context.select((SettingsProvider s) => s.loaded)) {
-                log.finer(() => "Load Step 1: Loading Settings");
-                context.read<SettingsProvider>().loadSettings();
-              } else {
-                log.finer(() => "Load Step 2: Signin In");
-
-                if (context.read<SettingsProvider>().lock && !_authed) {
-                  // Authentication required
-                  log.fine("awaiting authentication");
-                  auth().then((bool authed) {
-                    log.finest(() => "done authing, $authed");
-                    if (authed) {
-                      log.finest(() => "authentication succeeded");
-                      setState(() {
-                        _authed = true;
-                      });
-                    } else {
-                      log.shout(() => "authentication failed");
-                      // close app
-                      SystemChannels.platform.invokeMethod(
-                        'SystemNavigator.pop',
-                      );
-                    }
-                  });
-                } else {
-                  log.finest(() => "signing in");
-                  context.read<FireflyService>().signInFromStorage().then(
-                    (bool _) => setState(() {
-                      log.finest(() => "set _startup = false");
-                      _authed = true;
-                      _startup = false;
-                    }),
-                  );
-                }
-              }
-            } else {
-              signedIn = context.select((FireflyService f) => f.signedIn);
-              if (signedIn) {
-                context.read<FireflyService>().tzHandler.setUseServerTime(
-                  context.read<SettingsProvider>().useServerTime,
-                );
-              }
-              log.config("signedIn: $signedIn");
-            }
-
-            return MaterialApp(
-              title: 'Waterfly III',
-              theme: ThemeData(
-                brightness: .light,
-                colorScheme:
-                    context.select((SettingsProvider s) => s.dynamicColors)
-                    ? cSchemeDynamicLight?.harmonized() ?? cSchemeLight
-                    : cSchemeLight,
-                useMaterial3: true,
-                // See https://github.com/flutter/flutter/issues/131042#issuecomment-1690737834
-                appBarTheme: const AppBarTheme(shape: RoundedRectangleBorder()),
-                pageTransitionsTheme: const PageTransitionsTheme(
-                  builders: <TargetPlatform, PageTransitionsBuilder>{
-                    TargetPlatform.android:
-                        PredictiveBackPageTransitionsBuilder(),
-                  },
-                ),
+          builder: (BuildContext context, _) => MaterialApp(
+            title: 'Waterfly III',
+            theme: ThemeData(
+              brightness: .light,
+              colorScheme:
+                  context.select((SettingsProvider s) => s.dynamicColors)
+                  ? cSchemeDynamicLight?.harmonized() ?? cSchemeLight
+                  : cSchemeLight,
+              useMaterial3: true,
+              // See https://github.com/flutter/flutter/issues/131042#issuecomment-1690737834
+              appBarTheme: const AppBarTheme(shape: RoundedRectangleBorder()),
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android:
+                      PredictiveBackPageTransitionsBuilder(),
+                },
               ),
-              darkTheme: ThemeData(
-                brightness: .dark,
-                colorScheme:
-                    context.select((SettingsProvider s) => s.dynamicColors)
-                    ? cSchemeDynamicDark?.harmonized() ?? cSchemeDark
-                    : cSchemeDark,
-                useMaterial3: true,
-              ),
-              themeMode: context.select((SettingsProvider s) => s.theme),
-              localizationsDelegates: S.localizationsDelegates,
-              supportedLocales: S.supportedLocales,
-              locale: context.select((SettingsProvider s) => s.locale),
-              navigatorKey: navigatorKey,
-              home:
-                  ((_startup || !_authed) ||
-                      context.select(
-                        (FireflyService f) => f.storageSignInException != null,
-                      ))
-                  ? const SplashPage()
-                  : signedIn
-                  ? (_notificationPayload != null ||
-                            _quickAction == "action_transaction_add" ||
-                            (_filesSharedToApp != null &&
-                                _filesSharedToApp!.isNotEmpty))
-                        ? TransactionPage(
-                            notification: _notificationPayload,
-                            files: _filesSharedToApp,
-                          )
-                        : const NavPage()
-                  : const LoginPage(),
-            );
-          },
+            ),
+            darkTheme: ThemeData(
+              brightness: .dark,
+              colorScheme:
+                  context.select((SettingsProvider s) => s.dynamicColors)
+                  ? cSchemeDynamicDark?.harmonized() ?? cSchemeDark
+                  : cSchemeDark,
+              useMaterial3: true,
+            ),
+            themeMode: context.select((SettingsProvider s) => s.theme),
+            localizationsDelegates: S.localizationsDelegates,
+            supportedLocales: S.supportedLocales,
+            locale: context.select((SettingsProvider s) => s.locale),
+            navigatorKey: navigatorKey,
+            home: _getHome(
+              context.select((SettingsProvider s) => s),
+              context.select((FireflyService f) => f),
+            ),
+          ),
         );
       },
     );
