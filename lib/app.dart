@@ -3,11 +3,9 @@ import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show SystemChannels;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_sharing_intent/flutter_sharing_intent.dart';
 import 'package:flutter_sharing_intent/model/sharing_file.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
@@ -21,7 +19,6 @@ import 'package:waterflyiii/pages/navigation.dart';
 import 'package:waterflyiii/pages/splash.dart';
 import 'package:waterflyiii/pages/transaction.dart';
 import 'package:waterflyiii/settings.dart';
-import 'package:waterflyiii/widgets/logo.dart';
 
 final Logger log = Logger("App");
 
@@ -44,7 +41,6 @@ class _WaterflyAppState extends State<WaterflyApp> {
   // Not needed right now, as sharing while the app is open does not work
   //late StreamSubscription<List<SharedFile>> _intentDataStreamSubscription;
   List<SharedFile>? _filesSharedToApp;
-  bool _requiresAuth = false;
   DateTime? _lcLastOpen;
 
   final FireflyService _fireflyService = FireflyService();
@@ -144,81 +140,32 @@ class _WaterflyAppState extends State<WaterflyApp> {
   void _initLifecycleListener() {
     AppLifecycleListener(
       onResume: () {
-        if (_requiresAuth &&
+        // If lock is enabled, check if we need to re-authenticate based on timeout (10 mins)
+        if (_settingsProvider.lock &&
             (_lcLastOpen?.isBefore(
                   DateTime.now().subtract(const Duration(minutes: 10)),
                 ) ??
                 false)) {
-          log.finest(() => "App resuming, last opened: $_lcLastOpen");
-          _lcLastOpen = null;
-          _authed = false;
-
-          final bool canPush = navigatorKey.currentState != null;
-          if (canPush) {
-            navigatorKey.currentState?.push(
-              MaterialPageRoute<Widget>(
-                builder: (BuildContext context) => const AppLogo(),
-              ),
-            );
-          }
-
-          auth().then((bool authed) {
-            log.finest(() => "done authing, $authed");
-            if (authed) {
-              log.finest(() => "authentication succeeded");
-              _authed = true;
-              if (canPush) {
-                navigatorKey.currentState?.pop();
-              }
-            } else {
-              log.shout(() => "authentication failed");
-              _lcLastOpen = DateTime.now().subtract(
-                const Duration(minutes: 10),
-              );
-              // close app
-              SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-              if (canPush) {
-                navigatorKey.currentState?.pop();
-              }
-            }
+          log.finest(() => "App resuming, timeout reached. Requiring re-auth.");
+          setState(() {
+            _authed = false;
+            _lcLastOpen = null;
           });
         }
       },
       onPause: () {
-        if (_requiresAuth) {
+        if (_settingsProvider.lock) {
           _lcLastOpen ??= DateTime.now();
-          log.finest(() => "App pausing now");
         }
       },
     );
   }
 
   Future<void> _handleStartup() async {
-    // Step 1: Load Settings
     log.finer(() => "Load Step 1: Loading Settings");
     await _settingsProvider.loadSettings();
 
-    // Step 2: Handle local auth if required
-    log.finer(() => "Load Step 2: Handle Authentication");
-    if (_settingsProvider.lock) {
-      log.fine(() => "... awaiting authentication");
-      final bool authed = await auth();
-      if (!authed) {
-        log.shout(() => "!!! authentication failed");
-        // close app
-        await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-        return;
-      }
-      log.finest(() => "... authentication succeeded");
-    } else {
-      log.finest(() => "... not required");
-    }
-    if (mounted) {
-      setState(() => _authed = true);
-    }
-
-    // Step 3: Sign In
-    log.finer(() => "Load Step 3: Sign in");
+    log.finer(() => "Load Step 2: Sign in");
     await _fireflyService.signInFromStorage();
 
     log.finer(() => "Loading done.");
@@ -232,36 +179,36 @@ class _WaterflyAppState extends State<WaterflyApp> {
     _fireflyService.dispose();
     _settingsProvider.dispose();
     _layoutProvider.dispose();
-
     super.dispose();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
     if (mounted) {
       _layoutProvider.updateSize(context);
     }
   }
 
-  Future<bool> auth() {
-    final LocalAuthentication auth = LocalAuthentication();
-    return auth.authenticate(
-      localizedReason: "Waterfly III",
-      persistAcrossBackgrounding: true,
-    );
-  }
-
   Widget _getHome(SettingsProvider settings, FireflyService firefly) {
-    if (_startup || !_authed || !settings.loaded) {
+    // 1. Show Splash during initial startup or until settings are loaded
+    if (_startup || !settings.loaded) {
       log.finest(
         () =>
-            "_getHome: showing splash (startup: $_startup, authed: $_authed, settings: ${settings.loaded})",
+            "_getHome: showing splash (startup: $_startup, settings: ${settings.loaded})",
       );
       return const SplashPage();
     }
 
+    // 2. Show LockPage if security is enabled and user isn't authenticated
+    if (settings.lock && !_authed) {
+      log.finest(() => "_getHome: showing lockpage (authed: $_authed)");
+      return const Placeholder();
+      //return LockPage(onSuccess: () => setState(() => _authed = true));
+    }
+    _authed = true;
+
+    // 3. Handle Login/Errors
     if (firefly.storageSignInException != null) {
       log.finest(() => "_getHome: showing splash (storageSignInException)");
       return const SplashPage();
@@ -272,6 +219,7 @@ class _WaterflyAppState extends State<WaterflyApp> {
       return const LoginPage();
     }
 
+    // 4. Handle Deep Links
     if (_notificationPayload != null ||
         _quickAction == "action_transaction_add" ||
         (_filesSharedToApp?.isNotEmpty ?? false)) {
@@ -282,6 +230,7 @@ class _WaterflyAppState extends State<WaterflyApp> {
       );
     }
 
+    // 5. Default to Home
     log.finest(() => "_getHome: showing navpage");
     return const NavPage();
   }
@@ -319,42 +268,42 @@ class _WaterflyAppState extends State<WaterflyApp> {
               value: _layoutProvider,
             ),
           ],
-          builder: (BuildContext context, _) => MaterialApp(
-            title: 'Waterfly III',
-            theme: ThemeData(
-              brightness: .light,
-              colorScheme:
-                  context.select((SettingsProvider s) => s.dynamicColors)
-                  ? cSchemeDynamicLight?.harmonized() ?? cSchemeLight
-                  : cSchemeLight,
-              useMaterial3: true,
-              // See https://github.com/flutter/flutter/issues/131042#issuecomment-1690737834
-              appBarTheme: const AppBarTheme(shape: RoundedRectangleBorder()),
-              pageTransitionsTheme: const PageTransitionsTheme(
-                builders: <TargetPlatform, PageTransitionsBuilder>{
-                  TargetPlatform.android:
-                      PredictiveBackPageTransitionsBuilder(),
-                },
+          builder: (BuildContext context, _) {
+            final SettingsProvider settings = context.watch<SettingsProvider>();
+            final FireflyService firefly = context.watch<FireflyService>();
+
+            return MaterialApp(
+              title: 'Waterfly III',
+              theme: ThemeData(
+                brightness: .light,
+                colorScheme: settings.dynamicColors
+                    ? cSchemeDynamicLight?.harmonized() ?? cSchemeLight
+                    : cSchemeLight,
+                useMaterial3: true,
+                // See https://github.com/flutter/flutter/issues/131042#issuecomment-1690737834
+                appBarTheme: const AppBarTheme(shape: RoundedRectangleBorder()),
+                pageTransitionsTheme: const PageTransitionsTheme(
+                  builders: <TargetPlatform, PageTransitionsBuilder>{
+                    TargetPlatform.android:
+                        PredictiveBackPageTransitionsBuilder(),
+                  },
+                ),
               ),
-            ),
-            darkTheme: ThemeData(
-              brightness: .dark,
-              colorScheme:
-                  context.select((SettingsProvider s) => s.dynamicColors)
-                  ? cSchemeDynamicDark?.harmonized() ?? cSchemeDark
-                  : cSchemeDark,
-              useMaterial3: true,
-            ),
-            themeMode: context.select((SettingsProvider s) => s.theme),
-            localizationsDelegates: S.localizationsDelegates,
-            supportedLocales: S.supportedLocales,
-            locale: context.select((SettingsProvider s) => s.locale),
-            navigatorKey: navigatorKey,
-            home: _getHome(
-              context.select((SettingsProvider s) => s),
-              context.select((FireflyService f) => f),
-            ),
-          ),
+              darkTheme: ThemeData(
+                brightness: .dark,
+                colorScheme: settings.dynamicColors
+                    ? cSchemeDynamicDark?.harmonized() ?? cSchemeDark
+                    : cSchemeDark,
+                useMaterial3: true,
+              ),
+              themeMode: settings.theme,
+              localizationsDelegates: S.localizationsDelegates,
+              supportedLocales: S.supportedLocales,
+              locale: settings.locale,
+              navigatorKey: navigatorKey,
+              home: _getHome(settings, firefly),
+            );
+          },
         );
       },
     );
