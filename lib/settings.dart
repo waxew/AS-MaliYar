@@ -177,20 +177,18 @@ class SettingsProvider with ChangeNotifier {
   static const String settingTransactionDateFilter = "TX_DATE_FILTER";
 
   bool get debug => _loaded ? _boolSettings[.debug] : false;
-
   bool get lock => _loaded ? _boolSettings[.lock] : false;
-
   bool get showFutureTXs => _loaded ? _boolSettings[.showFutureTXs] : false;
-
   bool get dynamicColors => _loaded ? _boolSettings[.dynamicColors] : false;
-
   bool get useServerTime => _loaded ? _boolSettings[.useServerTime] : true;
-
   bool get hideTags => _loaded ? _boolSettings[.hideTags] : false;
   bool get billsShowOnlyActive =>
       _loaded ? _boolSettings[.billsShowOnlyActive] : false;
   bool get billsShowOnlyExpected =>
       _loaded ? _boolSettings[.billsShowOnlyExpected] : false;
+  bool _isSessionAuthed = false;
+
+  bool get isSessionAuthed => _isSessionAuthed;
 
   ThemeMode _theme = .system;
   ThemeMode get theme => _theme;
@@ -487,7 +485,12 @@ class SettingsProvider with ChangeNotifier {
     }();
   }
 
-  set lock(bool enabled) => _setBool(.lock, enabled);
+  set lock(bool enabled) {
+    _setBool(.lock, enabled);
+    _isSessionAuthed = enabled;
+    log.finest(() => "notify SettingsProvider->lock()");
+    notifyListeners();
+  }
 
   set showFutureTXs(bool enabled) => _setBool(.showFutureTXs, enabled);
 
@@ -825,6 +828,17 @@ class SettingsProvider with ChangeNotifier {
         .toList();
 
     return notifs;
+  }
+
+  void sessionAuthed() {
+    _isSessionAuthed = true;
+    notifyListeners();
+  }
+
+  // Call this on app resume/timeout
+  void sessionLock() {
+    _isSessionAuthed = false;
+    notifyListeners();
   }
 }
 
