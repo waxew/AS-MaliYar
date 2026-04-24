@@ -452,15 +452,13 @@ class _AppCardState extends State<AppCard> {
                   // Regex field
                   TextFormField(
                     decoration: InputDecoration(
-                      label: const Text("Regex"), // :TODO: l10n
+                      label: Text(S.of(context).settingsNLRegularExpression),
                       icon: const Icon(Icons.code),
                       border: const OutlineInputBorder(),
-                      hintText: "(optional)",
-                      // :TODO: l10n
                       suffixIcon: _regexErrorIcon,
                       errorText: _regexErrorIcon.isError
-                          ? "Invalid Regex"
-                          : null, // :TODO: l10n
+                          ? S.of(context).settingsNLRegularExpressionInvalid
+                          : null,
                     ),
                     initialValue: widget.settings.regex?.pattern,
                     onChanged: (String value) async {
