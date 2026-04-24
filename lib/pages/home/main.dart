@@ -596,7 +596,7 @@ class _HomeMainState extends State<HomeMain>
                 title: S.of(context).homeMainChartTagsTitle,
                 future: _fetchCategories(tags: true),
                 height: 175,
-                child: () => CategoryChart(data: tagChartData),
+                child: () => CategoryChart(data: tagChartData, isTag: true),
               ),
               .accounts => ChartCard(
                 title: S.of(context).homeMainChartAccountsTitle,
